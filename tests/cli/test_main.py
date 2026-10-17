@@ -24,6 +24,26 @@ from agentic_devkit.cli.main import main
 
 
 class CliTests(unittest.TestCase):
+    def test_help_lists_tdd_commands(self) -> None:
+        """Test Path: happy path
+
+        Requirement Tested:
+        `CLI` exposes TDD operations through its tdd command group.
+        A caller requests help to discover available test review commands.
+
+        Verification Method: verify public function output
+
+        Verification Detail:
+        Help exits successfully and lists lint and create-agent-md.
+        """
+        stdout = io.StringIO()
+        with contextlib.redirect_stdout(stdout), self.assertRaises(SystemExit) as exit:
+            main(["tdd", "--help"])
+        self.assertEqual(exit.exception.code, 0)
+        self.assertIn("agentic-devkit tdd", stdout.getvalue())
+        self.assertIn("lint", stdout.getvalue())
+        self.assertIn("create-agent-md", stdout.getvalue())
+
     def test_test_root_reports_generated_packet(self) -> None:
         """Test Path: happy path
 
