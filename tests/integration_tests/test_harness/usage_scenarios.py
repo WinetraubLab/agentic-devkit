@@ -111,7 +111,6 @@ def complete_packets(repo_root: Path, *, status: str, evidence: str) -> None:
 def record_approved_manifest(
     repo_root: Path,
     *,
-    reviewer: str,
     review_status: str,
     review_evidence: str,
 ) -> None:
@@ -123,7 +122,7 @@ def record_approved_manifest(
         status=review_status,
         evidence=review_evidence,
     )
-    lint = run_cli(repo_root, "lint", "--reviewer", reviewer)
+    lint = run_cli(repo_root, "lint")
     if lint.returncode != 0:
         raise AssertionError(lint.stdout + lint.stderr)
 
