@@ -1,4 +1,4 @@
-"""Tests in this file validate `conventional_linter` located at `src/agentic_tdd_linter/conventional_linter/check_test_module_contract.py`.
+"""Tests in this file validate `conventional_linter` located at `src/agentic_devkit/tdd_lint/conventional_linter/check_test_module_contract.py`.
 `conventional_linter` is responsible for validating repository-relative test module declarations."""
 
 from __future__ import annotations
@@ -7,10 +7,10 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from agentic_tdd_linter.conventional_linter.check_test_module_contract import (
+from agentic_devkit.tdd_lint.conventional_linter.check_test_module_contract import (
     check_test_module_contract,
 )
-from agentic_tdd_linter.indexing_test_functions.extracted_test_record import (
+from agentic_devkit.tdd_lint.indexing_test_functions.extracted_test_record import (
     ExtractedTestRecord,
 )
 

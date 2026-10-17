@@ -1,4 +1,4 @@
-"""Tests in this file validate `map_test_function_to_agent_md_file` located at `src/agentic_tdd_linter/agentic_linter/map_test_function_to_agent_md_file.py`.
+"""Tests in this file validate `map_test_function_to_agent_md_file` located at `src/agentic_devkit/tdd_lint/agentic_linter/map_test_function_to_agent_md_file.py`.
 `map_test_function_to_agent_md_file` is responsible for mapping test identities to `.agent.md` paths and recovering test identities from those paths.
 
 Terms:
@@ -13,7 +13,7 @@ import textwrap
 import unittest
 from pathlib import Path
 
-from agentic_tdd_linter.agentic_linter.map_test_function_to_agent_md_file import (
+from agentic_devkit.tdd_lint.agentic_linter.map_test_function_to_agent_md_file import (
     map_agent_md_file_to_test_function,
     map_test_function_to_agent_md_file,
 )

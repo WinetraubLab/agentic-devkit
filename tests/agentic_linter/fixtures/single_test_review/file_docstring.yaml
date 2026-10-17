@@ -38,7 +38,7 @@ file_docstring_001_interchangeable_file_terms:
 
 file_docstring_002_unused_duplicate_file:
   file_docstring: |
-    """Tests in this file validate `discover_test_files` located at `src/agentic_tdd_linter/indexing_test_functions/discover_test_files.py`.
+    """Tests in this file validate `discover_test_files` located at `src/agentic_devkit/tdd_lint/indexing_test_functions/discover_test_files.py`.
     `discover_test_files` is responsible for finding supported test files under a selected path.
 
     Terms:
@@ -83,7 +83,7 @@ file_docstring_002_unused_duplicate_file:
 
 file_docstring_003_alternate_spelling_of:
   file_docstring: |
-    """Tests in this file validate `conventional_linter` located at `src/agentic_tdd_linter/conventional_linter/check_file_docstring_term_count.py`.
+    """Tests in this file validate `conventional_linter` located at `src/agentic_devkit/tdd_lint/conventional_linter/check_file_docstring_term_count.py`.
     `conventional_linter` is responsible for enforcing the test-file glossary limit.
 
     Terms:
@@ -128,7 +128,7 @@ file_docstring_003_alternate_spelling_of:
 
 file_docstring_004_alternate_spelling_of:
   file_docstring: |
-    """Tests in this file validate `conventional_linter` located at `src/agentic_tdd_linter/conventional_linter/run_conventional_linter.py`.
+    """Tests in this file validate `conventional_linter` located at `src/agentic_devkit/tdd_lint/conventional_linter/run_conventional_linter.py`.
     `conventional_linter` is responsible for enforcing test documentation, naming, and visual-inspection conventions.
 
     Terms:
@@ -178,7 +178,7 @@ file_docstring_004_alternate_spelling_of:
 
 file_docstring_005_alternate_artifact_name:
   file_docstring: |
-    """Tests in this file validate `render_cross_test_agent_md_file` located at `src/agentic_tdd_linter/agentic_linter/render_cross_test_agent_md_file.py`.
+    """Tests in this file validate `render_cross_test_agent_md_file` located at `src/agentic_devkit/tdd_lint/agentic_linter/render_cross_test_agent_md_file.py`.
     `render_cross_test_agent_md_file` is responsible for creating an isolated cross-test `.agent.md` that documents test-coverage relationships.
 
     Terms:
@@ -229,7 +229,7 @@ file_docstring_006_alternate_context_name:
     `test_source_module_structure` is responsible for enforcing repository source-module and test-module structure.
 
     Terms:
-    - `source module`: A source module is a non-`__init__.py` Python file under src/agentic_tdd_linter. For example, tests/cli/test_main.py matches src/agentic_tdd_linter/cli/main.py.
+    - `source module`: A source module is a non-`__init__.py` Python file under src/agentic_devkit. For example, tests/cli/test_main.py matches src/agentic_devkit/cli/main.py.
     - `test module`: A test module is a test_*.py file under tests. For example, tests/cli/test_main.py is a test module.
     - `test-harness module`: A test-harness module is a same-basename non-test Python file beside a test module or inside its folder's test_harness package. For example, test_harness/mock_keyword_identification.py supports test_mock_keyword_identification.py.
     - `data-only module`: A data-only module is indexing_test_functions/extracted_test_record.py or version.py. For example, version.py exposes version data instead of public functions.
@@ -451,7 +451,7 @@ file_docstring_009_readme_name_shorthand:
     Terms:
     - `reviewer identity`: A reviewer identity records the agent and model that completed a review. For example, `codex:gpt-5.5` is a reviewer identity.
     - `lint arguments`: Lint arguments are exactly `lint`, `--reviewer`, and one reviewer identity in that order. For example, `lint --reviewer codex:gpt-5.5` supplies the lint arguments.
-    - `pre-commit review workflow`: The pre-commit review workflow orders three stages: run `agentic-tdd-linter create-agent-md` to create `.agent.md` files, complete their scorecards, and run reviewer-authenticated lint to persist proof.
+    - `pre-commit review workflow`: The pre-commit review workflow orders three stages: run `agentic-devkit tdd create-agent-md` to create `.agent.md` files, complete their scorecards, and run reviewer-authenticated lint to persist proof.
     - `CI/CD validation workflow`: The CI/CD validation workflow validates committed tests and manifest proof without creating scorecards. For example, GitHub Actions runs lint after changes are committed.
     """
   test: |

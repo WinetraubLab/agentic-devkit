@@ -91,7 +91,7 @@ sentence_quality_004_necessary_quantifier_preserves:
     `repository_validation` is responsible for validating repository module coverage.
 
     Terms:
-    - `source module`: A source module is a non-`__init__.py` Python file under src/agentic_tdd_linter. For example, tests/cli/test_main.py matches src/agentic_tdd_linter/cli/main.py.
+    - `source module`: A source module is a non-`__init__.py` Python file under src/agentic_devkit. For example, tests/cli/test_main.py matches src/agentic_devkit/cli/main.py.
     - `test module`: A test module is a test_*.py file under tests. For example, tests/cli/test_main.py is a test module.
     - `test-harness module`: A test-harness module is a same-basename non-test Python file beside a test module or inside its folder's test_harness package. For example, test_harness/mock_keyword_identification.py supports test_mock_keyword_identification.py.
     """
@@ -111,7 +111,7 @@ sentence_quality_004_necessary_quantifier_preserves:
         """
 
         repo_root = Path(__file__).resolve().parents[2]
-        package_root = repo_root / "src" / "agentic_tdd_linter"
+        package_root = repo_root / "src" / "agentic_devkit"
         test_root = repo_root / "tests"
         mirrored_folders = (
             "agentic_linter",
@@ -569,7 +569,7 @@ sentence_quality_019_implicit_condition_omits:
 
 sentence_quality_020_redundant_defined_term:
   file_docstring: |
-    """Tests in this file validate `pre-commit review workflow` located at `src/agentic_tdd_linter/cli/run_lint_pipeline.py`.
+    """Tests in this file validate `pre-commit review workflow` located at `src/agentic_devkit/tdd_lint/cli/run_lint_pipeline.py`.
     `pre-commit review workflow` is responsible for maintaining test-review evidence before commit.
 
     Terms:
@@ -691,7 +691,7 @@ sentence_quality_020_redundant_defined_term:
 
 sentence_quality_021_double_negative_invalidation:
   file_docstring: |
-    """Tests in this file validate `pre-commit review workflow` located at `src/agentic_tdd_linter/cli/run_lint_pipeline.py`.
+    """Tests in this file validate `pre-commit review workflow` located at `src/agentic_devkit/tdd_lint/cli/run_lint_pipeline.py`.
     `pre-commit review workflow` is responsible for maintaining test-review evidence before commit.
 
     Terms:
@@ -713,12 +713,12 @@ sentence_quality_021_double_negative_invalidation:
 
         Verification Detail:
         1. Harness creates a temporary repository containing two tests.
-        2. Harness invokes `agentic-tdd-linter create-agent-md --repo-root <temporary-repository>`.
+        2. Harness invokes `agentic-devkit tdd create-agent-md --repo-root <temporary-repository>`.
         3. Harness classifies every review as successful.
-        4. Harness invokes `agentic-tdd-linter lint --repo-root <temporary-repository> --reviewer integration:approved-reviewer` to persist passing proof.
+        4. Harness invokes `agentic-devkit tdd lint --repo-root <temporary-repository> --reviewer integration:approved-reviewer` to persist passing proof.
         5. Harness modifies only the first test source outside the `pre-commit review workflow`.
-        6. Harness invokes `agentic-tdd-linter lint --repo-root <temporary-repository>` again.
-        7. Harness invokes `agentic-tdd-linter create-agent-md --repo-root <temporary-repository>`.
+        6. Harness invokes `agentic-devkit tdd lint --repo-root <temporary-repository>` again.
+        7. Harness invokes `agentic-devkit tdd create-agent-md --repo-root <temporary-repository>`.
         8. Edited-test `.agent.md` contains `| pending | Replace with review evidence. |`.
         9. `cross_test_review.agent.md` contains `| pending | pending | Replace with classification evidence. |`.
         10. Edited-test `.agent.md` and `cross_test_review.agent.md` exclude `approved before source edit`.

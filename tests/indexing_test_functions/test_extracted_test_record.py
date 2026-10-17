@@ -1,4 +1,4 @@
-"""Tests in this file validate `extracted_test_record` located at `src/agentic_tdd_linter/indexing_test_functions/extracted_test_record.py`.
+"""Tests in this file validate `extracted_test_record` located at `src/agentic_devkit/tdd_lint/indexing_test_functions/extracted_test_record.py`.
 `extracted_test_record` is responsible for representing language-neutral indexed test data.
 
 Terms:
@@ -11,7 +11,7 @@ from __future__ import annotations
 import unittest
 from pathlib import Path
 
-from agentic_tdd_linter.indexing_test_functions.extracted_test_record import (
+from agentic_devkit.tdd_lint.indexing_test_functions.extracted_test_record import (
     ExtractedTestRecord,
 )
 

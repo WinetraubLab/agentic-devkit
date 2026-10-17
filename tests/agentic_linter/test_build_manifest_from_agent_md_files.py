@@ -1,4 +1,4 @@
-"""Tests in this file validate `build_manifest_from_agent_md_files` located at `src/agentic_tdd_linter/agentic_linter/build_manifest_from_agent_md_files.py`.
+"""Tests in this file validate `build_manifest_from_agent_md_files` located at `src/agentic_devkit/tdd_lint/agentic_linter/build_manifest_from_agent_md_files.py`.
 `build_manifest_from_agent_md_files` is responsible for converting completed `.agent.md` reviews into manifest proof and validating existing proof stored by default in `tests/agentic_review_manifest.jsonl`.
 Changing one test invalidates only that test's proof.
 
@@ -19,23 +19,23 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 
-from agentic_tdd_linter.agentic_linter.map_test_function_to_agent_md_file import (
+from agentic_devkit.tdd_lint.agentic_linter.map_test_function_to_agent_md_file import (
     map_test_function_to_agent_md_file,
 )
-from agentic_tdd_linter.agentic_linter.build_manifest_from_agent_md_files import (
+from agentic_devkit.tdd_lint.agentic_linter.build_manifest_from_agent_md_files import (
     _agent_review_manifest_path,
     _find_tests_requiring_agent_review,
     _lint_agent_review_manifest,
     _review_contract_sha256,
     build_manifest_from_agent_md_files,
 )
-from agentic_tdd_linter.agentic_linter.determine_agent_md_status import (
+from agentic_devkit.tdd_lint.agentic_linter.determine_agent_md_status import (
     _test_content_sha256,
 )
-from agentic_tdd_linter.indexing_test_functions.extract_tests_from_file import (
+from agentic_devkit.tdd_lint.indexing_test_functions.extract_tests_from_file import (
     extract_tests_from_file,
 )
-from agentic_tdd_linter.version import __version__
+from agentic_devkit.version import __version__
 
 
 class AgentReviewManifestTests(unittest.TestCase):

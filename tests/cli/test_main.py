@@ -1,4 +1,4 @@
-"""Tests in this file validate `CLI` located at `src/agentic_tdd_linter/cli/main.py`.
+"""Tests in this file validate `CLI` located at `src/agentic_devkit/cli/main.py`.
 `CLI` is responsible for providing the create-agent-md and lint command interface.
 
 Terms:
@@ -19,7 +19,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 
-from agentic_tdd_linter.cli.main import main
+from agentic_devkit.cli.main import main
 
 
 
@@ -82,6 +82,7 @@ class CliTests(unittest.TestCase):
             with contextlib.redirect_stdout(stdout):
                 exit_code = main(
                     [
+                        "tdd",
                         "create-agent-md",
                         "--repo-root",
                         str(repo_root),
@@ -152,6 +153,7 @@ class ReviewProofFlowTests(unittest.TestCase):
             with contextlib.redirect_stdout(stdout):
                 exit_code = main(
                     [
+                        "tdd",
                         "lint",
                         "--fresh",
                         "--repo-root",

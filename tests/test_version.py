@@ -1,4 +1,4 @@
-"""Tests in this file validate `version` located at `src/agentic_tdd_linter/version.py`.
+"""Tests in this file validate `version` located at `src/agentic_devkit/version.py`.
 `version` is responsible for exposing package version metadata.
 
 Terms:
@@ -12,7 +12,7 @@ import tomllib
 import unittest
 from pathlib import Path
 
-from agentic_tdd_linter.version import __version__
+from agentic_devkit.version import __version__
 
 
 class VersionTests(unittest.TestCase):

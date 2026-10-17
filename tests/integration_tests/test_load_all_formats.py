@@ -1,4 +1,4 @@
-"""Tests in this file validate `create-agent-md` located at `src/agentic_tdd_linter/cli/run_lint_pipeline.py`.
+"""Tests in this file validate `create-agent-md` located at `src/agentic_devkit/tdd_lint/cli/run_lint_pipeline.py`.
 `create-agent-md` is responsible for loading and validating Python and TypeScript tests before creating their review scorecards.
 
 Terms:
@@ -33,7 +33,7 @@ class LoadAllFormatsTests(unittest.TestCase):
 
         Verification Detail:
         1. Harness creates `src/parser.py` and `tests/test_parser.py`.
-        2. Harness invokes `agentic-tdd-linter create-agent-md --repo-root <temporary-repository> --fresh` as a subprocess.
+        2. Harness invokes `agentic-devkit tdd create-agent-md --repo-root <temporary-repository> --fresh` as a subprocess.
         3. Command produces exit code `0`.
         4. Artifact directory contains one single-test packet.
         5. Artifact directory contains one cross-test packet.
@@ -135,7 +135,7 @@ class LoadAllFormatsTests(unittest.TestCase):
 
         Verification Detail:
         1. Harness creates `src/parser.ts` and `tests/parser.test.ts`.
-        2. Harness invokes `agentic-tdd-linter create-agent-md --repo-root <temporary-repository> --fresh` as a subprocess.
+        2. Harness invokes `agentic-devkit tdd create-agent-md --repo-root <temporary-repository> --fresh` as a subprocess.
         3. Command produces exit code `0`.
         4. Artifact directory contains one single-test packet.
         5. Artifact directory contains one cross-test packet.
@@ -240,7 +240,7 @@ class LoadAllFormatsTests(unittest.TestCase):
 
         Verification Detail:
         1. Harness creates a `.py` file containing one fully documented test and no file docstring.
-        2. Harness invokes `agentic-tdd-linter create-agent-md --repo-root <temporary-repository>`.
+        2. Harness invokes `agentic-devkit tdd create-agent-md --repo-root <temporary-repository>`.
         3. Command output contains `missing_file_docstring`.
 
         Similar Coverage:
@@ -290,7 +290,7 @@ class LoadAllFormatsTests(unittest.TestCase):
 
         Verification Detail:
         1. Harness creates a `.test.ts` file containing one fully documented test and no file-level JSDoc.
-        2. Harness invokes `agentic-tdd-linter create-agent-md --repo-root <temporary-repository>`.
+        2. Harness invokes `agentic-devkit tdd create-agent-md --repo-root <temporary-repository>`.
         3. Command output contains `missing_file_docstring`.
 
         Similar Coverage:
@@ -344,7 +344,7 @@ class LoadAllFormatsTests(unittest.TestCase):
 
         Verification Detail:
         1. Harness creates one file declaring `parser` and containing a requirement that does not identify parser.
-        2. Harness invokes `agentic-tdd-linter create-agent-md --repo-root <temporary-repository>`.
+        2. Harness invokes `agentic-devkit tdd create-agent-md --repo-root <temporary-repository>`.
         3. Command output contains `multiple_modules_in_test_file`.
 
         Similar Coverage:
@@ -412,7 +412,7 @@ class LoadAllFormatsTests(unittest.TestCase):
 
         Verification Detail:
         1. Harness creates one file declaring `parser` and containing parser and formatter tests.
-        2. Harness invokes `agentic-tdd-linter create-agent-md --repo-root <temporary-repository>`.
+        2. Harness invokes `agentic-devkit tdd create-agent-md --repo-root <temporary-repository>`.
         3. Command output contains `split this test file so each file validates one module`.
 
         Similar Coverage:
@@ -483,7 +483,7 @@ class LoadAllFormatsTests(unittest.TestCase):
 
         Verification Detail:
         1. Harness creates a test file declaring `src/parser.py` without creating that module.
-        2. Harness invokes `agentic-tdd-linter create-agent-md --repo-root <temporary-repository>`.
+        2. Harness invokes `agentic-devkit tdd create-agent-md --repo-root <temporary-repository>`.
         3. Command output contains `missing_test_module`.
 
         Similar Coverage:

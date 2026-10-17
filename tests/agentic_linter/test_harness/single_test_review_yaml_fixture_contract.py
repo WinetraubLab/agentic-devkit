@@ -20,7 +20,8 @@ EXAMPLES = (
 TEMPLATE_PATH = (
     REPO_ROOT
     / "src"
-    / "agentic_tdd_linter"
+    / "agentic_devkit"
+    / "tdd_lint"
     / "agentic_linter"
     / "single_test_review.agent.md.j2"
 )

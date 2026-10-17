@@ -124,7 +124,7 @@ def _lint_agent_md_file(
                 (
                     "every scorecard row must contain exactly one pass or fail result; "
                     "complete the scorecard, then rerun "
-                    "`agentic-tdd-linter lint`"
+                    "`agentic-devkit tdd lint`"
                 ),
             )
         )

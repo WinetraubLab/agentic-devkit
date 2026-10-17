@@ -2,7 +2,7 @@
 `test_source_module_structure` is responsible for enforcing repository source-module and test-module structure.
 
 Terms:
-- `source module`: A source module is a non-`__init__.py` Python file under src/agentic_tdd_linter. For example, tests/cli/test_main.py matches src/agentic_tdd_linter/cli/main.py.
+- `source module`: A source module is a non-`__init__.py` Python file under src/agentic_devkit. For example, tests/cli/test_main.py matches src/agentic_devkit/cli/main.py.
 - `test module`: A test module is a test_*.py file under tests. For example, tests/cli/test_main.py is a test module.
 - `test-harness module`: A test-harness module is a same-basename non-test Python file beside a test module or inside its folder's test_harness package. For example, test_harness/mock_keyword_identification.py supports test_mock_keyword_identification.py.
 - `data-only module`: A data-only module is indexing_test_functions/extracted_test_record.py or version.py. For example, version.py exposes version data instead of public functions.
@@ -35,7 +35,7 @@ class SourceModuleStructureTests(unittest.TestCase):
         """
 
         repo_root = Path(__file__).resolve().parents[2]
-        package_root = repo_root / "src" / "agentic_tdd_linter"
+        package_root = repo_root / "src" / "agentic_devkit"
         test_root = repo_root / "tests"
         mirrored_folders = (
             "agentic_linter",
@@ -117,9 +117,9 @@ class SourceModuleStructureTests(unittest.TestCase):
         """
 
         repo_root = Path(__file__).resolve().parents[2]
-        package_root = repo_root / "src" / "agentic_tdd_linter"
+        package_root = repo_root / "src" / "agentic_devkit"
         data_only_modules = {
-            Path("indexing_test_functions/extracted_test_record.py"),
+            Path("tdd_lint/indexing_test_functions/extracted_test_record.py"),
             Path("version.py"),
         }
         repository_violations = _public_api_violations(
@@ -164,7 +164,9 @@ def _matching_source_path(
 ) -> Path:
     relative_test = test_file.relative_to(test_root)
     source_name = relative_test.name.removeprefix("test_")
-    return package_root / relative_test.parent / source_name
+    if relative_test.as_posix() == "cli/test_main.py":
+        return package_root / "cli" / source_name
+    return package_root / "tdd_lint" / relative_test.parent / source_name
 
 
 def _matching_test_support_paths(test_file: Path) -> tuple[Path, Path]:

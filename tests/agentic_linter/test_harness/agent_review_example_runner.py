@@ -6,20 +6,20 @@ import hashlib
 import textwrap
 from pathlib import Path
 
-from agentic_tdd_linter.agentic_linter.determine_agent_md_status import (
+from agentic_devkit.tdd_lint.agentic_linter.determine_agent_md_status import (
     _agent_md_file_is_stale,
     determine_agent_md_status,
 )
-from agentic_tdd_linter.agentic_linter.map_test_function_to_agent_md_file import (
+from agentic_devkit.tdd_lint.agentic_linter.map_test_function_to_agent_md_file import (
     map_test_function_to_agent_md_file,
 )
-from agentic_tdd_linter.agentic_linter.render_agent_md_file import (
+from agentic_devkit.tdd_lint.agentic_linter.render_agent_md_file import (
     render_agent_md_file,
 )
-from agentic_tdd_linter.indexing_test_functions.extract_tests_from_file import (
+from agentic_devkit.tdd_lint.indexing_test_functions.extract_tests_from_file import (
     extract_tests_from_file,
 )
-from agentic_tdd_linter.indexing_test_functions.extracted_test_record import (
+from agentic_devkit.tdd_lint.indexing_test_functions.extracted_test_record import (
     ExtractedTestRecord,
 )
 from tests.agentic_linter.test_harness.single_test_review_yaml_fixture_contract import (

@@ -17,7 +17,7 @@ HISTORICAL_SIDECARS = (
     Path("tests/integration_tests/test_agent_review_examples.json"),
 )
 TEMPLATE = Path(
-    "src/agentic_tdd_linter/agentic_linter/single_test_review.agent.md.j2"
+    "src/agentic_devkit/tdd_lint/agentic_linter/single_test_review.agent.md.j2"
 )
 FIXTURE_ROOT = Path("tests/agentic_linter/fixtures/single_test_review")
 CRITERION_HEADING = re.compile(r"^####\s+(\d+)\.\s+(.+?)\s*$", re.MULTILINE)

@@ -19,7 +19,7 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
-from agentic_tdd_linter.version import __version__
+from agentic_devkit.version import __version__
 from tests.agentic_linter.test_harness import agent_review_examples
 from tests.agentic_linter.test_harness.agent_review_examples import (
     _AgentReviewCase,

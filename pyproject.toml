@@ -3,15 +3,15 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "agentic-tdd-linter"
+name = "agentic-devkit"
 version = "0.7.3"
-description = "A linter for Python and TypeScript tests written during agent-assisted TDD."
+description = "Tools for agentic development, including TDD test linting and review."
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = ["Jinja2>=3.1"]
 
 [project.scripts]
-agentic-tdd-linter = "agentic_tdd_linter.cli.main:main"
+agentic-devkit = "agentic_devkit.cli.main:main"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/agentic_tdd_linter"]
+packages = ["src/agentic_devkit"]

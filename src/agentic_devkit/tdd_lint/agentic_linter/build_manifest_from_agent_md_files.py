@@ -16,7 +16,7 @@ from .determine_agent_md_status import (
 from ..conventional_linter.run_conventional_linter import LintIssue
 from ..indexing_test_functions.extract_tests_from_file import extract_tests_from_file
 from ..indexing_test_functions.extracted_test_record import ExtractedTestRecord
-from ..version import __version__
+from ...version import __version__
 
 
 DEFAULT_AGENT_REVIEW_MANIFEST = Path("tests") / "agentic_review_manifest.jsonl"
@@ -440,7 +440,7 @@ def _ordered_record(record: dict[str, str]) -> dict[str, str]:
 
 def _review_contract_files(repo_root: Path | None) -> list[tuple[str, Path]]:
     files: dict[str, Path] = {}
-    package_root = Path(__file__).resolve().parents[1]
+    package_root = Path(__file__).resolve().parents[2]
     contract_paths = (
         path
         for path in package_root.rglob("*")

@@ -1,4 +1,4 @@
-"""Tests in this file validate `determine_agent_md_status` located at `src/agentic_tdd_linter/agentic_linter/determine_agent_md_status.py`.
+"""Tests in this file validate `determine_agent_md_status` located at `src/agentic_devkit/tdd_lint/agentic_linter/determine_agent_md_status.py`.
 `determine_agent_md_status` is responsible for deriving review status and reporting malformed `.agent.md` scorecards.
 
 Terms:
@@ -12,11 +12,11 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from agentic_tdd_linter.agentic_linter.determine_agent_md_status import (
+from agentic_devkit.tdd_lint.agentic_linter.determine_agent_md_status import (
     _lint_agent_md_file,
     determine_agent_md_status,
 )
-from agentic_tdd_linter.agentic_linter.render_agent_md_file import (
+from agentic_devkit.tdd_lint.agentic_linter.render_agent_md_file import (
     _write_agent_md_files_for_test_file,
 )
 

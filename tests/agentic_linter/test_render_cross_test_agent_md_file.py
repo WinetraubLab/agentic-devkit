@@ -1,4 +1,4 @@
-"""Tests in this file validate `render_cross_test_agent_md_file` located at `src/agentic_tdd_linter/agentic_linter/render_cross_test_agent_md_file.py`.
+"""Tests in this file validate `render_cross_test_agent_md_file` located at `src/agentic_devkit/tdd_lint/agentic_linter/render_cross_test_agent_md_file.py`.
 `render_cross_test_agent_md_file` is responsible for creating an isolated cross-test `.agent.md` and determining whether that packet remains valid.
 
 Terms:
@@ -13,7 +13,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from agentic_tdd_linter.agentic_linter.render_cross_test_agent_md_file import (
+from agentic_devkit.tdd_lint.agentic_linter.render_cross_test_agent_md_file import (
     _build_cross_test_review_scope,
     cross_test_agent_md_file_is_stale,
     render_cross_test_agent_md_file,

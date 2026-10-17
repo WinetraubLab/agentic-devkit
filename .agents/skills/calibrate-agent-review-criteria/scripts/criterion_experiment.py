@@ -55,7 +55,7 @@ def _repository_root(start: Path) -> Path:
             candidate / "tests" / "agentic_linter" / "fixtures" / "single_test_review"
         ).is_dir():
             return candidate
-    raise SystemExit("run inside the agentic-tdd-lint repository")
+    raise SystemExit("run inside the agentic-devkit repository")
 
 
 def _examples(root: Path):
@@ -82,10 +82,10 @@ def _example(root: Path, name: str):
 
 
 def _prepare(root: Path, args: argparse.Namespace) -> int:
-    from agentic_tdd_linter.agentic_linter.render_agent_md_file import (
+    from agentic_devkit.tdd_lint.agentic_linter.render_agent_md_file import (
         render_agent_md_file,
     )
-    from agentic_tdd_linter.indexing_test_functions.extract_tests_from_file import (
+    from agentic_devkit.tdd_lint.indexing_test_functions.extract_tests_from_file import (
         extract_tests_from_file,
     )
 

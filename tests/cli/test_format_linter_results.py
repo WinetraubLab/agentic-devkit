@@ -1,4 +1,4 @@
-"""Tests in this file validate `format_linter_results` located at `src/agentic_tdd_linter/cli/format_linter_results.py`.
+"""Tests in this file validate `format_linter_results` located at `src/agentic_devkit/tdd_lint/cli/format_linter_results.py`.
 `format_linter_results` is responsible for rendering lint findings as terminal text or JSON.
 
 Terms:
@@ -14,8 +14,8 @@ import json
 import unittest
 from pathlib import Path
 
-from agentic_tdd_linter.cli import format_linter_results
-from agentic_tdd_linter.conventional_linter.run_conventional_linter import LintIssue
+from agentic_devkit.tdd_lint.cli import format_linter_results
+from agentic_devkit.tdd_lint.conventional_linter.run_conventional_linter import LintIssue
 
 
 class LinterResultFormattingTests(unittest.TestCase):

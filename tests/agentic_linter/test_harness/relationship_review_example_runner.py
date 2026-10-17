@@ -8,7 +8,7 @@ import re
 from pathlib import Path
 from typing import NamedTuple
 
-from agentic_tdd_linter.agentic_linter.render_cross_test_agent_md_file import (
+from agentic_devkit.tdd_lint.agentic_linter.render_cross_test_agent_md_file import (
     _relationship_review_input_scope,
     _render_test_relationship_docstrings_agent_md,
 )

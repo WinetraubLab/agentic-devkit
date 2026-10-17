@@ -1,8 +1,8 @@
-"""Tests in this file validate `CI/CD linter` located at `src/agentic_tdd_linter/cli/run_lint_pipeline.py`.
+"""Tests in this file validate `CI/CD linter` located at `src/agentic_devkit/tdd_lint/cli/run_lint_pipeline.py`.
 `CI/CD linter` is responsible for validating committed review proof without creating review packets.
 
 Terms:
-- `CI/CD linter`: CI/CD linter runs `agentic-tdd-linter lint` in an automated pipeline against committed manifest proof. For example, it validates current proof without generating `.agent.md` files.
+- `CI/CD linter`: CI/CD linter runs `agentic-devkit tdd lint` in an automated pipeline against committed manifest proof. For example, it validates current proof without generating `.agent.md` files.
 - `.agent.md`: An .agent.md file contains a review scorecard that create-agent-md generates for a test. For example, CI validates committed manifest proof without recreating these files.
 """
 
@@ -39,7 +39,7 @@ class CicdValidationWorkflowTests(unittest.TestCase):
         3. Harness persists passing manifest proof before invoking `CI/CD linter`.
         4. Harness appends `-outdated` to the manifest's installed linter version.
         5. Harness removes the existing '.agent.md' files to reproduce `CI/CD linter` input.
-        6. Harness invokes `CI/CD linter` using `agentic-tdd-linter lint --repo-root <temporary-repository>`.
+        6. Harness invokes `CI/CD linter` using `agentic-devkit tdd lint --repo-root <temporary-repository>`.
         7. `CI/CD linter` succeeds without requiring a new review.
 
         Similar Coverage:
@@ -125,7 +125,7 @@ class CicdValidationWorkflowTests(unittest.TestCase):
         1. Harness creates a temporary repository containing one valid test.
         2. Harness completes its review.
         3. Harness persists passing proof whose source hash identifies the current test content.
-        4. Harness invokes `CI/CD linter` using `agentic-tdd-linter lint --repo-root <temporary-repository>`.
+        4. Harness invokes `CI/CD linter` using `agentic-devkit tdd lint --repo-root <temporary-repository>`.
         5. `CI/CD linter` accepts current manifest proof, demonstrated by exit code `0`.
 
         Similar Coverage:
@@ -201,7 +201,7 @@ class CicdValidationWorkflowTests(unittest.TestCase):
         2. Harness completes its review.
         3. Harness persists current passing proof in the manifest.
         4. Harness removes the existing '.agent.md' directory before invoking `CI/CD linter`.
-        5. Harness invokes `CI/CD linter` using `agentic-tdd-linter lint --repo-root <temporary-repository>`.
+        5. Harness invokes `CI/CD linter` using `agentic-devkit tdd lint --repo-root <temporary-repository>`.
         6. Packet list contains zero paths after lint.
 
         Similar Coverage:

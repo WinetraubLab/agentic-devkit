@@ -29,7 +29,8 @@ def run_cli(
         [
             sys.executable,
             "-m",
-            "agentic_tdd_linter.cli.main",
+            "agentic_devkit.cli.main",
+            "tdd",
             command,
             "--repo-root",
             str(repo_root),

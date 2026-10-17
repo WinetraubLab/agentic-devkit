@@ -1,4 +1,4 @@
-"""Tests in this file validate `pre-commit review workflow` located at `src/agentic_tdd_linter/cli/run_lint_pipeline.py`.
+"""Tests in this file validate `pre-commit review workflow` located at `src/agentic_devkit/tdd_lint/cli/run_lint_pipeline.py`.
 `pre-commit review workflow` is responsible for maintaining test-review evidence before commit.
 
 Terms:
@@ -269,9 +269,9 @@ class PreCommitReviewWorkflowTests(unittest.TestCase):
 
         Verification Detail:
         1. Harness creates a temporary repository containing one test.
-        2. Harness invokes `agentic-tdd-linter create-agent-md --repo-root <temporary-repository>`.
+        2. Harness invokes `agentic-devkit tdd create-agent-md --repo-root <temporary-repository>`.
         3. Harness classifies every generated `.agent.md` scorecard as pass.
-        4. Harness invokes `agentic-tdd-linter lint --repo-root <temporary-repository>`.
+        4. Harness invokes `agentic-devkit tdd lint --repo-root <temporary-repository>`.
         5. `_manifest_records` output provides the asserted manifest record.
         6. The manifest record contains path `tests/test_arithmetic.py`, test `test_adds_two_numbers`, and status `pass`.
 
@@ -449,7 +449,7 @@ class PreCommitReviewWorkflowTests(unittest.TestCase):
 
         Verification Detail:
         1. Harness creates a temporary repository containing one conventionally valid unreviewed test.
-        2. Harness invokes `agentic-tdd-linter lint --repo-root <temporary-repository>` before create-agent-md.
+        2. Harness invokes `agentic-devkit tdd lint --repo-root <temporary-repository>` before create-agent-md.
         3. `pre-commit review workflow` output contains missing_required_agent_md.
         4. `pre-commit review workflow` output contains `Run the `$run-tdd-linter` skill.` and omits a create-agent-md command.
 
@@ -500,7 +500,7 @@ class PreCommitReviewWorkflowTests(unittest.TestCase):
 
         self.assertIn("missing_required_agent_md", lint.stdout)
         self.assertIn("Run the `$run-tdd-linter` skill.", lint.stdout)
-        self.assertNotIn("agentic-tdd-linter create-agent-md", lint.stdout)
+        self.assertNotIn("agentic-devkit tdd create-agent-md", lint.stdout)
 
     def test_classic_linter_errors_scenario(self) -> None:
         """Test Path: failure path
@@ -513,7 +513,7 @@ class PreCommitReviewWorkflowTests(unittest.TestCase):
 
         Verification Detail:
         1. Harness creates a temporary repository containing a test whose docstring lacks Requirement Tested.
-        2. Harness invokes `agentic-tdd-linter create-agent-md --repo-root <temporary-repository>`.
+        2. Harness invokes `agentic-devkit tdd create-agent-md --repo-root <temporary-repository>`.
         3. Command output contains `missing_requirement`.
         4. Packet list contains zero `.agent.md` paths.
 
@@ -719,7 +719,7 @@ class PreCommitReviewWorkflowTests(unittest.TestCase):
 
         self.assertIn("agent_review_failed", lint.stdout)
         self.assertIn("Run the `$run-tdd-linter` skill.", lint.stdout)
-        self.assertNotIn("agentic-tdd-linter create-agent-md", lint.stdout)
+        self.assertNotIn("agentic-devkit tdd create-agent-md", lint.stdout)
 
     def test_stale_test_requires_review(self) -> None:
         """Test Path: failure path
@@ -732,11 +732,11 @@ class PreCommitReviewWorkflowTests(unittest.TestCase):
 
         Verification Detail:
         1. Harness creates a temporary repository containing three tests.
-        2. Harness invokes `agentic-tdd-linter create-agent-md --repo-root <temporary-repository>`.
+        2. Harness invokes `agentic-devkit tdd create-agent-md --repo-root <temporary-repository>`.
         3. Harness classifies every review as successful.
-        4. Harness invokes `agentic-tdd-linter lint --repo-root <temporary-repository>` to persist passing proof.
+        4. Harness invokes `agentic-devkit tdd lint --repo-root <temporary-repository>` to persist passing proof.
         5. Harness modifies only the first test source outside the `pre-commit review workflow`.
-        6. Harness invokes `agentic-tdd-linter create-agent-md --repo-root <temporary-repository>`.
+        6. Harness invokes `agentic-devkit tdd create-agent-md --repo-root <temporary-repository>`.
         7. Edited-test `.agent.md` contains `| pending | Replace with review evidence. |`.
         8. `cross_test_review.agent.md` contains every pending relationship involving the edited test and excludes the unchanged-versus-unchanged relationship.
         9. Unchanged tests receive no individual `.agent.md` packets.
