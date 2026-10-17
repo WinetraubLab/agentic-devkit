@@ -37,7 +37,6 @@ def main(argv: Sequence[str] | None = None) -> int:
         else:
             result = run_lint_pipeline(
                 **common_arguments,
-                reviewer=args.reviewer or "",
             )
     except ValueError as error:
         print(f"agentic-tdd-linter: {error}", file=sys.stderr)
@@ -52,7 +51,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         )
     else:
         print(format_text(result.issues, result.files))
-        if not result.issues and result.recorded_manifest_path is not None:
+        if result.recorded_manifest_path is not None:
             relative_manifest = _relative_path(result.recorded_manifest_path, repo_root)
             print(
                 "agentic-tdd-linter: "
@@ -116,13 +115,6 @@ def _build_parser() -> argparse.ArgumentParser:
         _add_file_selection_arguments(command_parser)
         _add_shared_arguments(command_parser)
 
-    lint_parser.add_argument(
-        "--reviewer",
-        help=(
-            "reviewer identity to store in the manifest after artifact proof passes, "
-            "such as codex:gpt-5.5"
-        ),
-    )
     return parser
 
 
