@@ -1,10 +1,10 @@
 """Tests in this file validate `test_review_documentation` located at `tests/repository_health/test_review_documentation.py`.
-`test_review_documentation` is responsible for requiring README.md and docs/workflows/github-actions.md to document the supported pre-commit review and CI/CD validation workflows.
+`test_review_documentation` is responsible for requiring docs/tdd/README.md and docs/workflows/github-actions.md to document the supported pre-commit review and CI/CD validation workflows.
 
 Terms:
 - `.agent.md`: An .agent.md file contains one generated agent-review scorecard. For example, the pre-commit workflow creates and reviews .agent.md files before lint records proof.
 - `$run-tdd-linter`: The $run-tdd-linter skill runs the repository's agentic TDD review workflow. For example, a coding agent invokes it after installation.
-- `pre-commit review workflow`: The pre-commit review workflow orders three stages: run `agentic-tdd-linter create-agent-md` to create `.agent.md` files, complete their scorecards, and run lint to persist proof.
+- `pre-commit review workflow`: The pre-commit review workflow orders three stages: run `agentic-devkit tdd create-agent-md` to create `.agent.md` files, complete their scorecards, and run lint to persist proof.
 - `CI/CD validation workflow`: The CI/CD validation workflow validates committed tests and manifest proof without creating scorecards. For example, GitHub Actions runs lint after changes are committed.
 """
 
@@ -19,7 +19,7 @@ class ReviewDocumentationTests(unittest.TestCase):
         """Test Path: happy path
 
         Requirement Tested:
-        `test_review_documentation` requires README.md to include a level-three `pre-commit review workflow` heading.
+        `test_review_documentation` requires the TDD README to include a level-three `pre-commit review workflow` heading.
         Standard usage: The scenario demonstrates baseline behavior.
 
         Verification Method: verify public function output
@@ -35,7 +35,7 @@ class ReviewDocumentationTests(unittest.TestCase):
         """
 
         repo_root = Path(__file__).resolve().parents[2]
-        readme = (repo_root / "README.md").read_text(encoding="utf-8")
+        readme = (repo_root / "docs" / "tdd" / "README.md").read_text(encoding="utf-8")
 
         self.assertIn("### Pre-commit review workflow", readme.splitlines())
 
@@ -43,7 +43,7 @@ class ReviewDocumentationTests(unittest.TestCase):
         """Test Path: happy path
 
         Requirement Tested:
-        `test_review_documentation` requires README.md to include a level-three `CI/CD validation workflow` heading.
+        `test_review_documentation` requires the TDD README to include a level-three `CI/CD validation workflow` heading.
         Standard usage: The scenario demonstrates baseline behavior.
 
         Verification Method: verify public function output
@@ -61,7 +61,7 @@ class ReviewDocumentationTests(unittest.TestCase):
         """
 
         repo_root = Path(__file__).resolve().parents[2]
-        readme = (repo_root / "README.md").read_text(encoding="utf-8")
+        readme = (repo_root / "docs" / "tdd" / "README.md").read_text(encoding="utf-8")
 
         self.assertIn("### CI/CD validation workflow", readme)
 
@@ -69,7 +69,7 @@ class ReviewDocumentationTests(unittest.TestCase):
         """Test Path: happy path
 
         Requirement Tested:
-        `test_review_documentation` requires README.md installation guidance to instruct users to ask the coding agent to run the installed `$run-tdd-linter` skill.
+        `test_review_documentation` requires the TDD README installation guidance to instruct users to ask the coding agent to run the installed `$run-tdd-linter` skill.
         Standard usage: The scenario demonstrates baseline behavior.
 
         Verification Method: verify public function output
@@ -89,7 +89,7 @@ class ReviewDocumentationTests(unittest.TestCase):
         """
 
         repo_root = Path(__file__).resolve().parents[2]
-        readme = (repo_root / "README.md").read_text(encoding="utf-8")
+        readme = (repo_root / "docs" / "tdd" / "README.md").read_text(encoding="utf-8")
         installation_guide = readme.split("## Add It To Your Project", 1)[1].split(
             "## Install It On GitHub Actions On Your Project", 1
         )[0]
@@ -104,13 +104,13 @@ class ReviewDocumentationTests(unittest.TestCase):
         """Test Path: happy path
 
         Requirement Tested:
-        `test_review_documentation` requires README.md reference guidance to describe the `pre-commit review workflow` in this order: create `.agent.md` files, review them, then persist manifest proof through lint.
+        `test_review_documentation` requires the TDD README reference guidance to describe the `pre-commit review workflow` in this order: create `.agent.md` files, review them, then persist manifest proof through lint.
         Standard usage: The scenario demonstrates baseline behavior.
 
         Verification Method: verify public function output
 
         Verification Detail:
-        The Pre-commit review workflow section contains `agentic-tdd-linter create-agent-md` before `Complete every generated scorecard`.
+        The Pre-commit review workflow section contains `agentic-devkit tdd create-agent-md` before `Complete every generated scorecard`.
         The section contains `Complete every generated scorecard` before `lint`.
 
         Similar Coverage:
@@ -125,12 +125,12 @@ class ReviewDocumentationTests(unittest.TestCase):
         """
 
         repo_root = Path(__file__).resolve().parents[2]
-        guide = (repo_root / "README.md").read_text(encoding="utf-8")
+        guide = (repo_root / "docs" / "tdd" / "README.md").read_text(encoding="utf-8")
         pre_commit_guide = guide.split("### Pre-commit review workflow", 1)[1].split(
             "### CI/CD validation workflow", 1
         )[0]
         step_markers = (
-            "agentic-tdd-linter create-agent-md",
+            "agentic-devkit tdd create-agent-md",
             "Complete every generated scorecard",
             "`lint`",
         )
@@ -148,7 +148,7 @@ class ReviewDocumentationTests(unittest.TestCase):
         Verification Method: verify public function output
 
         Verification Detail:
-        GitHub Actions guide contents contain `agentic-tdd-linter lint`.
+        GitHub Actions guide contents contain `agentic-devkit tdd lint`.
         GitHub Actions guide contents contain `GitHub Actions verifies committed agent-review proof`.
         GitHub Actions guide contents contain `committed tests and manifest proof`.
 
@@ -169,7 +169,7 @@ class ReviewDocumentationTests(unittest.TestCase):
         )
 
         self.assertIn("GitHub Actions verifies committed agent-review proof", guide)
-        self.assertIn("agentic-tdd-linter lint", guide)
+        self.assertIn("agentic-devkit tdd lint", guide)
         self.assertIn("committed tests and manifest proof", guide)
 
     def test_github_actions_omits_packet_creation(self) -> None:
@@ -182,7 +182,7 @@ class ReviewDocumentationTests(unittest.TestCase):
         Verification Method: verify public function output
 
         Verification Detail:
-        GitHub Actions guide contents contain no `agentic-tdd-linter create-agent-md` command.
+        GitHub Actions guide contents contain no `agentic-devkit tdd create-agent-md` command.
 
         Similar Coverage:
         - Scenario Difference: `test_cicd_validation_workflow.py::test_cicd_creates_no_packets`
@@ -200,7 +200,7 @@ class ReviewDocumentationTests(unittest.TestCase):
             encoding="utf-8"
         )
 
-        self.assertNotIn("agentic-tdd-linter create-agent-md", guide)
+        self.assertNotIn("agentic-devkit tdd create-agent-md", guide)
 
 if __name__ == "__main__":
     unittest.main()
