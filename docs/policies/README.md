@@ -117,3 +117,51 @@ If the check fails, run `$review-policy-attestations` locally and commit the upd
 code and review results. See the [GitHub Actions guide](../workflows/github-actions.md#policy-verification)
 for CI setup.
 
+## Policy Writing Contract
+
+Store each policy at `policy/<field>/<policy-name>.policy.yaml`. Group related
+policies by field and use lowercase kebab-case for folder and policy names,
+for example `policy/naming/physical-lengths.policy.yaml`.
+
+Each YAML file must contain these nonempty strings:
+- `title`: A short name for the policy.
+- `objective`: Why the rule matters.
+- `policy_content`: The rules the agent must apply during review.
+
+Write rules that describe the intended meaning, when they apply, and how to
+recognize a violation. Include examples and relevant exceptions so the agent can
+distinguish definite violations from ambiguous cases.
+
+```yaml
+title: Physical length naming
+objective: Make the units of physical lengths explicit.
+policy_content: |
+  Parameters representing physical lengths in meters must end in _m.
+  For example, use car_length_m and tree_height_m.
+  Apply this rule based on what the parameter represents, not just its name.
+  Counts and lengths measured in other units are outside this rule.
+```
+
+Rendering inserts these values into the bundled `policy-template.md.j2`, which
+supplies the shared review instructions and attestation structure. The generated
+`<policy-name>.md` is stored beside its YAML source.
+
+Edit policies in YAML, then run `$review-policy-attestations`. The tool generates
+the Markdown; reviews update its `# Attestation` section.
+
+## Review commands
+
+After a successful review, run policy verification alongside your normal checks.
+Use the skill when reviews need updating.
+
+```bash
+agentic-devkit policy verify
+```
+
+To regenerate documents with empty attestations, or check generated text without
+changing files:
+
+```bash
+agentic-devkit policy render
+agentic-devkit policy check-documents
+```
