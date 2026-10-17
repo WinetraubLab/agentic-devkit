@@ -23,3 +23,4 @@ the agent reviews the code against it, fixes mistakes, and records an attestatio
 Development -> Attestation
 ```
 
+Use the installed `$review-policy-attestations` skill for this review workflow.
