@@ -38,11 +38,6 @@ Record `git status --short` and preserve every pre-existing change.
 Record the initial uncommitted file count; exclude generated packets and review
 manifests from all scope counts below.
 Do not revert or overwrite user edits. Re-read a file immediately before editing it, and ask before replacing concurrent changes whose intent is unclear.
-Read the current agent's exact name, `model`, and `reasoning_effort` from
-available runtime metadata. Use the same configuration for every isolated
-reviewer, and form the manifest reviewer identity as
-`<agent>:<model>:<reasoning_effort>`. If runtime metadata is unavailable, stop
-and request the actual values instead of guessing.
 Identify the repository's configured agentic TDD command. Use it throughout the
 run; direct CLI examples below use `agentic-tdd-linter` as a placeholder for that
 configured executable.
@@ -113,15 +108,13 @@ used to assess or propose corrections for the failure set:
 Record failed scorecard rows and unique impacted tests as separate values.
 When a cross-test failure cannot be mapped reliably, report the unmapped cross-test packet count beside the impacted-test value rather than guessing.
 
-When no scorecard row is pending or failed, record the completed reviews with:
+After reviewing every packet, record passing reviews even when other scorecards fail with:
 
 ```bash
-agentic-tdd-linter lint --repo-root . \
-  --reviewer '<agent>:<model>:<reasoning_effort>'
+agentic-tdd-linter lint --repo-root .
 ```
 
-Verify that any manifest records written in this cycle use that exact reviewer
-identity. Never reuse a reviewer identity from an earlier run.
+Verify that passing reviews are recorded in the manifest. A failing review must not prevent another test's passing attestation from being saved; keep failed or pending tests out of new pass records.
 
 ### Step 4: Apply corrections
 
@@ -207,7 +200,7 @@ After the final review, state whether:
 - conventional lint passed;
 - any `.agent.md` rows remain pending;
 - the last review still contains failures; and
-- any passing reviews recorded in this run use the current agent, model, and reasoning effort;
+- passing reviews were recorded in the manifest;
 - any material failures remain for a future run.
 
 End the final report with exactly:
