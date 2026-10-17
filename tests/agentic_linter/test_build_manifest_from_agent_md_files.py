@@ -66,6 +66,8 @@ class AgentReviewManifestTests(unittest.TestCase):
           Explanation: The current test verifies existing proof remains when a new test function is added. The named test verifies an incomplete replacement review preserves existing manifest records; both use failure path, but exercise materially different scenarios.
         - Happy/Failure Path Difference: `test_pre_commit_review_workflow.py::test_repeated_generation_preserves_manifest`
           Explanation: The current test verifies existing proof remains when a new test function is added. The named test verifies repeated ordinary generation preserves manifest bytes; the current test is failure path, while the named test is happy path.
+        - Happy/Failure Path Difference: `test_cicd_validation_workflow.py::test_outdated_version_remains_valid`
+          Explanation: The current test verifies adding an unreviewed sibling preserves existing proof; the named test verifies CI accepts unchanged test proof with outdated version metadata.
         """
 
         with tempfile.TemporaryDirectory() as directory:
@@ -221,6 +223,14 @@ class AgentReviewManifestTests(unittest.TestCase):
           Explanation: The current test verifies unchanged proof remains valid with historical review-contract metadata. The named test verifies lint ignores obsolete pending packets when manifest proof is current; both use happy path, but exercise materially different scenarios.
         - Scenario Difference: `test_pre_commit_review_workflow.py::test_repeated_generation_preserves_manifest`
           Explanation: The current test verifies unchanged proof remains valid with historical review-contract metadata. The named test verifies repeated ordinary generation preserves manifest bytes; both use happy path, but exercise materially different scenarios.
+        - Scenario Difference: `test_agent_review_examples.py::test_current_jsonl_attestation_skips_evaluation`
+          Explanation: The current test verifies unchanged test proof remains valid with historical review-contract metadata; the named test verifies matching YAML-case proof bypasses evaluation and produces no pending packet paths.
+        - Happy/Failure Path Difference: `test_agent_review_examples.py::test_stale_attestation_reports_pending_packet`
+          Explanation: The current test verifies unchanged test proof remains valid with historical review-contract metadata; the named test verifies an outdated YAML-case digest produces a pending-packet error.
+        - Scenario Difference: `test_render_cross_test_agent_md_file.py::test_completed_classification_remains_valid`
+          Explanation: The current test verifies unchanged test proof remains valid with historical review-contract metadata; the named test verifies completed pair classifications remain valid when reviewed test files are unchanged.
+        - Scenario Difference: `test_pre_commit_review_workflow.py::test_current_manifest_generates_zero_packets`
+          Explanation: The current test verifies unchanged test proof remains valid with historical review-contract metadata; the named test verifies ordinary packet generation reports zero packets for current passing proof.
         """
 
         with tempfile.TemporaryDirectory() as directory:
