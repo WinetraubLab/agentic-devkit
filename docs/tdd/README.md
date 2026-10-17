@@ -80,7 +80,7 @@ The goal is to catch weak, vague, or bloated tests before they guide implementat
 
 ## Add It To Your Project
 
-From the root of your project, copy and run this entire block:
+From your project root, run this block to install `agentic-devkit` and its shared skills (requires Python 3.11+ and Git).
 
 ```bash
 bash -c '
