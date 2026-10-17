@@ -355,7 +355,91 @@ class PreCommitReviewWorkflowTests(unittest.TestCase):
             },
         )
 
-    def test_retains_supplied_reviewer(self) -> None:
+    def test_records_passing_review_beside_failure(self) -> None:
+        """Test Path: failure path
+
+        Requirement Tested:
+        `pre-commit review workflow` records a passing test's attestation even when another test in the same file fails agent review.
+        Specialized usage: When one scorecard passes and another fails in the same file, the workflow records the passing attestation.
+
+        Verification Method: verify public function output
+
+        Verification Detail:
+        Lint exits with failure and reports agent_review_failed.
+        The JSONL manifest contains only the passing test with status pass.
+
+        Similar Coverage:
+        - Happy/Failure Path Difference: `test_build_manifest_from_agent_md_files.py::test_recording_keeps_current_proof`
+          Explanation: The current test verifies a mixed run saves passing proof while reporting another failed review. The named test verifies recording retains existing current proof; these scenarios distinguish the two contracts.
+        - Happy/Failure Path Difference: `test_pre_commit_review_workflow.py::test_nominal_review_scenario`
+          Explanation: The current test verifies a mixed run saves passing proof while reporting another failed review. The named test verifies a fully passing run records the approved test; these scenarios distinguish the two contracts.
+        - Happy/Failure Path Difference: `test_review_documentation.py::test_readme_shows_review_workflow`
+          Explanation: The current test verifies a mixed run saves passing proof while reporting another failed review. The named test verifies README documents the ordered review and recording stages; these scenarios distinguish the two contracts.
+        - Scenario Difference: `test_build_manifest_from_agent_md_files.py::test_excludes_added_function`
+          Explanation: The current test verifies a mixed run saves passing proof while reporting another failed review. The named test verifies unreviewed added tests receive no proof; these scenarios distinguish the two contracts.
+        - Scenario Difference: `test_build_manifest_from_agent_md_files.py::test_pending_review_is_not_recorded`
+          Explanation: The current test verifies a mixed run saves passing proof while reporting another failed review. The named test verifies an incomplete first review creates no proof; these scenarios distinguish the two contracts.
+        - Scenario Difference: `test_pre_commit_review_workflow.py::test_incomplete_review_preserves_manifest`
+          Explanation: The current test verifies a mixed run saves passing proof while reporting another failed review. The named test verifies an incomplete replacement review preserves prior proof; these scenarios distinguish the two contracts.
+        """
+
+        test_source = textwrap.dedent(
+            '''\
+            """Tests in this file validate `addition` located at `src/arithmetic.py`.
+            `addition` is responsible for combining numbers into their sum.
+
+            Terms:
+            - `addition`: Addition combines two numbers into their sum. For example, one plus one produces two.
+            """
+
+            def test_passing() -> None:
+                """Test Path: happy path
+
+                Requirement Tested:
+                `addition` produces the sum of two numbers.
+                Standard usage: The operands are positive integers.
+
+                Verification Method: verify public function output
+
+                Verification Detail:
+                One plus one equals `2`.
+                """
+
+                assert 1 + 1 == 2
+            '''
+        )
+        second_test = test_source[test_source.index("def test_passing"):].replace(
+            "test_passing", "test_failing"
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            repo_root = Path(directory)
+            _write_source(repo_root / "src" / "arithmetic.py", "def add(a, b): return a + b\n")
+            _write_source(repo_root / "tests" / "test_arithmetic.py", test_source + "\n" + second_test)
+            creation = _run_cli(repo_root, "create-agent-md")
+            self.assertEqual(0, creation.returncode, creation.stdout)
+            _complete_packets(repo_root, status="pass", evidence="review completed")
+            failing_packet = next(
+                path for path in _packet_paths(repo_root) if "test_failing" in path.name
+            )
+            failing_packet.write_text(
+                failing_packet.read_text(encoding="utf-8").replace(
+                    "| pass | review completed. |",
+                    "| fail | Requirement does not match the assertion. |",
+                    1,
+                ),
+                encoding="utf-8",
+            )
+
+            lint = _run_cli(repo_root, "lint")
+            self.assertEqual(1, lint.returncode)
+            self.assertIn("agent_review_failed", lint.stdout)
+            records = _manifest_records(repo_root)
+
+        self.assertEqual(
+            [("tests/test_arithmetic.py", "test_passing", "pass")],
+            [(record["path"], record["test"], record["status"]) for record in records],
+        )
+
         """Test Path: happy path
 
         Requirement Tested:
