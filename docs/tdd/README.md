@@ -36,36 +36,6 @@ Use the installed `$simplify-implementation` skill for the complete refactor-pha
 
 The key assumption is that generated implementation code may be too large or complex for humans to review line by line. Instead, human review should focus on the tests, because the tests define the intended behavior. If the tests are clear, complete, and correct, then the generated implementation can be judged by whether it satisfies those tests.
 
-## Repository Structure
-
-Production code is grouped by responsibility:
-
-```text
-src/agentic_devkit/
-    cli/main.py           # Toolkit command routing
-    version.py            # Toolkit version
-    tdd_lint/
-        indexing_test_functions/ # Test discovery and extraction
-        conventional_linter/     # Deterministic lint rules
-        agentic_linter/          # Agent-review generation and proof
-        cli/                     # TDD pipeline and reporting
-```
-
-Tests use the same boundaries and add two test-only groups:
-
-```text
-tests/
-    indexing_test_functions/ # Tests for discovery and function indexing
-    conventional_linter/  # Tests for deterministic lint rules
-    agentic_linter/       # Tests for the agent-review subsystem
-    cli/                  # Tests for CLI behavior
-    integration_tests/    # End-to-end and dogfood tests
-    repository_health/    # Fixture, manifest, workflow, and documentation health
-```
-
-`integration_tests` and `repository_health` have no production-code counterparts:
-they verify interactions and the repository itself rather than implement linter behavior.
-
 ## What It Checks
 
 The TDD linter looks for tests that are:
@@ -81,24 +51,24 @@ The goal is to catch weak, vague, or bloated tests before they guide implementat
 
 ## Set up TDD linting to your project
 
-Install the agent skills described in the [toolkit setup](../../README.md#agent-skills).
-Then run this block from your project root:
+[Install the toolkit](../../README.md#installation) and the
+[`run-tdd-linter` agent skill](../../README.md#agent-skills) in your project.
 
-```bash
-bash -c '
-set -e
+Keep your Python or TypeScript tests under `tests/`, for example
+`tests/test_lengths.py` or `tests/lengths.test.ts`. Follow the
+[Test Docstring Contract](#test-docstring-contract) when writing them. If your
+tests live elsewhere, tell the agent which directory to use; the CLI supports
+`--test-root <directory>`.
 
-python3 -m venv .venv
-git submodule update --init --remote .agents/skills/shared
-./.venv/bin/pip install git+https://github.com/WinetraubLab/agentic-devkit
+From your project root, ask your coding agent:
 
-printf "\nThen ask your coding agent:\n\nRun the \`\$run-tdd-linter\` skill.\n"
-'
+```text
+Run the `$run-tdd-linter` skill.
 ```
 
-The skill generates and reviews the `.agent.md` scorecards, runs the linter,
-and iterates on test corrections until the workflow converges. Shared Codex skills are distributed separately through the project's
-`.agents/skills/shared` Git submodule.
+A successful run leaves your tests with passing review proof in
+`tests/agentic_review_manifest.jsonl`. Commit that manifest with your test changes.
+
 
 After the first successful run, add `./.venv/bin/agentic-devkit tdd lint` after the project's normal test suite. This preserves existing tests and linters while checking agent-authored tests alongside test and coverage results.
 

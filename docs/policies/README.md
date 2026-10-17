@@ -33,15 +33,45 @@ Use the installed `$review-policy-attestations` skill for this review workflow.
 
 ## Set up policy reviews to your project
 
-[Install the toolkit](../../README.md#installation), then create a `policy/` folder
-in your Git repository. Your project will contain:
+[Install the toolkit](../../README.md#installation) and the
+[`review-policy-attestations` agent skill](../../README.md#agent-skills) in your project.
+
+Create your policies using the [Policy Writing Contract](#policy-writing-contract),
+for example `policy/naming/physical-lengths.policy.yaml`. Your project will contain:
 
 ```text
 policy/
+├── policy-scope-digest.json     # Reviewed root folders and generated digests
 └── <field>/
     ├── <policy-name>.policy.yaml # Policy content supplied to the template
     └── <policy-name>.md         # Generated policy and editable attestation
 ```
 
-Write your policies using the [Policy Writing Contract](#policy-writing-contract),
-then render their review documents as described below.
+Specify the root folders to review under your policies in
+`policy/policy-scope-digest.json`:
+
+```json
+{
+  "digests": [
+    {
+      "root_folder": "src",
+      "digest": null
+    }
+  ]
+}
+```
+
+Add an entry for each root folder. Set `digest` to `null` for new entries; the
+tool generates and updates it during review. Folder paths are relative to your
+project root.
+
+From your project root, ask your coding agent:
+
+```text
+Run the `$review-policy-attestations` skill.
+```
+
+A successful run leaves generated policies with completed attestations and a
+current `policy/policy-scope-digest.json`. Commit these with your policy YAML
+and code changes.
+
