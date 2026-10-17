@@ -138,6 +138,22 @@ class CrossTestAgentMarkdownTests(unittest.TestCase):
         Similar Coverage:
         - Scenario Difference: `test_render_cross_test_agent_md_file.py::test_lists_each_pair_once`
           Explanation: The current test verifies `render_cross_test_agent_md_file` treats a completed `pair classification` as still valid when selected test files remain unchanged. The named test verifies `render_cross_test_agent_md_file` creates one `pair classification` row for every unordered test pair; both use happy path, but exercise materially different scenarios.
+        - Scenario Difference: `test_cicd_validation_workflow.py::test_outdated_version_remains_valid`
+          Explanation: The current test verifies unchanged test files preserve completed pair classifications; the named test verifies CI accepts current test-content proof with outdated version metadata.
+        - Scenario Difference: `test_agent_review_examples.py::test_current_jsonl_attestation_skips_evaluation`
+          Explanation: The current test verifies completed pair classifications remain valid when reviewed test files are unchanged; the named test verifies matching YAML-case proof bypasses evaluation and produces no pending packet paths.
+        - Happy/Failure Path Difference: `test_agent_review_examples.py::test_stale_attestation_reports_pending_packet`
+          Explanation: The current test verifies completed pair classifications remain valid when reviewed test files are unchanged; the named test verifies an outdated YAML-case digest produces a pending-packet error.
+        - Scenario Difference: `test_build_manifest_from_agent_md_files.py::test_manifest_accepts_old_review_contract`
+          Explanation: The current test verifies completed pair classifications remain valid when reviewed test files are unchanged; the named test verifies unchanged test proof remains valid with historical review-contract metadata.
+        - Module Difference: `test_cicd_validation_workflow.py::test_cicd_accepts_current_proof`
+          Explanation: The current test verifies completed pair classifications remain valid when reviewed test files are unchanged; the named test verifies CI accepts a passing manifest for unchanged test content.
+        - Scenario Difference: `test_pre_commit_review_workflow.py::test_current_manifest_generates_zero_packets`
+          Explanation: The current test verifies completed pair classifications remain valid when reviewed test files are unchanged; the named test verifies ordinary packet generation reports zero packets for current passing proof.
+        - Scenario Difference: `test_pre_commit_review_workflow.py::test_lint_ignores_obsolete_pending_packets`
+          Explanation: The current test verifies completed pair classifications remain valid when reviewed test files are unchanged; the named test verifies lint ignores obsolete pending packets when current manifest proof exists.
+        - Happy/Failure Path Difference: `test_pre_commit_review_workflow.py::test_stale_test_requires_review`
+          Explanation: The current test verifies completed pair classifications remain valid when reviewed test files are unchanged; the named test verifies editing a test regenerates its packet and its affected relationship rows.
         """
 
         with tempfile.TemporaryDirectory() as directory:
