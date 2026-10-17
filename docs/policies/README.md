@@ -24,3 +24,10 @@ Development -> Attestation
 ```
 
 Use the installed `$review-policy-attestations` skill for this review workflow.
+
+## What It Checks
+
+- Reviews are current for the code being checked.
+- Policy documents and attestations are valid.
+- Reported violations do not exceed the committed baseline.
+
