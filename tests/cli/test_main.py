@@ -4,14 +4,12 @@
 Terms:
 - `CLI output`: CLI output is the text printed for a command result. For example, it reports lint issues or the number of recorded attestations.
 - `.agent.md`: An .agent.md file contains one review scorecard that create-agent-md generates. For example, packet creation writes one file for each test.
-- `reviewer identity`: A reviewer identity names the agent and model that completed a review. For example, `codex:gpt-5.5` is a reviewer identity.
 """
 
 from __future__ import annotations
 
 import contextlib
 import io
-import json
 import sys
 import tempfile
 import textwrap
@@ -23,20 +21,6 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 
 from agentic_tdd_linter.cli.main import main
 
-from agentic_tdd_linter.agentic_linter.build_manifest_from_agent_md_files import (
-    _agent_review_manifest_path,
-    _review_contract_sha256,
-)
-from agentic_tdd_linter.agentic_linter.determine_agent_md_status import (
-    _test_content_sha256,
-)
-from agentic_tdd_linter.agentic_linter.map_test_function_to_agent_md_file import (
-    map_test_function_to_agent_md_file,
-)
-from agentic_tdd_linter.indexing_test_functions.extract_tests_from_file import (
-    extract_tests_from_file,
-)
-from agentic_tdd_linter.version import __version__
 
 
 class CliTests(unittest.TestCase):
@@ -179,84 +163,6 @@ class ReviewProofFlowTests(unittest.TestCase):
         self.assertIn("test_first.py", stdout.getvalue())
         self.assertNotIn("test_second", stdout.getvalue())
 
-    def test_lint_requires_reviewer(self) -> None:
-        """Test Path: failure path
-
-        Requirement Tested:
-        `CLI` emits missing_reviewer for completed `.agent.md` files when `reviewer identity` is absent.
-        Specialized usage: Caller provides a completed `.agent.md` file without `reviewer identity`, so CLI emits missing_reviewer.
-
-        Verification Method: verify public function output
-
-        Verification Detail:
-        Manifest proof has status `pass` and reviewer `codex:gpt-5.5`.
-        The `.agent.md` scorecard has status `pass` and no `reviewer identity`.
-        `CLI output` contains `missing_reviewer`.
-
-        Similar Coverage:
-        - Happy/Failure Path Difference: `test_pre_commit_review_workflow.py::test_nominal_review_scenario`
-          Explanation: The current test verifies `CLI` emits missing_reviewer for completed `.agent.md` files when `reviewer identity` is absent. The named test verifies `pre-commit review workflow` persists an approved test in the manifest when its `.agent.md` scorecard passes; the current test is failure path, while the named test is happy path.
-        - Happy/Failure Path Difference: `test_pre_commit_review_workflow.py::test_retains_supplied_reviewer`
-          Explanation: The current test verifies `CLI` rejects a completed scorecard when `reviewer identity` is absent. The named test verifies `pre-commit review workflow` retains the reviewer supplied to lint; the current test is failure path, while the named test is happy path.
-        """
-
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            reviewer = "codex:gpt-5.5"
-            test_source = textwrap.dedent(
-                '''
-                def test_adds_values() -> None:
-                    """Test Path: happy path
-
-                    Requirement Tested:
-                    `addition` calculates sums.
-                    When operands contain positive integers, addition calculates sums.
-
-                    Verification Method: verify public function output
-
-                    Verification Detail:
-                    The expression produces `2`.
-                    """
-
-                    assert 1 + 1 == 2
-                '''
-            ).strip() + "\n"
-            test_file = _write_test_file(root, test_source)
-            _write_manifest(
-                root,
-                test_file,
-                source_hash="0" * 64,
-                status="pass",
-                reviewer=reviewer,
-            )
-            _write_artifact(root, test_file, status="pass")
-            stdout = io.StringIO()
-
-            with contextlib.redirect_stdout(stdout):
-                exit_code = main(["lint", "--repo-root", str(root)])
-
-        self.assertIn("missing_reviewer", stdout.getvalue())
-
-def _write_test_file(root: Path, source: str) -> Path:
-    test_directory = root / "tests"
-    test_directory.mkdir()
-    module_file = root / "src" / "addition.py"
-    module_file.parent.mkdir()
-    module_file.write_text("def add(a, b): return a + b\n", encoding="utf-8")
-    test_file = test_directory / "test_sample.py"
-    test_file.write_text(_with_file_docstring(source), encoding="utf-8")
-    return test_file
-
-
-def _with_file_docstring(source: str) -> str:
-    return textwrap.dedent(
-        '''
-        """Tests in this file validate `addition` located at `src/addition.py`.
-        `addition` is responsible for calculating numeric sums.
-        """
-        '''
-    ).strip() + "\n\n" + source
-
 
 def _valid_test_function_source(name: str) -> str:
     return textwrap.dedent(
@@ -278,65 +184,6 @@ def _valid_test_function_source(name: str) -> str:
         '''
     )
 
-
-def _test_hash(test_file: Path, root: Path) -> str:
-    test = next(
-        test
-        for test in extract_tests_from_file(test_file, root)
-        if test.name == "test_adds_values"
-    )
-    return _test_content_sha256(test.source)
-
-
-def _write_artifact(root: Path, test_file: Path, *, status: str) -> Path:
-    artifact_path = map_test_function_to_agent_md_file(test_file, root, test_name="test_adds_values")
-    artifact_path.parent.mkdir(parents=True, exist_ok=True)
-    artifact_path.write_text(
-        textwrap.dedent(
-            f"""
-            # Agentic Test Docstring Review
-
-            Test file: `tests/test_sample.py`
-            Test Content SHA256: `{_test_hash(test_file, root)}`
-
-            ### `test_adds_values`
-
-            ## Agent Review Result
-
-            Status: {status}
-            Notes:
-            - Scenario or example: adding `1 + 1` should produce `2`.
-            - Review result: Review passed.
-            """
-        ).strip()
-        + "\n",
-        encoding="utf-8",
-    )
-    return artifact_path
-
-
-def _write_manifest(
-    root: Path,
-    test_file: Path,
-    *,
-    source_hash: str,
-    status: str,
-    reviewer: str,
-    linter_version: str = __version__,
-) -> Path:
-    manifest_path = _agent_review_manifest_path(root)
-    manifest_path.parent.mkdir(parents=True, exist_ok=True)
-    record = {
-        "path": "tests/test_sample.py",
-        "test": "test_adds_values",
-        "source_sha256": source_hash,
-        "status": status,
-        "linter_version": linter_version,
-        "review_contract_sha256": _review_contract_sha256(root),
-        "reviewer": reviewer,
-    }
-    manifest_path.write_text(json.dumps(record) + "\n", encoding="utf-8")
-    return manifest_path
 
 
 if __name__ == "__main__":

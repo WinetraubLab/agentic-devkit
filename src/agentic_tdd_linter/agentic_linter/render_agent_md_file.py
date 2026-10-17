@@ -33,7 +33,6 @@ def _render_agent_md_files_for_test_file(
         (
             test,
             _render_agent_md(
-                test_file_path=absolute_path,
                 test=test,
                 score_only=score_only,
             ),
@@ -43,7 +42,6 @@ def _render_agent_md_files_for_test_file(
 
 
 def _render_agent_md(
-    test_file_path: Path,
     test: ExtractedTestRecord,
     *,
     score_only: bool = False,
@@ -119,7 +117,6 @@ def render_agent_md_file(
     """Write the agent-review artifact for one test."""
 
     markdown = _render_agent_md(
-        test_file_path=test_file_path,
         test=test,
         score_only=score_only,
     )

@@ -35,10 +35,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         if args.command == "create-agent-md":
             result = create_agent_md_files(**common_arguments)
         else:
-            result = run_lint_pipeline(
-                **common_arguments,
-                reviewer=args.reviewer or "",
-            )
+            result = run_lint_pipeline(**common_arguments)
     except ValueError as error:
         print(f"agentic-tdd-linter: {error}", file=sys.stderr)
         return 2
@@ -52,7 +49,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         )
     else:
         print(format_text(result.issues, result.files))
-        if not result.issues and result.recorded_manifest_path is not None:
+        if result.recorded_manifest_path is not None:
             relative_manifest = _relative_path(result.recorded_manifest_path, repo_root)
             print(
                 "agentic-tdd-linter: "
@@ -79,7 +76,7 @@ def _next_action(
 
     if issues:
         return "Next action:\nRun the `$run-tdd-linter` skill."
-    if command == "create-agent-md" and not issues and generated_count:
+    if command == "create-agent-md" and generated_count:
         return "\n".join(
             (
                 "Next action:",
@@ -116,13 +113,6 @@ def _build_parser() -> argparse.ArgumentParser:
         _add_file_selection_arguments(command_parser)
         _add_shared_arguments(command_parser)
 
-    lint_parser.add_argument(
-        "--reviewer",
-        help=(
-            "reviewer identity to store in the manifest after artifact proof passes, "
-            "such as codex:gpt-5.5"
-        ),
-    )
     return parser
 
 
@@ -137,6 +127,8 @@ def _add_file_selection_arguments(parser: argparse.ArgumentParser) -> None:
             "test root"
         ),
     )
+
+
 def _add_shared_arguments(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--format",

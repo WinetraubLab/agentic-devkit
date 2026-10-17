@@ -72,46 +72,16 @@ def complete_packets(repo_root: Path, *, status: str, evidence: str) -> None:
             "| pending | pending | Replace with classification evidence. |",
             f"| yes | Module Difference | {evidence}. |",
         )
-        if status == "pass":
-            packet = packet.replace(
-                "| pending | Replace with review evidence. |",
-                f"| pass | {evidence}. |",
-            ).replace(
-                (
-                    "| pending | Complete only when an overlapping pair "
-                    "involves this test. |"
-                ),
-                f"| pass | {evidence}. |",
-            )
-        else:
-            packet = packet.replace(
-                "| pending | Replace with review evidence. |",
-                f"| fail | {evidence}. |",
-                1,
-            ).replace(
-                "| pending | Replace with review evidence. |",
-                f"| pass | {evidence}. |",
-            ).replace(
-                (
-                    "| pending | Complete only when an overlapping pair "
-                    "involves this test. |"
-                ),
-                f"| fail | {evidence}. |",
-                1,
-            ).replace(
-                (
-                    "| pending | Complete only when an overlapping pair "
-                    "involves this test. |"
-                ),
-                f"| pass | {evidence}. |",
-            )
+        pending_row = "| pending | Replace with review evidence. |"
+        if status != "pass":
+            packet = packet.replace(pending_row, f"| fail | {evidence}. |", 1)
+        packet = packet.replace(pending_row, f"| pass | {evidence}. |")
         packet_path.write_text(packet, encoding="utf-8")
 
 
 def record_approved_manifest(
     repo_root: Path,
     *,
-    reviewer: str,
     review_status: str,
     review_evidence: str,
 ) -> None:
@@ -123,7 +93,7 @@ def record_approved_manifest(
         status=review_status,
         evidence=review_evidence,
     )
-    lint = run_cli(repo_root, "lint", "--reviewer", reviewer)
+    lint = run_cli(repo_root, "lint")
     if lint.returncode != 0:
         raise AssertionError(lint.stdout + lint.stderr)
 

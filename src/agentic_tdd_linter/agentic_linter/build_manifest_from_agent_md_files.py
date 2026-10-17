@@ -9,11 +9,9 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable, Mapping, Sequence
 
-from .map_test_function_to_agent_md_file import map_test_function_to_agent_md_file
 from .determine_agent_md_status import (
     _lint_agent_md_file,
     _test_content_sha256,
-    determine_agent_md_status,
 )
 from ..conventional_linter.run_conventional_linter import LintIssue
 from ..indexing_test_functions.extract_tests_from_file import extract_tests_from_file
@@ -30,7 +28,6 @@ REQUIRED_FIELDS = (
     "status",
     "linter_version",
     "review_contract_sha256",
-    "reviewer",
 )
 
 
@@ -68,32 +65,15 @@ def _review_contract_sha256(repo_root: Path | None = None) -> str:
 def build_manifest_from_agent_md_files(
     files: Iterable[Path],
     repo_root: Path,
-    reviewer: str,
     manifest_path: Path | None = None,
     artifact_root: Path | None = None,
     tests_by_file: Mapping[Path, Sequence[ExtractedTestRecord]] | None = None,
     preserve_unselected_tests: bool = False,
 ) -> tuple[Path, int, list[LintIssue]]:
-    """Build compact pass records from reviewed ``.agent.md`` files."""
+    """Build compact pass records from completed review packets."""
 
     root = Path(repo_root).resolve()
     manifest = _agent_review_manifest_path(root, manifest_path)
-    reviewer = reviewer.strip()
-    if not reviewer:
-        return (
-            manifest,
-            0,
-            [
-                _manifest_issue(
-                    manifest,
-                    root,
-                    1,
-                    "missing_reviewer",
-                    "reviewer identity is required",
-                )
-            ],
-        )
-
     contract_hash = _review_contract_sha256(root)
     selected_files = sorted({Path(file).resolve() for file in files})
     selected_tests = {
@@ -124,26 +104,18 @@ def build_manifest_from_agent_md_files(
                 issues.extend(artifact_issues)
                 continue
 
-            artifact_text = map_test_function_to_agent_md_file(
-                test_file,
-                root,
-                artifact_root,
-                test.name,
-            ).read_text(encoding="utf-8")
-            status = determine_agent_md_status(artifact_text)
             records.append(
                 {
                     "path": _relative_path(test_file, root).as_posix(),
                     "test": test.name,
                     "source_sha256": _test_content_sha256(test.source),
-                    "status": status,
+                    "status": "pass",
                     "linter_version": __version__,
                     "review_contract_sha256": contract_hash,
-                    "reviewer": reviewer,
                 }
             )
 
-    if issues:
+    if not records:
         return manifest, 0, issues
 
     existing_records, parse_issues = _read_manifest_records(manifest, root, missing_is_issue=False)
@@ -188,7 +160,7 @@ def build_manifest_from_agent_md_files(
         ),
         encoding="utf-8",
     )
-    return manifest, len(records), []
+    return manifest, len(records), issues
 
 
 def _find_tests_requiring_agent_review(
@@ -453,7 +425,10 @@ def _read_manifest_records(
         records.append(
             ManifestRecord(
                 line=line_number,
-                values={str(key): str(record_value) for key, record_value in value.items()},
+                values={
+                    str(key): str(record_value)
+                    for key, record_value in value.items()
+                },
             )
         )
     return records, issues

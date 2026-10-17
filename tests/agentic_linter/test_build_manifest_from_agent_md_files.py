@@ -38,9 +38,6 @@ from agentic_tdd_linter.indexing_test_functions.extract_tests_from_file import (
 from agentic_tdd_linter.version import __version__
 
 
-REVIEWER = "codex:gpt-5.5"
-
-
 class AgentReviewManifestTests(unittest.TestCase):
     def test_added_function_preserves_existing_proof(self) -> None:
         """Test Path: failure path
@@ -123,6 +120,8 @@ class AgentReviewManifestTests(unittest.TestCase):
           Explanation: The current test verifies a newly added unreviewed test is absent from an otherwise retained manifest. The named test verifies no manifest file is created when a scorecard contains pending rows; both use failure path, but exercise materially different scenarios.
         - Happy/Failure Path Difference: `test_pre_commit_review_workflow.py::test_nominal_review_scenario`
           Explanation: The current test verifies incomplete proof for a new test is omitted from the manifest. The named test verifies the pre-commit review workflow persists an approved test after its scorecard passes; the current test is failure path, while the named test is happy path.
+        - Scenario Difference: `test_pre_commit_review_workflow.py::test_records_passing_review_beside_failure`
+          Explanation: The current test verifies unreviewed added tests receive no proof. The named test verifies a mixed run saves passing proof while reporting another failed review; these scenarios distinguish the two contracts.
         """
 
         with tempfile.TemporaryDirectory() as directory:
@@ -204,8 +203,8 @@ class AgentReviewManifestTests(unittest.TestCase):
         Similar Coverage:
         - Scenario Difference: `test_build_manifest_from_agent_md_files.py::test_review_contract_changes_with_documentation`
           Explanation: The current test verifies historical contract metadata does not invalidate unchanged proof. The named test verifies current contract metadata changes with its inputs; both use happy path, but exercise materially different scenarios.
-        - Module Difference: `test_cicd_validation_workflow.py::test_outdated_version_remains_valid`
-          Explanation: The current test verifies a historical review-contract hash remains valid. The named test verifies a historical linter version remains valid; both exercise grandfathered proof through different named modules or contract subjects.
+        - Scenario Difference: `test_cicd_validation_workflow.py::test_outdated_version_remains_valid`
+          Explanation: The current test verifies historical review-contract metadata remains valid for unchanged tests. The named test verifies historical linter-version metadata remains valid for unchanged tests; these scenarios distinguish the two contracts.
         - Happy/Failure Path Difference: `test_build_manifest_from_agent_md_files.py::test_added_function_preserves_existing_proof`
           Explanation: The current test verifies unchanged proof remains valid with historical review-contract metadata. The named test verifies existing proof remains when a new test function is added; the current test is happy path, while the named test is failure path.
         - Happy/Failure Path Difference: `test_build_manifest_from_agent_md_files.py::test_deleted_file_proof_removed`
@@ -406,11 +405,14 @@ class AgentReviewManifestTests(unittest.TestCase):
           Explanation: The current test verifies a manifest update retains current proof. The named test verifies lint ignores obsolete pending packets when manifest proof is current; both use happy path, but exercise materially different scenarios.
         - Scenario Difference: `test_pre_commit_review_workflow.py::test_repeated_generation_preserves_manifest`
           Explanation: The current test verifies a manifest update retains current proof. The named test verifies repeated ordinary generation preserves manifest bytes; both use happy path, but exercise materially different scenarios.
+        - Happy/Failure Path Difference: `test_pre_commit_review_workflow.py::test_records_passing_review_beside_failure`
+          Explanation: The current test verifies recording retains existing current proof. The named test verifies a mixed run saves passing proof while reporting another failed review; these scenarios distinguish the two contracts.
+        - Happy/Failure Path Difference: `test_build_manifest_from_agent_md_files.py::test_pending_review_is_not_recorded`
+          Explanation: The current test verifies recording retains existing current proof. The named test verifies an incomplete first review creates no proof; these scenarios distinguish the two contracts.
         """
 
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            reviewer = "codex:gpt-5.5"
             source = textwrap.dedent(
                 '''
                 def test_adds_values() -> None:
@@ -445,7 +447,6 @@ class AgentReviewManifestTests(unittest.TestCase):
             result_path, _, _ = build_manifest_from_agent_md_files(
                 [test_file],
                 root,
-                reviewer=reviewer,
             )
             records = [
                 json.loads(line)
@@ -486,6 +487,12 @@ class AgentReviewManifestTests(unittest.TestCase):
           Explanation: The current test verifies an incomplete first review creates no manifest proof. The named test verifies an incomplete replacement review preserves existing manifest bytes; both use failure path, but exercise materially different scenarios.
         - Happy/Failure Path Difference: `test_determine_agent_md_status.py::test_derives_pass_status`
           Explanation: The current test verifies a pending review is omitted from the manifest. The named test verifies a completed scorecard produces pass status; the current test is failure path, while the named test is happy path.
+        - Scenario Difference: `test_pre_commit_review_workflow.py::test_records_passing_review_beside_failure`
+          Explanation: The current test verifies an incomplete first review creates no proof. The named test verifies a mixed run saves passing proof while reporting another failed review; these scenarios distinguish the two contracts.
+        - Happy/Failure Path Difference: `test_build_manifest_from_agent_md_files.py::test_recording_keeps_current_proof`
+          Explanation: The current test verifies an incomplete first review creates no proof. The named test verifies recording retains existing current proof; these scenarios distinguish the two contracts.
+        - Happy/Failure Path Difference: `test_pre_commit_review_workflow.py::test_lint_ignores_obsolete_pending_packets`
+          Explanation: The current test verifies an incomplete first review creates no proof. The named test verifies current proof permits lint despite obsolete pending packets; these scenarios distinguish the two contracts.
         """
 
         with tempfile.TemporaryDirectory() as directory:
@@ -514,7 +521,6 @@ class AgentReviewManifestTests(unittest.TestCase):
             manifest_path, _, _ = build_manifest_from_agent_md_files(
                 [test_file],
                 root,
-                reviewer="codex:gpt-5",
             )
 
             self.assertFalse(manifest_path.exists())
@@ -634,7 +640,6 @@ def _manifest_record(
             if review_contract_hash is not None
             else _review_contract_sha256(root)
         ),
-        "reviewer": REVIEWER,
     }
 
 
