@@ -79,7 +79,7 @@ The TDD linter looks for tests that are:
 
 The goal is to catch weak, vague, or bloated tests before they guide implementation.
 
-## Add TDD linting to your project
+## Set up TDD linting to your project
 
 Install the agent skills described in the [toolkit setup](../../README.md#agent-skills).
 Then run this block from your project root:
