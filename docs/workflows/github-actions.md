@@ -3,9 +3,9 @@
 This repository has two separate workflows:
 
 - The **pre-commit review workflow** creates `.agent.md` scorecards, completes their reviews, and records proof in the manifest before changes are committed.
-- The **CI/CD validation workflow** runs `agentic-tdd-linter lint` against the committed tests and manifest proof.
+- The **CI/CD validation workflow** runs `agentic-devkit tdd lint` against the committed tests and manifest proof.
 
-GitHub Actions verifies committed agent-review proof. It performs only the CI/CD validation workflow. It does not perform reviews, create `.agent.md` files, or record new manifest proof. The pre-commit review workflow is documented in the README.
+GitHub Actions verifies committed agent-review proof. It performs only the CI/CD validation workflow. It does not perform reviews, create `.agent.md` files, or record new manifest proof. The pre-commit review workflow is documented in the [TDD guide](../tdd/README.md).
 
 The committed proof is the compact JSONL manifest at `tests/agentic_review_manifest.jsonl`.
 
@@ -32,7 +32,7 @@ The fields mean:
 In CI, verify the manifest:
 
 ```bash
-agentic-tdd-linter lint
+agentic-devkit tdd lint
 ```
 
 You can run that command directly as a workflow step, or call it from dogfood tests that are already part of the normal unit suite. This repository uses the dogfood test path, so the unit test workflow only needs:
