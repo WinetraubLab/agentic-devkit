@@ -148,7 +148,7 @@ jobs:
       - run: uvx --from "git+https://github.com/WinetraubLab/agentic-devkit" agentic-devkit tdd lint
 ```
 
-Before committing, run `agentic-tdd-linter create-agent-md`, review any generated packets, and run `agentic-tdd-linter lint`. Commit the refreshed `tests/agentic_review_manifest.jsonl` with the test changes.
+Before committing, run `agentic-devkit tdd create-agent-md`, review any generated packets, and run `agentic-devkit tdd lint`. Commit the refreshed `tests/agentic_review_manifest.jsonl` with the test changes.
 ````
 
 Full proof flow: [GitHub Actions Review Proof](../workflows/github-actions.md).
