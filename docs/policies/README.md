@@ -123,23 +123,18 @@ Store each policy at `policy/<field>/<policy-name>.policy.yaml`. Group related
 policies by field and use lowercase kebab-case for folder and policy names,
 for example `policy/naming/physical-lengths.policy.yaml`.
 
-Each YAML file must contain these nonempty strings:
-- `title`: A short name for the policy.
-- `objective`: Why the rule matters.
-- `policy_content`: The rules the agent must apply during review.
-
-Write rules that describe the intended meaning, when they apply, and how to
-recognize a violation. Include examples and relevant exceptions so the agent can
-distinguish definite violations from ambiguous cases.
-
 ```yaml
 title: Physical length naming
 objective: Make the units of physical lengths explicit.
+applicable_folders: all # All JSON roots (default), or a list such as [src/vehicles].
 policy_content: |
   Parameters representing physical lengths in meters must end in _m.
   For example, use car_length_m and tree_height_m.
   Apply this rule based on what the parameter represents, not just its name.
   Counts and lengths measured in other units are outside this rule.
+exemptions: | # Optional accepted violations; retained across review resets.
+  src/legacy-car.py may retain car_length without the _m suffix
+  until callers migrate to car_length_m.
 ```
 
 Rendering inserts these values into the bundled `policy-template.md.j2`, which
