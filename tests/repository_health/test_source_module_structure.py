@@ -5,7 +5,7 @@ Terms:
 - `source module`: A source module is a non-`__init__.py` Python file under src/agentic_devkit. For example, tests/cli/test_main.py matches src/agentic_devkit/cli/main.py.
 - `test module`: A test module is a test_*.py file under tests. For example, tests/cli/test_main.py is a test module.
 - `test-harness module`: A test-harness module is a same-basename non-test Python file beside a test module or inside its folder's test_harness package. For example, test_harness/mock_keyword_identification.py supports test_mock_keyword_identification.py.
-- `data-only module`: A data-only module is indexing_test_functions/extracted_test_record.py or version.py. For example, version.py exposes version data instead of public functions.
+- `data-only module`: A data-only module is tdd_lint/indexing_test_functions/extracted_test_record.py or version.py. For example, version.py exposes version data instead of public functions.
 """
 
 from __future__ import annotations
@@ -57,8 +57,8 @@ class SourceModuleStructureTests(unittest.TestCase):
         """Test Path: failure path
 
         Requirement Tested:
-        `test_source_module_structure` emits a violation when a `source module` exposes fewer than one or more than two public functions.
-        Specialized usage: A source module exposes zero or three public functions instead of one or two, so `test_source_module_structure` emits a violation.
+        `test_source_module_structure` emits a violation when a non-exempt `source module` exposes fewer than one or more than two public functions.
+        Specialized usage: A non-exempt source module exposes zero or three public functions instead of one or two, so `test_source_module_structure` emits a violation.
 
         Verification Method: verify private function output
 
@@ -68,7 +68,9 @@ class SourceModuleStructureTests(unittest.TestCase):
 
         Similar Coverage:
         - Happy/Failure Path Difference: `test_source_module_structure.py::test_exempts_data_only_modules`
-          Explanation: The current test verifies `test_source_module_structure` emits a violation when a `source module` exposes fewer than one or more than two public functions. The named test verifies `test_source_module_structure` exempts every `data-only module` from the one-or-two-public-functions limit; the current test is failure path, while the named test is happy path.
+          Explanation: The current test verifies `test_source_module_structure` emits a violation when a non-exempt `source module` exposes fewer than one or more than two public functions. The named test verifies `test_source_module_structure` exempts every `data-only module` from the one-or-two-public-functions limit; the current test is failure path, while the named test is happy path.
+        - Happy/Failure Path Difference: `test_source_module_structure.py::test_repository_obeys_public_function_limit`
+          Explanation: The current test verifies zero-function and three-function fixtures produce violations; the named test verifies repository modules satisfy the public-function limit.
         """
 
         with tempfile.TemporaryDirectory() as directory:
@@ -108,25 +110,19 @@ class SourceModuleStructureTests(unittest.TestCase):
         Verification Method: verify private function output
 
         Verification Detail:
-        `_public_api_violations` produces `[]` for the package root when the two `data-only module` paths are exempt.
-        `_public_api_violations` accepts a controlled three-function `data-only module`.
+        `_public_api_violations` returns an empty list when both declared `data-only module` paths contain three-function fixtures and are exempt.
 
         Similar Coverage:
         - Happy/Failure Path Difference: `test_source_module_structure.py::test_enforces_public_function_limit`
           Explanation: The current test verifies `test_source_module_structure` exempts every `data-only module` from the one-or-two-public-functions limit. The named test verifies `test_source_module_structure` emits a violation when a `source module` exposes fewer than one or more than two public functions; the current test is happy path, while the named test is failure path.
+        - Scenario Difference: `test_source_module_structure.py::test_repository_obeys_public_function_limit`
+          Explanation: The current test verifies both declared exemption paths accept three-function fixtures; the named test verifies repository modules satisfy the limit with exemptions.
         """
 
-        repo_root = Path(__file__).resolve().parents[2]
-        package_root = repo_root / "src" / "agentic_devkit"
         data_only_modules = {
             Path("tdd_lint/indexing_test_functions/extracted_test_record.py"),
             Path("version.py"),
         }
-        repository_violations = _public_api_violations(
-            package_root,
-            data_only_modules,
-        )
-
         with tempfile.TemporaryDirectory() as directory:
             controlled_root = Path(directory)
             three_functions = (
@@ -134,18 +130,46 @@ class SourceModuleStructureTests(unittest.TestCase):
                 "def second(): pass\n"
                 "def third(): pass\n"
             )
-            (controlled_root / "data.py").write_text(
-                three_functions,
-                encoding="utf-8",
-            )
+            for relative_path in data_only_modules:
+                module_path = controlled_root / relative_path
+                module_path.parent.mkdir(parents=True, exist_ok=True)
+                module_path.write_text(three_functions, encoding="utf-8")
 
             controlled_violations = _public_api_violations(
                 controlled_root,
-                {Path("data.py")},
+                data_only_modules,
             )
 
-        self.assertEqual([], repository_violations)
         self.assertEqual([], controlled_violations)
+
+    def test_repository_obeys_public_function_limit(self) -> None:
+        """Test Path: happy path
+
+        Requirement Tested:
+        `test_source_module_structure` requires non-exempt `source module` files to expose one or two public functions.
+        Standard usage: The scenario demonstrates baseline behavior.
+
+        Verification Method: verify private function output
+
+        Verification Detail:
+        `_public_api_violations` returns an empty list for the repository package with its two `data-only module` paths exempt.
+
+        Similar Coverage:
+        - Happy/Failure Path Difference: `test_source_module_structure.py::test_enforces_public_function_limit`
+          Explanation: The current test verifies repository modules satisfy the public-function limit; the named test verifies zero-function and three-function fixtures produce violations.
+        - Scenario Difference: `test_source_module_structure.py::test_exempts_data_only_modules`
+          Explanation: The current test verifies repository modules satisfy the limit with exemptions; the named test verifies both declared exemption paths accept three-function fixtures.
+        """
+        repo_root = Path(__file__).resolve().parents[2]
+        package_root = repo_root / "src" / "agentic_devkit"
+        data_only_modules = {
+            Path("tdd_lint/indexing_test_functions/extracted_test_record.py"),
+            Path("version.py"),
+        }
+
+        repository_violations = _public_api_violations(package_root, data_only_modules)
+
+        self.assertEqual([], repository_violations)
 
 
 def _source_modules(package_root: Path) -> list[Path]:
