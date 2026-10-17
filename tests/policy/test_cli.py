@@ -41,3 +41,13 @@ class PolicyCliTests(unittest.TestCase):
 
         Requirement Tested:
         `policy CLI` verifies attestations using the caller's baseline revision.
+
+        Verification Method: verify public function output
+
+        Verification Detail:
+        Verification succeeds and reports HEAD as the selected baseline.
+        """
+        result = _run_cli(_fixture(self), "verify", "--baseline-ref", "HEAD")
+        self.assertEqual(0, result.returncode, result.stderr)
+        self.assertIn("Policy attestations do not exceed HEAD", result.stdout)
+
