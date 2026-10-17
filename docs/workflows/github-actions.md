@@ -14,7 +14,7 @@ The committed proof is the compact JSONL manifest at `tests/agentic_review_manif
 Each JSONL record proves one reviewed test:
 
 ```json
-{"path": "tests/test_example.py", "test": "test_example", "source_sha256": "...", "status": "pass", "linter_version": "0.1.0", "review_contract_sha256": "...", "reviewer": "codex:gpt-5.5"}
+{"path": "tests/test_example.py", "test": "test_example", "source_sha256": "...", "status": "pass", "linter_version": "0.1.0", "review_contract_sha256": "..."}
 ```
 
 The fields mean:
@@ -26,7 +26,6 @@ The fields mean:
 - `review_contract_sha256`: a hash of the linter's Python and Jinja source files,
   `README.md`, `pyproject.toml`, and Markdown files under `docs/` at review time. It
   does not hash the reviewed test or the completed review response.
-- `reviewer`: the model or agent identity used for review.
 
 ## Workflow Verification
 
