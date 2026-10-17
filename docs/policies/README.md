@@ -31,3 +31,17 @@ Use the installed `$review-policy-attestations` skill for this review workflow.
 - Policy documents and attestations are valid.
 - Reported violations do not exceed the committed baseline.
 
+## Add policies to your project
+
+[Install the toolkit](../../README.md#installation), then create a `policy/` folder
+in your Git repository. Your project will contain:
+
+```text
+policy/
+└── <field>/
+    ├── <policy-name>.policy.yaml # Policy content supplied to the template
+    └── <policy-name>.md         # Generated policy and editable attestation
+```
+
+Write your policies using the [Policy Writing Contract](#policy-writing-contract),
+then render their review documents as described below.
