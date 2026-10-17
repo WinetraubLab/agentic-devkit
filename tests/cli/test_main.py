@@ -28,13 +28,13 @@ class CliTests(unittest.TestCase):
         """Test Path: happy path
 
         Requirement Tested:
-        `CLI` exposes TDD operations through its tdd command group.
-        A caller requests help to discover available test review commands.
+        `CLI` lists lint and create-agent-md in successful help output for its tdd command group.
+        Standard usage: The scenario demonstrates baseline behavior.
 
         Verification Method: verify public function output
 
         Verification Detail:
-        Help exits successfully and lists lint and create-agent-md.
+        Help exits with code 0 and identifies agentic-devkit tdd with lint and create-agent-md as available commands.
         """
         stdout = io.StringIO()
         with contextlib.redirect_stdout(stdout), self.assertRaises(SystemExit) as exit:
