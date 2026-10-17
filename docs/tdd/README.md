@@ -1,16 +1,16 @@
-# agentic-tdd-linter
+# TDD linting
 
-`agentic-tdd-linter` is a linter for Python and TypeScript tests written during agent-assisted [test-driven development (TDD)](https://martinfowler.com/bliki/TestDrivenDevelopment.html).
+The TDD linting tool in `agentic-devkit` checks Python and TypeScript tests written during agent-assisted [test-driven development (TDD)](https://martinfowler.com/bliki/TestDrivenDevelopment.html).
 It helps verify that tests written by coding agents are clear enough for humans to use when guiding implementation.
 
 ## Design Philosophy
 
 Coding agents can generate implementation faster than humans can review it line by line. In agentic TDD, tests become the main review boundary: they define the intended behavior and constrain the generated code.
-`agentic-tdd-linter` helps improve those tests before they become the specification. It does not replace human judgment, `pytest`, coverage tools, or code review.
+The TDD linter helps improve those tests before they become the specification. It does not replace human judgment, `pytest`, coverage tools, or code review.
 
 ## Development Pattern
 
-`agentic-tdd-linter` is designed for an agentic TDD workflow built around the classic loop:
+The TDD linter supports an agentic TDD workflow built around the classic loop:
 
 ```text
 Red -> Green -> Refactor
@@ -21,7 +21,7 @@ Follow this flow:
 1. A human asks a coding agent to develop or modify a feature.
 2. Red: test development, **with human review**.
    - The coding agent writes tests for the intended behavior.
-   - `agentic-tdd-linter` checks whether the tests are understandable, focused, meaningful, connected to the change, and non-redundant.
+   - The TDD linter checks whether the tests are understandable, focused, meaningful, connected to the change, and non-redundant.
    - The coding agent iterates on the tests until they are clear enough for human review.
    - The human reviews the tests as the primary specification of the intended behavior.
    - If the tests accurately capture the desired behavior, the human approves them.
