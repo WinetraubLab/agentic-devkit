@@ -1,6 +1,6 @@
 ---
 name: run-tdd-linter
-description: Run a repository's TDD linter through iterative conventional corrections, `.agent.md` review, self-critique, and consolidated test corrections. Use when the user says "run TDD linter," "run self linter," "TDD lint," "self lint," or asks to improve tests until agentic lint passes.
+description: Run a repository's TDD linter through iterative conventional corrections, `.agent.md` review, self-critique, and consolidated test corrections. Use when the user says "run TDD linter," "run self linter," "TDD lint," "self lint," "make sure code passes tdd," or asks to improve tests until agentic lint passes.
 ---
 
 # Run TDD Linter
