@@ -31,7 +31,6 @@ class PreCommitReviewWorkflowTests(unittest.TestCase):
         self,
         repo_root: Path,
         *,
-        reviewer: str,
         evidence: str,
     ) -> Path:
         test_source = textwrap.dedent(
@@ -64,8 +63,6 @@ class PreCommitReviewWorkflowTests(unittest.TestCase):
         recorded_lint = _run_cli(
             repo_root,
             "lint",
-            "--reviewer",
-            reviewer,
         )
         self.assertEqual(0, recorded_lint.returncode)
         return manifest_path
@@ -124,7 +121,6 @@ class PreCommitReviewWorkflowTests(unittest.TestCase):
             repo_root = Path(directory)
             self._record_current_review(
                 repo_root,
-                reviewer="integration:current-reviewer",
                 evidence="current review passed",
             )
             creation = _run_cli(repo_root, "create-agent-md")
@@ -137,7 +133,7 @@ class PreCommitReviewWorkflowTests(unittest.TestCase):
 
         Requirement Tested:
         `pre-commit review workflow` preserves manifest bytes across repeated create-agent-md invocations when every test has current passing proof.
-        Specialized usage: A pre-commit automation invokes create-agent-md again when it loses the first invocation result rather than retaining it, while tests and manifest bytes remain unchanged.
+        Specialized usage: A caller invokes create-agent-md twice while the approved tests and manifest remain unchanged.
 
         Verification Method: verify public function output
 
@@ -176,7 +172,6 @@ class PreCommitReviewWorkflowTests(unittest.TestCase):
             repo_root = Path(directory)
             manifest_path = self._record_current_review(
                 repo_root,
-                reviewer="integration:idempotence-reviewer",
                 evidence="idempotence review passed",
             )
             manifest_before = manifest_path.read_bytes()
@@ -226,6 +221,8 @@ class PreCommitReviewWorkflowTests(unittest.TestCase):
           Explanation: The current test verifies lint ignores obsolete pending packets when manifest proof is current. The named test verifies repeated ordinary generation preserves manifest bytes; both use happy path, but exercise materially different scenarios.
         - Happy/Failure Path Difference: `test_pre_commit_review_workflow.py::test_stale_test_requires_review`
           Explanation: The current test verifies lint ignores obsolete pending packets when manifest proof is current. The named test verifies an edited test creates only its packet and related relationship rows; the current test is happy path, while the named test is failure path.
+        - Happy/Failure Path Difference: `test_build_manifest_from_agent_md_files.py::test_pending_review_is_not_recorded`
+          Explanation: The current test verifies current proof permits lint despite obsolete pending packets. The named test verifies an incomplete first review creates no proof; these scenarios distinguish the two contracts.
         """
 
         with tempfile.TemporaryDirectory() as directory:
@@ -234,7 +231,6 @@ class PreCommitReviewWorkflowTests(unittest.TestCase):
             pending_marker = "| pending |"
             self._record_current_review(
                 repo_root,
-                reviewer="integration:obsolete-packet-reviewer",
                 evidence=completed_evidence,
             )
             self._make_review_packets_obsolete(
@@ -275,7 +271,7 @@ class PreCommitReviewWorkflowTests(unittest.TestCase):
         1. Harness creates a temporary repository containing one test.
         2. Harness invokes `agentic-tdd-linter create-agent-md --repo-root <temporary-repository>`.
         3. Harness classifies every generated `.agent.md` scorecard as pass.
-        4. Harness invokes `agentic-tdd-linter lint --repo-root <temporary-repository> --reviewer integration:nominal-reviewer`.
+        4. Harness invokes `agentic-tdd-linter lint --repo-root <temporary-repository>`.
         5. `_manifest_records` output provides the asserted manifest record.
         6. The manifest record contains path `tests/test_arithmetic.py`, test `test_adds_two_numbers`, and status `pass`.
 
@@ -286,10 +282,8 @@ class PreCommitReviewWorkflowTests(unittest.TestCase):
           Explanation: The current test verifies `pre-commit review workflow` persists an approved test in the manifest when its `.agent.md` scorecard passes. The named test verifies `build_manifest_from_agent_md_files` creates `manifest proof` only after the reviewer completes every scorecard row; the current test is happy path, while the named test is failure path.
         - Scenario Difference: `test_build_manifest_from_agent_md_files.py::test_recording_keeps_current_proof`
           Explanation: The current test verifies `pre-commit review workflow` persists an approved test in the manifest when its `.agent.md` scorecard passes. The named test verifies `build_manifest_from_agent_md_files` retains passing `manifest proof` during `orphaned record` cleanup when its source SHA256 matches the current test content; both use happy path, but exercise materially different scenarios.
-        - Happy/Failure Path Difference: `test_main.py::test_lint_requires_reviewer`
-          Explanation: The current test verifies `pre-commit review workflow` persists an approved test in the manifest when its `.agent.md` scorecard passes. The named test verifies `CLI` emits missing_reviewer for completed `.agent.md` files when `reviewer identity` is absent; the current test is happy path, while the named test is failure path.
-        - Scenario Difference: `test_pre_commit_review_workflow.py::test_retains_supplied_reviewer`
-          Explanation: The current test verifies `pre-commit review workflow` persists the approved test's path, name, and status. The named test verifies the workflow retains the reviewer supplied to lint in that test's manifest record; both use happy path, but exercise materially different record fields.
+        - Scenario Difference: `test_pre_commit_review_workflow.py::test_omits_reviewer_from_manifest`
+          Explanation: The current test verifies a fully passing run records the approved test. The named test verifies workflow records omit reviewer metadata; these scenarios distinguish the two contracts.
         - Happy/Failure Path Difference: `test_pre_commit_review_workflow.py::test_agentic_linter_errors_scenario`
           Explanation: The current test verifies `pre-commit review workflow` persists an approved test in the manifest when its `.agent.md` scorecard passes. The named test verifies a failed `.agent.md` scorecard directs callers to `$run-tdd-linter`; the current test is happy path, while the named test is failure path.
         - Happy/Failure Path Difference: `test_pre_commit_review_workflow.py::test_classic_linter_errors_scenario`
@@ -300,10 +294,12 @@ class PreCommitReviewWorkflowTests(unittest.TestCase):
           Explanation: The current test verifies `pre-commit review workflow` persists an approved test in the manifest when its `.agent.md` scorecard passes. The named test verifies missing review proof replaces create-agent-md command guidance with `$run-tdd-linter` guidance; the current test is happy path, while the named test is failure path.
         - Happy/Failure Path Difference: `test_pre_commit_review_workflow.py::test_stale_test_requires_review`
           Explanation: The current test verifies `pre-commit review workflow` persists an approved test in the manifest when its `.agent.md` scorecard passes. The named test verifies `pre-commit review workflow` requires a new review only for an edited test and its cross-test relationships; the current test is happy path, while the named test is failure path.
-        - Module Difference: `test_review_documentation.py::test_readme_shows_review_workflow`
-          Explanation: The current test verifies `pre-commit review workflow` persists an approved test in the manifest when its `.agent.md` scorecard passes. The named test verifies `test_review_documentation` requires README to list the `pre-commit review workflow` in this order: create `.agent.md` files, review them, then persist manifest proof through reviewer-authenticated lint; both exercise materially the same scenario through different named modules or contract subjects.
+        - Scenario Difference: `test_review_documentation.py::test_readme_shows_review_workflow`
+          Explanation: The current test verifies a fully passing run records the approved test. The named test verifies README documents the ordered review and recording stages; these scenarios distinguish the two contracts.
         - Happy/Failure Path Difference: `test_pre_commit_review_workflow.py::test_incomplete_review_preserves_manifest`
           Explanation: The current test verifies a completed passing review is persisted. The named test verifies an incomplete replacement review preserves existing manifest records; the current test is happy path, while the named test is failure path.
+        - Happy/Failure Path Difference: `test_pre_commit_review_workflow.py::test_records_passing_review_beside_failure`
+          Explanation: The current test verifies a fully passing run records the approved test. The named test verifies a mixed run saves passing proof while reporting another failed review; these scenarios distinguish the two contracts.
         """
 
         test_source = textwrap.dedent(
@@ -333,7 +329,6 @@ class PreCommitReviewWorkflowTests(unittest.TestCase):
         )
         expected_test_path = "tests/test_arithmetic.py"
         expected_test_name = "test_adds_two_numbers"
-        expected_reviewer = "integration:nominal-reviewer"
 
         with tempfile.TemporaryDirectory() as directory:
             repo_root = Path(directory)
@@ -345,7 +340,7 @@ class PreCommitReviewWorkflowTests(unittest.TestCase):
 
             _run_cli(repo_root, "create-agent-md")
             _complete_packets(repo_root, status="pass", evidence="nominal review passed")
-            _run_cli(repo_root, "lint", "--reviewer", expected_reviewer)
+            _run_cli(repo_root, "lint")
             records = _manifest_records(repo_root)
 
         self.assertEqual(
