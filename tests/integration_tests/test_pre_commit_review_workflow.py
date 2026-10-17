@@ -282,8 +282,6 @@ class PreCommitReviewWorkflowTests(unittest.TestCase):
           Explanation: The current test verifies `pre-commit review workflow` persists an approved test in the manifest when its `.agent.md` scorecard passes. The named test verifies `build_manifest_from_agent_md_files` creates `manifest proof` only after the reviewer completes every scorecard row; the current test is happy path, while the named test is failure path.
         - Scenario Difference: `test_build_manifest_from_agent_md_files.py::test_recording_keeps_current_proof`
           Explanation: The current test verifies `pre-commit review workflow` persists an approved test in the manifest when its `.agent.md` scorecard passes. The named test verifies `build_manifest_from_agent_md_files` retains passing `manifest proof` during `orphaned record` cleanup when its source SHA256 matches the current test content; both use happy path, but exercise materially different scenarios.
-        - Scenario Difference: `test_pre_commit_review_workflow.py::test_omits_reviewer_from_manifest`
-          Explanation: The current test verifies a fully passing run records the approved test. The named test verifies workflow records omit reviewer metadata; these scenarios distinguish the two contracts.
         - Happy/Failure Path Difference: `test_pre_commit_review_workflow.py::test_agentic_linter_errors_scenario`
           Explanation: The current test verifies `pre-commit review workflow` persists an approved test in the manifest when its `.agent.md` scorecard passes. The named test verifies a failed `.agent.md` scorecard directs callers to `$run-tdd-linter`; the current test is happy path, while the named test is failure path.
         - Happy/Failure Path Difference: `test_pre_commit_review_workflow.py::test_classic_linter_errors_scenario`
@@ -439,66 +437,6 @@ class PreCommitReviewWorkflowTests(unittest.TestCase):
             [("tests/test_arithmetic.py", "test_passing", "pass")],
             [(record["path"], record["test"], record["status"]) for record in records],
         )
-
-        """Test Path: happy path
-
-        Requirement Tested:
-        `pre-commit review workflow` retains the reviewer supplied to lint in the approved test's manifest record.
-        Standard usage: The scenario demonstrates baseline behavior.
-
-        Verification Method: verify public function output
-
-        Verification Detail:
-        The manifest record's reviewer equals `integration:nominal-reviewer` supplied to lint.
-
-        Similar Coverage:
-        - Scenario Difference: `test_pre_commit_review_workflow.py::test_nominal_review_scenario`
-          Explanation: The current test verifies `pre-commit review workflow` retains the reviewer supplied to lint in the approved test's manifest record. The named test verifies the workflow persists the approved test's path, name, and status; both use happy path, but exercise materially different record fields.
-        - Happy/Failure Path Difference: `test_main.py::test_lint_requires_reviewer`
-          Explanation: The current test verifies `pre-commit review workflow` retains the reviewer supplied to lint. The named test verifies `CLI` rejects a completed scorecard when reviewer identity is absent; the current test is happy path, while the named test is failure path.
-        """
-
-        test_source = textwrap.dedent(
-            '''\
-            """Tests in this file validate `addition` located at `src/arithmetic.py`.
-            `addition` is responsible for combining numbers into their sum.
-
-            Terms:
-            - `addition`: Addition combines two numbers into their sum. For example, one plus one produces two.
-            """
-
-            def test_adds_two_numbers() -> None:
-                """Test Path: happy path
-
-                Requirement Tested:
-                `addition` produces the sum of two numbers.
-                Standard usage: The operands are positive integers.
-
-                Verification Method: verify public function output
-
-                Verification Detail:
-                One plus one equals `2`.
-                """
-
-                assert 1 + 1 == 2
-            '''
-        )
-        expected_reviewer = "integration:nominal-reviewer"
-
-        with tempfile.TemporaryDirectory() as directory:
-            repo_root = Path(directory)
-            _write_source(
-                repo_root / "src" / "arithmetic.py",
-                "def add(a, b): return a + b\n",
-            )
-            _write_source(repo_root / "tests" / "test_arithmetic.py", test_source)
-
-            _run_cli(repo_root, "create-agent-md")
-            _complete_packets(repo_root, status="pass", evidence="nominal review passed")
-            _run_cli(repo_root, "lint", "--reviewer", expected_reviewer)
-            records = _manifest_records(repo_root)
-
-        self.assertEqual(expected_reviewer, records[0]["reviewer"])
 
     def test_lint_before_packet_creation_scenario(self) -> None:
         """Test Path: failure path
@@ -777,7 +715,7 @@ class PreCommitReviewWorkflowTests(unittest.TestCase):
                 1,
             )
             failing_packet.write_text(failing_text, encoding="utf-8")
-            lint = _run_cli(repo_root, "lint", "--reviewer", "integration:failure-reviewer")
+            lint = _run_cli(repo_root, "lint")
 
         self.assertIn("agent_review_failed", lint.stdout)
         self.assertIn("Run the `$run-tdd-linter` skill.", lint.stdout)
@@ -796,7 +734,7 @@ class PreCommitReviewWorkflowTests(unittest.TestCase):
         1. Harness creates a temporary repository containing three tests.
         2. Harness invokes `agentic-tdd-linter create-agent-md --repo-root <temporary-repository>`.
         3. Harness classifies every review as successful.
-        4. Harness invokes `agentic-tdd-linter lint --repo-root <temporary-repository> --reviewer integration:approved-reviewer` to persist passing proof.
+        4. Harness invokes `agentic-tdd-linter lint --repo-root <temporary-repository>` to persist passing proof.
         5. Harness modifies only the first test source outside the `pre-commit review workflow`.
         6. Harness invokes `agentic-tdd-linter create-agent-md --repo-root <temporary-repository>`.
         7. Edited-test `.agent.md` contains `| pending | Replace with review evidence. |`.
@@ -906,8 +844,6 @@ class PreCommitReviewWorkflowTests(unittest.TestCase):
             _run_cli(
                 repo_root,
                 "lint",
-                "--reviewer",
-                "integration:approved-reviewer",
             )
             single_packets = [
                 path
@@ -998,15 +934,41 @@ class PreCommitReviewWorkflowTests(unittest.TestCase):
           Explanation: The current test verifies an incomplete replacement review preserves existing manifest records. The named test verifies a completed passing review is persisted; the current test is failure path, while the named test is happy path.
         - Scenario Difference: `test_pre_commit_review_workflow.py::test_stale_test_requires_review`
           Explanation: The current test verifies an incomplete replacement review preserves existing manifest records. The named test verifies an edited test creates only its packet and related relationship rows; both use failure path, but exercise materially different scenarios.
+        - Scenario Difference: `test_pre_commit_review_workflow.py::test_records_passing_review_beside_failure`
+          Explanation: The current test verifies an incomplete replacement review preserves prior proof. The named test verifies a mixed run saves passing proof while reporting another failed review; these scenarios distinguish the two contracts.
         """
 
+        test_source = textwrap.dedent(
+            '''\
+            """Tests in this file validate `current review example` located at `src/current.py`.
+            `current review example` is responsible for exposing a stable truth value.
+            """
+
+            def test_current_truth() -> None:
+                """Test Path: happy path
+
+                Requirement Tested:
+                `current review example` exposes a true value.
+                Standard usage: The source and its passing review remain unchanged.
+
+                Verification Method: verify public function output
+
+                Verification Detail:
+                The exposed value equals true.
+                """
+
+                assert True
+            '''
+        )
         with tempfile.TemporaryDirectory() as directory:
             repo_root = Path(directory)
-            manifest_path = self._record_current_review(
-                repo_root,
-                reviewer="integration:incomplete-reviewer",
-                evidence="review passed before edit",
-            )
+            _write_source(repo_root / "src" / "current.py", "VALUE = True\n")
+            _write_source(repo_root / "tests" / "test_current.py", test_source)
+            _run_cli(repo_root, "create-agent-md")
+            _complete_packets(repo_root, status="pass", evidence="review passed before edit")
+            initial_lint = _run_cli(repo_root, "lint")
+            self.assertEqual(0, initial_lint.returncode, initial_lint.stdout)
+            manifest_path = repo_root / "tests" / "agentic_review_manifest.jsonl"
             manifest_before = manifest_path.read_bytes()
             test_file = repo_root / "tests" / "test_current.py"
             _write_source(
@@ -1198,8 +1160,6 @@ class PreCommitReviewWorkflowTests(unittest.TestCase):
             _run_cli(
                 repo_root,
                 "lint",
-                "--reviewer",
-                "integration:refresh-reviewer",
             )
             cross_packet_path = next(
                 path
