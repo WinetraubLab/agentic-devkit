@@ -91,9 +91,8 @@ printf "\nThen ask your coding agent:\n\nRun the \`\$run-tdd-linter\` skill.\n"
 '
 ```
 
-The skill generates and reviews the `.agent.md` scorecards, runs the linter with
-the current agent identity, and iterates on test corrections until the workflow
-converges. Shared Codex skills are distributed separately through the project's
+The skill generates and reviews the `.agent.md` scorecards, runs the linter,
+and iterates on test corrections until the workflow converges. Shared Codex skills are distributed separately through the project's
 `.agents/skills/shared` Git submodule.
 
 After the first successful run, add `./.venv/bin/agentic-tdd-linter lint` after the project's normal test suite. This preserves existing tests and linters while checking agent-authored tests alongside test and coverage results.
@@ -104,7 +103,7 @@ By default, both commands scan the test suite but process only tests without cur
 
 ```bash
 agentic-tdd-linter create-agent-md --fresh tests/test_example.py
-agentic-tdd-linter lint --fresh tests/test_example.py --reviewer codex:gpt-5.5
+agentic-tdd-linter lint --fresh tests/test_example.py
 ```
 
 Without a path, `--fresh` applies to the complete test root. With a path, it refreshes
@@ -146,7 +145,7 @@ jobs:
       - run: uvx --from "git+https://github.com/WinetraubLab/agentic-tdd-linter" agentic-tdd-linter lint
 ```
 
-Before committing, run `agentic-tdd-linter create-agent-md`, review any generated packets, and run `agentic-tdd-linter lint --reviewer codex:gpt-5.5`. Commit the refreshed `tests/agentic_review_manifest.jsonl` with the test changes.
+Before committing, run `agentic-tdd-linter create-agent-md`, review any generated packets, and run `agentic-tdd-linter lint`. Commit the refreshed `tests/agentic_review_manifest.jsonl` with the test changes.
 ````
 
 Full proof flow: [GitHub Actions Review Proof](docs/workflows/github-actions.md).
@@ -161,7 +160,7 @@ Contributors run this workflow before committing test changes:
 
 1. Run `agentic-tdd-linter create-agent-md` to create `.agent.md` scorecards.
 2. Complete every generated scorecard.
-3. Run `lint --reviewer <identity>` to record completed reviews in `tests/agentic_review_manifest.jsonl`.
+3. Run `lint` to record completed reviews in `tests/agentic_review_manifest.jsonl`.
 4. Commit the updated tests and manifest.
 
 This workflow creates `.agent.md` files and updates manifest proof.
