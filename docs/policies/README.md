@@ -80,3 +80,40 @@ and code changes.
 Follow the [GitHub Actions guide](../workflows/github-actions.md#policy-verification)
 to check your committed policy attestations on pull requests and pushes.
 
+## Review workflow
+
+Use local reviews to create attestations, then CI to validate them.
+
+### Local review
+
+Run `$review-policy-attestations` after development or policy changes. The skill
+reviews the configured folders, fixes minor violations, and records attestations.
+Changes to reviewed code or root folders require a fresh review.
+
+In each generated policy's `# Attestation` section, record either:
+
+```text
+Noncompliant Files: NONE
+```
+
+or the remaining violations:
+
+```text
+Noncompliant Files:
+- src/example.py
+```
+
+Verification allows no more findings than the committed baseline; new policies
+or invalid baseline attestations allow none. Commit the completed reviews with
+your changes.
+
+### CI verification
+
+CI runs `agentic-devkit policy verify` against your committed code, policy documents,
+and digests. It checks that attestations are current and finding counts stay within
+the baseline. CI does not perform compliance reviews.
+
+If the check fails, run `$review-policy-attestations` locally and commit the updated
+code and review results. See the [GitHub Actions guide](../workflows/github-actions.md#policy-verification)
+for CI setup.
+

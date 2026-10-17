@@ -74,9 +74,38 @@ A successful run leaves your tests with passing review proof in
 Follow the [GitHub Actions guide](../workflows/github-actions.md#tdd-linting) to check your
 committed review proof on pull requests and pushes.
 
+## Review workflow
+
+Use local reviews to create proof, then CI to validate it:
+
+### Local review
+
+Before committing changes to your tests, run `$run-tdd-linter`. The skill follows
+these steps:
+
+1. Run `agentic-devkit tdd create-agent-md` to create `.agent.md` scorecards.
+2. Complete every generated scorecard.
+3. Run `lint` to record completed reviews in `tests/agentic_review_manifest.jsonl`.
+4. Commit the updated tests and manifest.
+
+This workflow creates `.agent.md` files and updates manifest proof.
+
+### CI verification
+
+CI/CD runs `agentic-devkit tdd lint` after the changes are committed. It validates
+the committed tests and `tests/agentic_review_manifest.jsonl`. CI/CD does not create
+`.agent.md` files, perform reviews, or record new manifest proof. Missing, stale,
+or failed proof causes CI/CD to fail. Run the `$run-tdd-linter` skill locally
+to complete the required reviews, then commit the updated manifest.
+
+## Review commands
+
+After the first successful review, run `agentic-devkit tdd lint` alongside your
+normal tests and coverage checks. Use the skill when reviews need updating.
+
 Each generated `.agent.md` file reviews one Python `test_...` function or TypeScript `test(...)` call. A source file with multiple tests produces one independent review artifact per test.
 
-By default, both commands scan the test suite but process only tests without current passing manifest proof. Pass files or directories to limit the scope. Use `--fresh` to ignore previous review proof. For `create-agent-md`, this regenerates every packet in the selected scope, including the cross-test packet:
+By default, `tdd lint` and `tdd create-agent-md` scan the test suite but process only tests without current passing manifest proof. Pass files or directories to limit the scope. Use `--fresh` to ignore previous review proof. For `create-agent-md`, this regenerates every packet in the selected scope, including the cross-test packet:
 
 ```bash
 agentic-devkit tdd create-agent-md --fresh tests/test_example.py
