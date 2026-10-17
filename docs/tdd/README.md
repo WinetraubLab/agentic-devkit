@@ -98,15 +98,15 @@ The skill generates and reviews the `.agent.md` scorecards, runs the linter,
 and iterates on test corrections until the workflow converges. Shared Codex skills are distributed separately through the project's
 `.agents/skills/shared` Git submodule.
 
-After the first successful run, add `./.venv/bin/agentic-tdd-linter lint` after the project's normal test suite. This preserves existing tests and linters while checking agent-authored tests alongside test and coverage results.
+After the first successful run, add `./.venv/bin/agentic-devkit tdd lint` after the project's normal test suite. This preserves existing tests and linters while checking agent-authored tests alongside test and coverage results.
 
 Each generated `.agent.md` file reviews one Python `test_...` function or TypeScript `test(...)` call. A source file with multiple tests produces one independent review artifact per test.
 
 By default, both commands scan the test suite but process only tests without current passing manifest proof. Pass files or directories to limit the scope. Use `--fresh` to ignore previous review proof. For `create-agent-md`, this regenerates every packet in the selected scope, including the cross-test packet:
 
 ```bash
-agentic-tdd-linter create-agent-md --fresh tests/test_example.py
-agentic-tdd-linter lint --fresh tests/test_example.py
+agentic-devkit tdd create-agent-md --fresh tests/test_example.py
+agentic-devkit tdd lint --fresh tests/test_example.py
 ```
 
 Without a path, `--fresh` applies to the complete test root. With a path, it refreshes
