@@ -35,9 +35,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         if args.command == "create-agent-md":
             result = create_agent_md_files(**common_arguments)
         else:
-            result = run_lint_pipeline(
-                **common_arguments,
-            )
+            result = run_lint_pipeline(**common_arguments)
     except ValueError as error:
         print(f"agentic-tdd-linter: {error}", file=sys.stderr)
         return 2
@@ -78,7 +76,7 @@ def _next_action(
 
     if issues:
         return "Next action:\nRun the `$run-tdd-linter` skill."
-    if command == "create-agent-md" and not issues and generated_count:
+    if command == "create-agent-md" and generated_count:
         return "\n".join(
             (
                 "Next action:",
@@ -129,6 +127,8 @@ def _add_file_selection_arguments(parser: argparse.ArgumentParser) -> None:
             "test root"
         ),
     )
+
+
 def _add_shared_arguments(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--format",

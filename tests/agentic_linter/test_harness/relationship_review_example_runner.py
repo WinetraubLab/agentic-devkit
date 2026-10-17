@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections import Counter
 import hashlib
 import re
 from pathlib import Path
@@ -154,9 +155,8 @@ def _relationship_review_cases(
         for example in read_test_relationship_review_examples(path)
     ]
     duplicate_names = {
-        example.name
-        for example in examples
-        if sum(item.name == example.name for item in examples) > 1
+        name for name, count in Counter(example.name for example in examples).items()
+        if count > 1
     }
     if duplicate_names:
         raise ValueError(
@@ -171,7 +171,7 @@ def _relationship_review_cases(
         source_sha256 = hashlib.sha256(
             _relationship_review_input_scope(packet_text).encode("utf-8")
         ).hexdigest()
-        review = _expected_reviews(example)[0]
+        review = _expected_review(example)
         case = _AgentReviewCase(
             yaml_case=example.name,
             test_name=review.test_name,
@@ -194,27 +194,20 @@ def _example_packet_text(example: TestRelationshipReviewExample) -> str:
     )
 
 
-def _expected_reviews(
+def _expected_review(
     example: TestRelationshipReviewExample,
-) -> tuple[_ExpectedReview, ...]:
+) -> _ExpectedReview:
     scorecard = {10: example.expected_requirement_overlap}
     if example.expected_difference_kind is not None:
         scorecard[11] = example.expected_difference_kind
-    return (
-        _ExpectedReview(
-            test_name=(
-                f"{example.tests[0].identifier} <> "
-                f"{example.tests[1].identifier}"
-            ),
-            scorecard=scorecard,
-            completed_results=(
-                "yes",
-                "no",
-                "Not Applicable",
-                *DIFFERENCE_KINDS,
-            ),
-            mismatch_name=f"{example.name}/pair",
+    return _ExpectedReview(
+        test_name=(
+            f"{example.tests[0].identifier} <> "
+            f"{example.tests[1].identifier}"
         ),
+        scorecard=scorecard,
+        completed_results=("yes", "no", "Not Applicable", *DIFFERENCE_KINDS),
+        mismatch_name=f"{example.name}/pair",
     )
 
 

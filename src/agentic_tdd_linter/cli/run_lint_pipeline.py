@@ -80,12 +80,11 @@ def run_lint_pipeline(
     for path in pending_files:
         ready_by_file[path] = []
         for test in pending_by_file[path]:
-            artifact_issues = _missing_required_artifact_issues(
-                [path], root, artifact_root, {path: [test]},
-            )
-            issues.extend(artifact_issues)
-            if not artifact_issues:
+            issue = _missing_required_artifact_issue(path, test, root, artifact_root)
+            if issue is None:
                 ready_by_file[path].append(test)
+            else:
+                issues.append(issue)
     ready_files = [path for path, tests in ready_by_file.items() if tests]
     recorded_manifest_path: Path | None = None
     recorded_count = 0
@@ -331,39 +330,28 @@ def _extract_tests(
     return tests_by_file, issues
 
 
-def _missing_required_artifact_issues(
-    files: Sequence[Path],
+def _missing_required_artifact_issue(
+    test_file: Path,
+    test: ExtractedTestRecord,
     repo_root: Path,
     artifact_root: Path,
-    tests_by_file: Mapping[Path, Sequence[ExtractedTestRecord]],
-) -> list[LintIssue]:
-    issues: list[LintIssue] = []
-    for test_file in files:
-        for test in tests_by_file[test_file.resolve()]:
-            artifact_path = map_test_function_to_agent_md_file(
-                test_file,
-                repo_root,
-                artifact_root,
-                test.name,
-            )
-            if not artifact_path.exists() or _agent_md_file_is_stale(
-                test.source,
-                artifact_path,
-            ):
-                issues.append(
-                    LintIssue(
-                        path=_relative_path(artifact_path, repo_root),
-                        test_name=test.name,
-                        line=1,
-                        rule="missing_required_agent_md",
-                        message=(
-                            "required agent review packet is missing or stale for "
-                            f"`{_relative_path(test_file, repo_root)}`; "
-                            "run the `$run-tdd-linter` skill"
-                        ),
-                    )
-                )
-    return issues
+) -> LintIssue | None:
+    artifact_path = map_test_function_to_agent_md_file(
+        test_file, repo_root, artifact_root, test.name,
+    )
+    if artifact_path.exists() and not _agent_md_file_is_stale(test.source, artifact_path):
+        return None
+    return LintIssue(
+        path=_relative_path(artifact_path, repo_root),
+        test_name=test.name,
+        line=1,
+        rule="missing_required_agent_md",
+        message=(
+            "required agent review packet is missing or stale for "
+            f"`{_relative_path(test_file, repo_root)}`; "
+            "run the `$run-tdd-linter` skill"
+        ),
+    )
 
 
 def _relative_path(path: Path, repo_root: Path) -> Path:
