@@ -69,8 +69,10 @@ Run the `$run-tdd-linter` skill.
 A successful run leaves your tests with passing review proof in
 `tests/agentic_review_manifest.jsonl`. Commit that manifest with your test changes.
 
+## Add GitHub Actions
 
-After the first successful run, add `./.venv/bin/agentic-devkit tdd lint` after the project's normal test suite. This preserves existing tests and linters while checking agent-authored tests alongside test and coverage results.
+Follow the [GitHub Actions guide](../workflows/github-actions.md#tdd-linting) to check your
+committed review proof on pull requests and pushes.
 
 Each generated `.agent.md` file reviews one Python `test_...` function or TypeScript `test(...)` call. A source file with multiple tests produces one independent review artifact per test.
 
