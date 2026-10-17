@@ -31,7 +31,7 @@ Use the installed `$review-policy-attestations` skill for this review workflow.
 - Policy documents and attestations are valid.
 - Reported violations do not exceed the committed baseline.
 
-## Add policies to your project
+## Set up policy reviews to your project
 
 [Install the toolkit](../../README.md#installation), then create a `policy/` folder
 in your Git repository. Your project will contain:
