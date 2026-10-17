@@ -41,11 +41,14 @@ The key assumption is that generated implementation code may be too large or com
 Production code is grouped by responsibility:
 
 ```text
-src/agentic_tdd_linter/
-    indexing_test_functions/ # Shared test-file discovery and function indexing
-    conventional_linter/  # Deterministic lint rules
-    agentic_linter/       # Agent-review generation and proof
-    cli/                  # Command-line behavior and reporting
+src/agentic_devkit/
+    cli/main.py           # Toolkit command routing
+    version.py            # Toolkit version
+    tdd_lint/
+        indexing_test_functions/ # Test discovery and extraction
+        conventional_linter/     # Deterministic lint rules
+        agentic_linter/          # Agent-review generation and proof
+        cli/                     # TDD pipeline and reporting
 ```
 
 Tests use the same boundaries and add two test-only groups:
