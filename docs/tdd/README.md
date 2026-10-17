@@ -65,7 +65,7 @@ they verify interactions and the repository itself rather than implement linter 
 
 ## What It Checks
 
-`agentic-tdd-linter` looks for tests that are:
+The TDD linter looks for tests that are:
 - vague or hard to understand
 - missing meaningful assertions
 - missing required structured docstring fields
