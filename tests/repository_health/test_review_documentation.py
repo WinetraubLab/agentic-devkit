@@ -49,7 +49,7 @@ class ReviewDocumentationTests(unittest.TestCase):
         Verification Method: verify public function output
 
         Verification Detail:
-        README.md contents contain `### CI/CD validation workflow`.
+        README.md contains the complete heading line `### CI/CD validation workflow`.
 
         Similar Coverage:
         - Scenario Difference: `test_review_documentation.py::test_github_actions_omits_packet_creation`
@@ -63,7 +63,7 @@ class ReviewDocumentationTests(unittest.TestCase):
         repo_root = Path(__file__).resolve().parents[2]
         readme = (repo_root / "docs" / "tdd" / "README.md").read_text(encoding="utf-8")
 
-        self.assertIn("### CI/CD validation workflow", readme)
+        self.assertIn("### CI/CD validation workflow", readme.splitlines())
 
     def test_readme_directs_tdd_linter_skill(self) -> None:
         """Test Path: happy path
