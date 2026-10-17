@@ -126,59 +126,6 @@ other tests in the same file. Manifest proof records the linter version and revi
 contract as historical metadata. Reviews remain valid across linter-policy changes
 and require renewal only when their reviewed test content changes.
 
-## Install It On GitHub Actions On Your Project
-
-Paste this prompt into your coding agent:
-
-````text
-Add `.github/workflows/agentic-tdd-linter.yml` to this project.
-
-Use this workflow:
-
-```yaml
-name: Agentic TDD Linter
-
-on:
-  pull_request:
-  push:
-
-jobs:
-  lint-tests:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v5
-      - run: uvx --from "git+https://github.com/WinetraubLab/agentic-devkit" agentic-devkit tdd lint
-```
-
-Before committing, run `agentic-devkit tdd create-agent-md`, review any generated packets, and run `agentic-devkit tdd lint`. Commit the refreshed `tests/agentic_review_manifest.jsonl` with the test changes.
-````
-
-Full proof flow: [GitHub Actions Review Proof](../workflows/github-actions.md).
-
-## Two Review Workflows
-
-This project separates review creation from automated validation:
-
-### Pre-commit review workflow
-
-Contributors run this workflow before committing test changes:
-
-1. Run `agentic-devkit tdd create-agent-md` to create `.agent.md` scorecards.
-2. Complete every generated scorecard.
-3. Run `lint` to record completed reviews in `tests/agentic_review_manifest.jsonl`.
-4. Commit the updated tests and manifest.
-
-This workflow creates `.agent.md` files and updates manifest proof.
-
-### CI/CD validation workflow
-
-CI/CD runs `agentic-devkit tdd lint` after the changes are committed. It validates
-the committed tests and `tests/agentic_review_manifest.jsonl`. CI/CD does not create
-`.agent.md` files, perform reviews, or record new manifest proof. Missing, stale,
-failed, or version-incompatible proof causes CI/CD to fail and directs the contributor
-to run the `$run-tdd-linter` skill.
-
 ## Test Docstring Contract
 
 ```text
@@ -212,6 +159,7 @@ Inspection Instructions:
 ```
 
 Instructions:
+
 - Begin every test-file docstring with the exact module declaration and responsibility sentences shown above.
 - Use a repository-relative path that identifies an existing module.
 - Begin every first `Requirement Tested` sentence with the exact backticked module name declared by the file.
