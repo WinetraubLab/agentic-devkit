@@ -1,4 +1,4 @@
-"""Tests in this file validate `conventional_linter` located at `src/agentic_tdd_linter/conventional_linter/check_file_docstring_term_count.py`.
+"""Tests in this file validate `conventional_linter` located at `src/agentic_devkit/tdd_lint/conventional_linter/check_file_docstring_term_count.py`.
 `conventional_linter` is responsible for enforcing the test-file glossary limit.
 
 Terms:
@@ -10,10 +10,10 @@ from __future__ import annotations
 import unittest
 from pathlib import Path
 
-from agentic_tdd_linter.conventional_linter.check_file_docstring_term_count import (
+from agentic_devkit.tdd_lint.conventional_linter.check_file_docstring_term_count import (
     check_file_docstring_term_count,
 )
-from agentic_tdd_linter.indexing_test_functions.extracted_test_record import (
+from agentic_devkit.tdd_lint.indexing_test_functions.extracted_test_record import (
     ExtractedTestRecord,
 )
 

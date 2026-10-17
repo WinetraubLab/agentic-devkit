@@ -143,7 +143,7 @@ assertion_quality_005_per_source_test:
     `repository_validation` is responsible for validating repository module coverage.
 
     Terms:
-    - `source module`: A source module is a non-`__init__.py` Python file under src/agentic_tdd_linter. For example, src/agentic_tdd_linter/cli/main.py is a source module.
+    - `source module`: A source module is a non-`__init__.py` Python file under src/agentic_devkit. For example, src/agentic_devkit/cli/main.py is a source module.
     - `test module`: A test module is a test_*.py file under tests. For example, tests/cli/test_main.py is a test module.
     """
   test: |
@@ -165,7 +165,7 @@ assertion_quality_005_per_source_test:
         """
 
         repo_root = Path(__file__).resolve().parents[2]
-        package_root = repo_root / "src" / "agentic_tdd_linter"
+        package_root = repo_root / "src" / "agentic_devkit"
         test_root = repo_root / "tests"
         self.assertEqual(
             [],

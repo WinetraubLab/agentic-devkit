@@ -11,7 +11,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable, NamedTuple
 
-from agentic_tdd_linter.version import __version__
+from agentic_devkit.version import __version__
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 SCORECARD_ROW_PATTERN = re.compile(

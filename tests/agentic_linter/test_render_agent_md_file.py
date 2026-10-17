@@ -1,4 +1,4 @@
-"""Tests in this file validate `render_agent_md_file` located at `src/agentic_tdd_linter/agentic_linter/render_agent_md_file.py`.
+"""Tests in this file validate `render_agent_md_file` located at `src/agentic_devkit/tdd_lint/agentic_linter/render_agent_md_file.py`.
 `render_agent_md_file` is responsible for creating one isolated single-test `.agent.md` with a pending review scorecard.
 
 Terms:
@@ -13,7 +13,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from agentic_tdd_linter.agentic_linter.render_agent_md_file import (
+from agentic_devkit.tdd_lint.agentic_linter.render_agent_md_file import (
     _render_agent_md_files_for_test_file,
     render_agent_md_file,
 )

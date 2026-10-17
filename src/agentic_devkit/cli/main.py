@@ -8,9 +8,9 @@ import sys
 from pathlib import Path
 from typing import Sequence
 
-from ..conventional_linter.run_conventional_linter import LintIssue
-from .format_linter_results import format_json, format_text
-from .run_lint_pipeline import create_agent_md_files, run_lint_pipeline
+from ..tdd_lint.conventional_linter.run_conventional_linter import LintIssue
+from ..tdd_lint.cli.format_linter_results import format_json, format_text
+from ..tdd_lint.cli.run_lint_pipeline import create_agent_md_files, run_lint_pipeline
 
 
 def main(argv: Sequence[str] | None = None) -> int:
@@ -19,7 +19,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser = _build_parser()
     args = parser.parse_args(argv)
 
-    if args.command not in {"lint", "create-agent-md"}:
+    if getattr(args, "command", None) not in {"lint", "create-agent-md"}:
         parser.print_help()
         return 2
 
@@ -37,14 +37,14 @@ def main(argv: Sequence[str] | None = None) -> int:
         else:
             result = run_lint_pipeline(**common_arguments)
     except ValueError as error:
-        print(f"agentic-tdd-linter: {error}", file=sys.stderr)
+        print(f"agentic-devkit: {error}", file=sys.stderr)
         return 2
 
     if args.format == "json":
         print(format_json(result.issues, result.files))
     elif args.command == "create-agent-md" and not result.issues:
         print(
-            "agentic-tdd-linter: "
+            "agentic-devkit: "
             f"generated {len(result.generated_artifacts)} agent review packets"
         )
     else:
@@ -52,7 +52,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         if result.recorded_manifest_path is not None:
             relative_manifest = _relative_path(result.recorded_manifest_path, repo_root)
             print(
-                "agentic-tdd-linter: "
+                "agentic-devkit: "
                 f"recorded {result.recorded_count} review attestations in {relative_manifest}"
             )
     if args.format == "text":
@@ -82,7 +82,7 @@ def _next_action(
                 "Next action:",
                 "1. Run the affected unit tests and finish all source edits before review.",
                 "2. If source changed after packet generation, regenerate once with "
-                "`agentic-tdd-linter create-agent-md --fresh`.",
+                "`agentic-devkit tdd create-agent-md --fresh`.",
                 "3. Keep the source stable while every generated scorecard is reviewed "
                 "with one fresh isolated reviewer per `.agent.md` packet.",
                 "4. If review fails, collect every packet failure before editing; make one "
@@ -96,10 +96,12 @@ def _next_action(
 
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        prog="agentic-tdd-linter",
-        description="Lint Python and TypeScript tests written during agent-assisted TDD.",
+        prog="agentic-devkit",
+        description="Tools for agentic development.",
     )
-    subparsers = parser.add_subparsers(dest="command")
+    groups = parser.add_subparsers(dest="group")
+    tdd_parser = groups.add_parser("tdd", help="lint and review agent-authored tests")
+    subparsers = tdd_parser.add_subparsers(dest="command", required=True)
 
     lint_parser = subparsers.add_parser(
         "lint",

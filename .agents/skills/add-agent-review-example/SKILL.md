@@ -12,7 +12,7 @@ YAML schema and Jinja scorecard synchronized.
 
 1. Locate the repository root and read:
    - `tests/agentic_linter/fixtures/single_test_review/*.yaml`
-   - `src/agentic_tdd_linter/agentic_linter/single_test_review.agent.md.j2`
+   - `src/agentic_devkit/tdd_lint/agentic_linter/single_test_review.agent.md.j2`
    - `tests/agentic_linter/agent_review_yaml_fixture_contract.py`
    - `tests/agentic_linter/test_agent_review_yaml_fixture_contract.py`
 2. Obtain the complete Python test source from the path, test name, or snippet supplied by

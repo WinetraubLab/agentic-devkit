@@ -39,7 +39,7 @@ Record the initial uncommitted file count; exclude generated packets and review
 manifests from all scope counts below.
 Do not revert or overwrite user edits. Re-read a file immediately before editing it, and ask before replacing concurrent changes whose intent is unclear.
 Identify the repository's configured agentic TDD command. Use it throughout the
-run; direct CLI examples below use `agentic-tdd-linter` as a placeholder for that
+run; direct CLI examples below use `agentic-devkit` as a placeholder for that
 configured executable.
 Initialize a wall-clock timer immediately before Step 1.
 
@@ -52,7 +52,7 @@ Repeat Steps 1–4 for the requested number of cycles.
 Run:
 
 ```bash
-agentic-tdd-linter create-agent-md --repo-root .
+agentic-devkit tdd create-agent-md --repo-root .
 ```
 
 On the first call of cycle 1 only, append `--fresh` when `fresh: yes`.
@@ -111,7 +111,7 @@ When a cross-test failure cannot be mapped reliably, report the unmapped cross-t
 After reviewing every packet, record passing reviews even when other scorecards fail with:
 
 ```bash
-agentic-tdd-linter lint --repo-root .
+agentic-devkit tdd lint --repo-root .
 ```
 
 Verify that passing reviews are recorded in the manifest. A failing review must not prevent another test's passing attestation from being saved; keep failed or pending tests out of new pass records.
@@ -168,7 +168,7 @@ Report the generated-packet count and affected-unit-test result immediately abov
 
 After the last requested correction cycle and its report are complete,
 regenerate the `.agent.md` packets with the configured
-`agentic-tdd-linter create-agent-md` command and review every pending packet once
+`agentic-devkit tdd create-agent-md` command and review every pending packet once
 as a separate final review. Do not pass `--fresh`, and do not edit source or test
 files during this review. Add this instruction to every isolated reviewer
 prompt:
@@ -183,7 +183,7 @@ prompt:
 > of a material problem, pass. Explain each decision.
 
 After completing every pending scorecard row, run the configured TDD lint
-command (`agentic-tdd-linter lint`) once, even if failures remain. Use its exit
+command (`agentic-devkit tdd lint`) once, even if failures remain. Use its exit
 status as the current bottom line.
 
 ## 3. Report results to user

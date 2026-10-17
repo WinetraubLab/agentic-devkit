@@ -19,7 +19,7 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
-from agentic_tdd_linter.version import __version__
+from agentic_devkit.version import __version__
 from tests.agentic_linter.test_harness import agent_review_examples
 from tests.agentic_linter.test_harness.agent_review_examples import (
     _AgentReviewCase,
@@ -37,7 +37,7 @@ class AgentReviewExampleTests(unittest.TestCase):
         """Test Path: happy path
 
         Requirement Tested:
-        `agent_review_examples` does not evaluate a review packet when a matching `JSONL attestation` exists for the case.
+        `agent_review_examples` resolves cases with matching `JSONL attestation` proof without evaluation or pending packet paths.
         Standard usage: The scenario demonstrates baseline behavior.
 
         Verification Method: verify private function output
@@ -49,7 +49,23 @@ class AgentReviewExampleTests(unittest.TestCase):
 
         Similar Coverage:
         - Happy/Failure Path Difference: `test_agent_review_examples.py::test_stale_attestation_reports_pending_packet`
-          Explanation: The current test verifies `agent_review_examples` does not evaluate a review packet when a matching `JSONL attestation` exists for the case. The named test verifies `agent_review_examples` emits a pending-packet error when a `JSONL attestation` has an outdated source digest and packet evaluation remains incomplete; the current test is happy path, while the named test is failure path.
+          Explanation: The current test verifies `agent_review_examples` resolves cases with matching `JSONL attestation` proof without evaluation or pending packet paths. The named test verifies `agent_review_examples` emits a pending-packet error when a `JSONL attestation` has an outdated source digest and packet evaluation remains incomplete; the current test is happy path, while the named test is failure path.
+        - Scenario Difference: `test_cicd_validation_workflow.py::test_outdated_version_remains_valid`
+          Explanation: The current test verifies matching YAML-case proof skips evaluation; the named test verifies CI accepts unchanged test proof with outdated version metadata.
+        - Scenario Difference: `test_build_manifest_from_agent_md_files.py::test_manifest_accepts_old_review_contract`
+          Explanation: The current test verifies matching YAML-case proof bypasses evaluation and produces no pending packet paths; the named test verifies unchanged test proof remains valid with historical review-contract metadata.
+        - Scenario Difference: `test_render_cross_test_agent_md_file.py::test_completed_classification_remains_valid`
+          Explanation: The current test verifies matching YAML-case proof bypasses evaluation and produces no pending packet paths; the named test verifies completed pair classifications remain valid when reviewed test files are unchanged.
+        - Scenario Difference: `test_cicd_validation_workflow.py::test_cicd_accepts_current_proof`
+          Explanation: The current test verifies matching YAML-case proof bypasses evaluation and produces no pending packet paths; the named test verifies CI accepts a passing manifest for unchanged test content.
+        - Scenario Difference: `test_cicd_validation_workflow.py::test_cicd_creates_no_packets`
+          Explanation: The current test verifies matching YAML-case proof bypasses evaluation and produces no pending packet paths; the named test verifies CI writes no review packets when the manifest already proves the tests.
+        - Scenario Difference: `test_pre_commit_review_workflow.py::test_current_manifest_generates_zero_packets`
+          Explanation: The current test verifies matching YAML-case proof bypasses evaluation and produces no pending packet paths; the named test verifies ordinary packet generation reports zero packets for current passing proof.
+        - Scenario Difference: `test_pre_commit_review_workflow.py::test_lint_ignores_obsolete_pending_packets`
+          Explanation: The current test verifies matching YAML-case proof bypasses evaluation and produces no pending packet paths; the named test verifies lint ignores obsolete pending packets when current manifest proof exists.
+        - Happy/Failure Path Difference: `test_pre_commit_review_workflow.py::test_stale_test_requires_review`
+          Explanation: The current test verifies matching YAML-case proof bypasses evaluation and produces no pending packet paths; the named test verifies editing a test regenerates its packet and its affected relationship rows.
         """
 
         with tempfile.TemporaryDirectory() as directory:
@@ -114,6 +130,20 @@ class AgentReviewExampleTests(unittest.TestCase):
         Similar Coverage:
         - Happy/Failure Path Difference: `test_agent_review_examples.py::test_current_jsonl_attestation_skips_evaluation`
           Explanation: The current test verifies `agent_review_examples` emits a pending-packet error when a `JSONL attestation` has an outdated source digest and packet evaluation remains incomplete. The named test verifies `agent_review_examples` does not evaluate a review packet when a matching `JSONL attestation` exists for the case; the current test is failure path, while the named test is happy path.
+        - Happy/Failure Path Difference: `test_cicd_validation_workflow.py::test_outdated_version_remains_valid`
+          Explanation: The current test verifies a changed YAML-case digest requires review; the named test verifies CI accepts current test-content proof with outdated version metadata.
+        - Happy/Failure Path Difference: `test_build_manifest_from_agent_md_files.py::test_manifest_accepts_old_review_contract`
+          Explanation: The current test verifies an outdated YAML-case digest produces a pending-packet error; the named test verifies unchanged test proof remains valid with historical review-contract metadata.
+        - Happy/Failure Path Difference: `test_render_cross_test_agent_md_file.py::test_completed_classification_remains_valid`
+          Explanation: The current test verifies an outdated YAML-case digest produces a pending-packet error; the named test verifies completed pair classifications remain valid when reviewed test files are unchanged.
+        - Happy/Failure Path Difference: `test_cicd_validation_workflow.py::test_cicd_accepts_current_proof`
+          Explanation: The current test verifies an outdated YAML-case digest produces a pending-packet error; the named test verifies CI accepts a passing manifest for unchanged test content.
+        - Happy/Failure Path Difference: `test_pre_commit_review_workflow.py::test_current_manifest_generates_zero_packets`
+          Explanation: The current test verifies an outdated YAML-case digest produces a pending-packet error; the named test verifies ordinary packet generation reports zero packets for current passing proof.
+        - Happy/Failure Path Difference: `test_pre_commit_review_workflow.py::test_lint_ignores_obsolete_pending_packets`
+          Explanation: The current test verifies an outdated YAML-case digest produces a pending-packet error; the named test verifies lint ignores obsolete pending packets when current manifest proof exists.
+        - Scenario Difference: `test_pre_commit_review_workflow.py::test_stale_test_requires_review`
+          Explanation: The current test verifies an outdated YAML-case digest produces a pending-packet error; the named test verifies editing a test regenerates its packet and its affected relationship rows.
         """
 
         with tempfile.TemporaryDirectory() as directory:

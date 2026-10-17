@@ -72,7 +72,7 @@ def _scenario_type(test: ExtractedTestRecord) -> str:
 
 @lru_cache(maxsize=1)
 def _agentic_review_template() -> Template:
-    template_source = files("agentic_tdd_linter").joinpath(TEMPLATE_PATH).read_text(
+    template_source = files("agentic_devkit.tdd_lint").joinpath(TEMPLATE_PATH).read_text(
         encoding="utf-8"
     )
     environment = Environment(

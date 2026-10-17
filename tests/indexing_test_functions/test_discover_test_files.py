@@ -1,4 +1,4 @@
-"""Tests in this file validate `discover_test_files` located at `src/agentic_tdd_linter/indexing_test_functions/discover_test_files.py`.
+"""Tests in this file validate `discover_test_files` located at `src/agentic_devkit/tdd_lint/indexing_test_functions/discover_test_files.py`.
 `discover_test_files` is responsible for finding supported test files under a selected path.
 
 Terms:
@@ -16,7 +16,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 
-from agentic_tdd_linter.indexing_test_functions.discover_test_files import (
+from agentic_devkit.tdd_lint.indexing_test_functions.discover_test_files import (
     discover_test_files,
 )
 

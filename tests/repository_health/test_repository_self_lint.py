@@ -17,7 +17,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
-from agentic_tdd_linter.cli.main import main
+from agentic_devkit.cli.main import main
 
 
 class SelfLintTests(unittest.TestCase):
@@ -39,7 +39,7 @@ class SelfLintTests(unittest.TestCase):
         stdout = io.StringIO()
 
         with contextlib.redirect_stdout(stdout):
-            exit_code = main(["lint", "--repo-root", str(repo_root)])
+            exit_code = main(["tdd", "lint", "--repo-root", str(repo_root)])
 
         self.assertEqual(0, exit_code)
         self.assertIn("no issues found", stdout.getvalue())

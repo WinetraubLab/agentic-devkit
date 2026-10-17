@@ -13,11 +13,11 @@ def format_text(issues: Sequence[LintIssue], files: Sequence[Path]) -> str:
     """Return human-readable output for linter results."""
 
     if not files:
-        return "agentic-tdd-linter: no test files to lint"
+        return "agentic-devkit: no test files to lint"
 
     if not issues:
         noun = "file" if len(files) == 1 else "files"
-        return f"agentic-tdd-linter: no issues found in {len(files)} {noun}"
+        return f"agentic-devkit: no issues found in {len(files)} {noun}"
 
     lines: list[str] = []
     for issue in issues:

@@ -6,10 +6,10 @@ import tempfile
 import textwrap
 from pathlib import Path
 
-from agentic_tdd_linter.conventional_linter.run_conventional_linter import (
+from agentic_devkit.tdd_lint.conventional_linter.run_conventional_linter import (
     run_conventional_linter,
 )
-from agentic_tdd_linter.indexing_test_functions.extract_tests_from_file import (
+from agentic_devkit.tdd_lint.indexing_test_functions.extract_tests_from_file import (
     extract_tests_from_file,
 )
 

@@ -347,7 +347,7 @@ requirement_formulation_012_api_limit_and:
     `source_module_policy` is responsible for defining public interfaces for source modules.
 
     Terms:
-    - `source module`: A source module is a non-`__init__.py` Python file under src/agentic_tdd_linter. For example, cli/main.py is a source module.
+    - `source module`: A source module is a non-`__init__.py` Python file under src/agentic_devkit. For example, cli/main.py is a source module.
     - `data-only module`: A data-only module exposes declarative values instead of callable behavior. For example, version.py exposes version metadata.
     """
   test: |
@@ -366,7 +366,7 @@ requirement_formulation_012_api_limit_and:
         """
 
         repo_root = Path(__file__).resolve().parents[2]
-        package_root = repo_root / "src" / "agentic_tdd_linter"
+        package_root = repo_root / "src" / "agentic_devkit"
         data_only_modules = {
             Path("indexing_test_functions/extracted_test_record.py"),
             Path("version.py"),
@@ -389,7 +389,7 @@ requirement_formulation_013_module_public_function:
     `test_source_module_structure` is responsible for enforcing repository source-module and test-module structure.
 
     Terms:
-    - `source module`: A source module is a non-`__init__.py` Python file under src/agentic_tdd_linter. For example, tests/cli/test_main.py matches src/agentic_tdd_linter/cli/main.py.
+    - `source module`: A source module is a non-`__init__.py` Python file under src/agentic_devkit. For example, tests/cli/test_main.py matches src/agentic_devkit/cli/main.py.
     - `test module`: A test module is a test_*.py file under tests. For example, tests/cli/test_main.py is a test module.
     - `test-harness module`: A test-harness module is a same-basename non-test Python file beside a test module or inside its folder's test_harness package. For example, test_harness/mock_keyword_identification.py supports test_mock_keyword_identification.py.
     - `data-only module`: A data-only module is indexing_test_functions/extracted_test_record.py or version.py. For example, version.py exposes version data instead of public functions.
@@ -412,7 +412,7 @@ requirement_formulation_013_module_public_function:
         """
 
         repo_root = Path(__file__).resolve().parents[2]
-        package_root = repo_root / "src" / "agentic_tdd_linter"
+        package_root = repo_root / "src" / "agentic_devkit"
         data_only_modules = {
             Path("indexing_test_functions/extracted_test_record.py"),
             Path("version.py"),
@@ -639,7 +639,7 @@ requirement_formulation_018_source_test_pairing:
     `repository_validation` is responsible for validating repository module coverage.
 
     Terms:
-    - `source module`: A source module is a non-`__init__.py` Python file under src/agentic_tdd_linter. For example, tests/cli/test_main.py matches src/agentic_tdd_linter/cli/main.py.
+    - `source module`: A source module is a non-`__init__.py` Python file under src/agentic_devkit. For example, tests/cli/test_main.py matches src/agentic_devkit/cli/main.py.
     - `test module`: A test module is a test_*.py file under tests. For example, tests/cli/test_main.py is a test module.
     """
   test: |
@@ -662,7 +662,7 @@ requirement_formulation_018_source_test_pairing:
 
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            package_root = root / "src" / "agentic_tdd_linter"
+            package_root = root / "src" / "agentic_devkit"
             test_root = root / "tests"
             source = package_root / "agentic_linter" / "orphan.py"
             source.parent.mkdir(parents=True)
@@ -690,7 +690,7 @@ requirement_formulation_019_source_test_pairing:
     `repository_validation` is responsible for validating repository module coverage.
 
     Terms:
-    - `source module`: A source module is a non-`__init__.py` Python file under src/agentic_tdd_linter. For example, tests/cli/test_main.py matches src/agentic_tdd_linter/cli/main.py.
+    - `source module`: A source module is a non-`__init__.py` Python file under src/agentic_devkit. For example, tests/cli/test_main.py matches src/agentic_devkit/cli/main.py.
     - `test module`: A test module is a test_*.py file under tests. For example, tests/cli/test_main.py is a test module.
     """
   test: |
@@ -713,7 +713,7 @@ requirement_formulation_019_source_test_pairing:
 
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            package_root = root / "src" / "agentic_tdd_linter"
+            package_root = root / "src" / "agentic_devkit"
             test_root = root / "tests"
             source = package_root / "agentic_linter" / "orphan.py"
             source.parent.mkdir(parents=True)
@@ -763,9 +763,9 @@ requirement_formulation_020_ordered_review_stages:
             repo_root = Path(__file__).resolve().parents[2]
             guide = (repo_root / "README.md").read_text(encoding="utf-8")
             step_markers = (
-                "agentic-tdd-linter create-agent-md",
+                "agentic-devkit tdd create-agent-md",
                 "Review the generated files",
-                "agentic-tdd-linter lint --reviewer",
+                "agentic-devkit tdd lint --reviewer",
             )
             step_positions = tuple(guide.index(marker) for marker in step_markers)
 
@@ -948,11 +948,11 @@ requirement_formulation_023_stale_attestation_uses:
 
 requirement_formulation_024_changed_review_contract:
   file_docstring: |
-    """Tests in this file validate `CI/CD linter` located at `src/agentic_tdd_linter/cli/run_lint_pipeline.py`.
+    """Tests in this file validate `CI/CD linter` located at `src/agentic_devkit/tdd_lint/cli/run_lint_pipeline.py`.
     `CI/CD linter` is responsible for validating committed review proof without creating review packets.
 
     Terms:
-    - `CI/CD linter`: CI/CD linter runs `agentic-tdd-linter lint` in an automated pipeline against committed manifest proof. For example, it validates current proof without generating `.agent.md` files.
+    - `CI/CD linter`: CI/CD linter runs `agentic-devkit tdd lint` in an automated pipeline against committed manifest proof. For example, it validates current proof without generating `.agent.md` files.
     - `.agent.md`: An .agent.md file contains a review scorecard that create-agent-md generates for a test. For example, CI validates committed manifest proof without recreating these files.
     """
   test: |
@@ -971,7 +971,7 @@ requirement_formulation_024_changed_review_contract:
         3. Harness persists passing manifest proof.
         4. Harness modifies only README after manifest approval.
         5. Harness removes existing `.agent.md` files to reproduce `CI/CD linter` input.
-        6. Harness invokes `agentic-tdd-linter lint --repo-root <temporary-repository> --reviewer integration:contract-reviewer`.
+        6. Harness invokes `agentic-devkit tdd lint --repo-root <temporary-repository> --reviewer integration:contract-reviewer`.
         7. `CI/CD linter` output contains missing_required_agent_md.
 
         Similar Coverage:
@@ -1031,7 +1031,7 @@ requirement_formulation_024_changed_review_contract:
 
 requirement_formulation_025_overloaded_record_default:
   file_docstring: |
-    """Tests in this file validate `extracted_test_record` located at `src/agentic_tdd_linter/indexing_test_functions/extracted_test_record.py`.
+    """Tests in this file validate `extracted_test_record` located at `src/agentic_devkit/tdd_lint/indexing_test_functions/extracted_test_record.py`.
     `extracted_test_record` is responsible for representing language-neutral indexed test data.
 
     Terms:

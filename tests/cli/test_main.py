@@ -1,4 +1,4 @@
-"""Tests in this file validate `CLI` located at `src/agentic_tdd_linter/cli/main.py`.
+"""Tests in this file validate `CLI` located at `src/agentic_devkit/cli/main.py`.
 `CLI` is responsible for providing the create-agent-md and lint command interface.
 
 Terms:
@@ -19,11 +19,31 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 
-from agentic_tdd_linter.cli.main import main
+from agentic_devkit.cli.main import main
 
 
 
 class CliTests(unittest.TestCase):
+    def test_help_lists_tdd_commands(self) -> None:
+        """Test Path: happy path
+
+        Requirement Tested:
+        `CLI` lists lint and create-agent-md in successful help output for its tdd command group.
+        Standard usage: The scenario demonstrates baseline behavior.
+
+        Verification Method: verify public function output
+
+        Verification Detail:
+        Help exits with code 0 and identifies agentic-devkit tdd with lint and create-agent-md as available commands.
+        """
+        stdout = io.StringIO()
+        with contextlib.redirect_stdout(stdout), self.assertRaises(SystemExit) as exit:
+            main(["tdd", "--help"])
+        self.assertEqual(exit.exception.code, 0)
+        self.assertIn("agentic-devkit tdd", stdout.getvalue())
+        self.assertIn("lint", stdout.getvalue())
+        self.assertIn("create-agent-md", stdout.getvalue())
+
     def test_test_root_reports_generated_packet(self) -> None:
         """Test Path: happy path
 
@@ -82,6 +102,7 @@ class CliTests(unittest.TestCase):
             with contextlib.redirect_stdout(stdout):
                 exit_code = main(
                     [
+                        "tdd",
                         "create-agent-md",
                         "--repo-root",
                         str(repo_root),
@@ -152,6 +173,7 @@ class ReviewProofFlowTests(unittest.TestCase):
             with contextlib.redirect_stdout(stdout):
                 exit_code = main(
                     [
+                        "tdd",
                         "lint",
                         "--fresh",
                         "--repo-root",

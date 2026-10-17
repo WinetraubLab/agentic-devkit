@@ -12,7 +12,7 @@ stability_001_readme_workflows_head:
     Terms:
     - `reviewer identity`: A reviewer identity records the agent and model that completed a review. For example, `codex:gpt-5.5` is a reviewer identity.
     - `lint arguments`: Lint arguments are exactly `lint`, `--reviewer`, and one reviewer identity in that order. For example, `lint --reviewer codex:gpt-5.5` supplies the lint arguments.
-    - `pre-commit review workflow`: The pre-commit review workflow orders three stages: run `agentic-tdd-linter create-agent-md` to create `.agent.md` files, complete their scorecards, and run reviewer-authenticated lint to persist proof.
+    - `pre-commit review workflow`: The pre-commit review workflow orders three stages: run `agentic-devkit tdd create-agent-md` to create `.agent.md` files, complete their scorecards, and run reviewer-authenticated lint to persist proof.
     - `CI/CD validation workflow`: The CI/CD validation workflow validates committed tests and manifest proof without creating scorecards. For example, GitHub Actions runs lint after changes are committed.
     """
   test: |
@@ -91,7 +91,7 @@ stability_001_readme_workflows_head:
 
 stability_002_accepts_defined_requirement:
   file_docstring: |
-    """Tests in this file validate `conventional_linter` located at `src/agentic_tdd_linter/conventional_linter/run_conventional_linter.py`.
+    """Tests in this file validate `conventional_linter` located at `src/agentic_devkit/tdd_lint/conventional_linter/run_conventional_linter.py`.
     `conventional_linter` is responsible for validating backticked requirement-term definitions.
 
     Terms:
@@ -178,7 +178,7 @@ stability_002_accepts_defined_requirement:
 
 stability_004_reports_same_line:
   file_docstring: |
-    """Tests in this file validate `conventional_linter` located at `src/agentic_tdd_linter/conventional_linter/run_conventional_linter.py`.
+    """Tests in this file validate `conventional_linter` located at `src/agentic_devkit/tdd_lint/conventional_linter/run_conventional_linter.py`.
     `conventional_linter` is responsible for enforcing test documentation, naming, and visual-inspection conventions.
 
     Terms:
@@ -276,7 +276,7 @@ stability_004_reports_same_line:
 
 stability_005_typescript_fields_need:
   file_docstring: |
-    """Tests in this file validate `conventional_linter` located at `src/agentic_tdd_linter/conventional_linter/run_conventional_linter.py`.
+    """Tests in this file validate `conventional_linter` located at `src/agentic_devkit/tdd_lint/conventional_linter/run_conventional_linter.py`.
     `conventional_linter` is responsible for enforcing test documentation, naming, and visual-inspection conventions.
 
     Terms:
@@ -376,7 +376,7 @@ stability_005_typescript_fields_need:
 
 stability_006_loads_python_tests:
   file_docstring: |
-    """Tests in this file validate `create-agent-md` located at `src/agentic_tdd_linter/cli/run_lint_pipeline.py`.
+    """Tests in this file validate `create-agent-md` located at `src/agentic_devkit/tdd_lint/cli/run_lint_pipeline.py`.
     `create-agent-md` is responsible for loading and validating Python and TypeScript tests before creating their review scorecards.
 
     Terms:
@@ -396,7 +396,7 @@ stability_006_loads_python_tests:
 
         Verification Detail:
         1. Harness creates `src/parser.py` and `tests/test_parser.py`.
-        2. Harness invokes `agentic-tdd-linter create-agent-md --repo-root <temporary-repository>` as a subprocess.
+        2. Harness invokes `agentic-devkit tdd create-agent-md --repo-root <temporary-repository>` as a subprocess.
         3. Command produces exit code `0`.
         4. Artifact directory contains one single-test packet.
         5. Artifact directory contains one cross-test packet.
@@ -662,7 +662,7 @@ stability_009_github_actions_shows:
     - `.agent.md`: An .agent.md file contains one generated agent-review scorecard. For example, the pre-commit workflow creates and reviews .agent.md files before lint records proof.
     - `reviewer identity`: A reviewer identity records the agent and model that completed a review. For example, `codex:gpt-5.5` is a reviewer identity.
     - `lint arguments`: Lint arguments are exactly `lint`, `--reviewer`, and one reviewer identity in that order. For example, `lint --reviewer codex:gpt-5.5` supplies the lint arguments.
-    - `pre-commit review workflow`: The pre-commit review workflow orders three stages: run `agentic-tdd-linter create-agent-md` to create `.agent.md` files, complete their scorecards, and run reviewer-authenticated lint to persist proof.
+    - `pre-commit review workflow`: The pre-commit review workflow orders three stages: run `agentic-devkit tdd create-agent-md` to create `.agent.md` files, complete their scorecards, and run reviewer-authenticated lint to persist proof.
     - `CI/CD validation workflow`: The CI/CD validation workflow validates committed tests and manifest proof without creating scorecards. For example, GitHub Actions runs lint after changes are committed.
     """
   test: |
@@ -676,7 +676,7 @@ stability_009_github_actions_shows:
         Verification Method: verify public function output
 
         Verification Detail:
-        GitHub Actions guide contents contain `agentic-tdd-linter lint`.
+        GitHub Actions guide contents contain `agentic-devkit tdd lint`.
         GitHub Actions guide contents contain `GitHub Actions verifies committed agent-review proof`.
         GitHub Actions guide contents contain `committed tests and manifest proof`.
 
@@ -693,7 +693,7 @@ stability_009_github_actions_shows:
         )
 
         self.assertIn("GitHub Actions verifies committed agent-review proof", guide)
-        self.assertIn("agentic-tdd-linter lint", guide)
+        self.assertIn("agentic-devkit tdd lint", guide)
         self.assertIn("committed tests and manifest proof", guide)
   expected_scorecard:
     11: # First Line States a General Behavioral Rule
@@ -757,7 +757,7 @@ stability_010_github_actions_omits:
     Terms:
     - `reviewer identity`: A reviewer identity records the agent and model that completed a review. For example, `codex:gpt-5.5` is a reviewer identity.
     - `lint arguments`: Lint arguments are exactly `lint`, `--reviewer`, and one reviewer identity in that order. For example, `lint --reviewer codex:gpt-5.5` supplies the lint arguments.
-    - `pre-commit review workflow`: The pre-commit review workflow orders three stages: run `agentic-tdd-linter create-agent-md` to create `.agent.md` files, complete their scorecards, and run reviewer-authenticated lint to persist proof.
+    - `pre-commit review workflow`: The pre-commit review workflow orders three stages: run `agentic-devkit tdd create-agent-md` to create `.agent.md` files, complete their scorecards, and run reviewer-authenticated lint to persist proof.
     - `CI/CD validation workflow`: The CI/CD validation workflow validates committed tests and manifest proof without creating scorecards. For example, GitHub Actions runs lint after changes are committed.
     """
   test: |
@@ -765,13 +765,13 @@ stability_010_github_actions_omits:
             """Test Path: happy path
 
             Requirement Tested:
-            `test_review_documentation` requires `CI/CD validation workflow` guidance to exclude the agentic-tdd-linter create-agent-md command.
+            `test_review_documentation` requires `CI/CD validation workflow` guidance to exclude the agentic-devkit tdd create-agent-md command.
             Standard usage: The scenario demonstrates baseline behavior.
 
             Verification Method: verify public function output
 
             Verification Detail:
-            The guide contains no `agentic-tdd-linter create-agent-md` command.
+            The guide contains no `agentic-devkit tdd create-agent-md` command.
 
             Similar Coverage:
             - Lower Level Test: `test_cicd_validation_workflow.py::test_cicd_creates_no_packets`
@@ -785,7 +785,7 @@ stability_010_github_actions_omits:
                 encoding="utf-8"
             )
 
-            self.assertNotIn("agentic-tdd-linter create-agent-md", guide)
+            self.assertNotIn("agentic-devkit tdd create-agent-md", guide)
   expected_scorecard:
     11: # First Line States a General Behavioral Rule
       pass # This is a good eungh test and should pass all criteria.
@@ -848,7 +848,7 @@ stability_011_github_actions_omits:
     Terms:
     - `reviewer identity`: A reviewer identity records the agent and model that completed a review. For example, `codex:gpt-5.5` is a reviewer identity.
     - `lint arguments`: Lint arguments are exactly `lint`, `--reviewer`, and one reviewer identity in that order. For example, `lint --reviewer codex:gpt-5.5` supplies the lint arguments.
-    - `pre-commit review workflow`: The pre-commit review workflow orders three stages: run `agentic-tdd-linter create-agent-md` to create `.agent.md` files, complete their scorecards, and run reviewer-authenticated lint to persist proof.
+    - `pre-commit review workflow`: The pre-commit review workflow orders three stages: run `agentic-devkit tdd create-agent-md` to create `.agent.md` files, complete their scorecards, and run reviewer-authenticated lint to persist proof.
     - `CI/CD validation workflow`: The CI/CD validation workflow validates committed tests and manifest proof without creating scorecards. For example, GitHub Actions runs lint after changes are committed.
     """
   test: |
@@ -862,7 +862,7 @@ stability_011_github_actions_omits:
             Verification Method: verify public function output
 
             Verification Detail:
-            GitHub Actions guide contents contain no `agentic-tdd-linter create-agent-md` command.
+            GitHub Actions guide contents contain no `agentic-devkit tdd create-agent-md` command.
 
             Similar Coverage:
             - Lower Level Test: `test_cicd_validation_workflow.py::test_cicd_creates_no_packets`
@@ -876,7 +876,7 @@ stability_011_github_actions_omits:
                 encoding="utf-8"
             )
 
-            self.assertNotIn("agentic-tdd-linter create-agent-md", guide)
+            self.assertNotIn("agentic-devkit tdd create-agent-md", guide)
   expected_scorecard:
     11: # First Line States a General Behavioral Rule
       pass # This is a good eungh test and should pass all criteria.
@@ -933,7 +933,7 @@ stability_011_github_actions_omits:
 
 stability_012_cicd_accepts_current:
   file_docstring: |
-    """Tests in this file validate `CI/CD linter` located at `src/agentic_tdd_linter/cli/run_lint_pipeline.py`.
+    """Tests in this file validate `CI/CD linter` located at `src/agentic_devkit/tdd_lint/cli/run_lint_pipeline.py`.
     `CI/CD linter` is responsible for validating `manifest proof`.
 
     Terms:
@@ -953,7 +953,7 @@ stability_012_cicd_accepts_current:
         1. Harness creates a temporary repository containing one valid test.
         2. Harness completes its review.
         3. Harness persists `manifest proof`.
-        4. Harness invokes `CI/CD linter` using `agentic-tdd-linter lint --repo-root <temporary-repository> --reviewer integration:ci-reviewer`.
+        4. Harness invokes `CI/CD linter` using `agentic-devkit tdd lint --repo-root <temporary-repository> --reviewer integration:ci-reviewer`.
         5. `CI/CD linter` accepts `manifest proof`, demonstrated by exit code `0`.
 
         Similar Coverage:
@@ -1060,7 +1060,7 @@ stability_012_cicd_accepts_current:
 
 stability_013_cicd_accepts_current:
   file_docstring: |
-    """Tests in this file validate `CI/CD linter` located at `src/agentic_tdd_linter/cli/run_lint_pipeline.py`.
+    """Tests in this file validate `CI/CD linter` located at `src/agentic_devkit/tdd_lint/cli/run_lint_pipeline.py`.
     `CI/CD linter` is responsible for validating `manifest proof`.
 
     Terms:
@@ -1082,7 +1082,7 @@ stability_013_cicd_accepts_current:
         1. Harness creates a temporary repository containing one valid test.
         2. Harness creates `manifest proof` with review status pass and `reviewer identity` equal to `integration:ci-reviewer`.
         3. `source hash` corresponds to the valid test source.
-        4. Harness invokes `CI/CD linter` using `agentic-tdd-linter lint --repo-root <temporary-repository> --reviewer integration:ci-reviewer`.
+        4. Harness invokes `CI/CD linter` using `agentic-devkit tdd lint --repo-root <temporary-repository> --reviewer integration:ci-reviewer`.
         5. `CI/CD linter` accepts `manifest proof`, demonstrated by exit code `0`.
 
         Similar Coverage:
@@ -1189,7 +1189,7 @@ stability_013_cicd_accepts_current:
 
 stability_014_accepts_public_output:
   file_docstring: |
-    """Tests in this file validate `conventional_linter` located at `src/agentic_tdd_linter/conventional_linter/run_conventional_linter.py`.
+    """Tests in this file validate `conventional_linter` located at `src/agentic_devkit/tdd_lint/conventional_linter/run_conventional_linter.py`.
     `conventional_linter` is responsible for validating test-path and verification-method classifications.
 
     Terms:
@@ -1293,7 +1293,7 @@ stability_014_accepts_public_output:
 
 stability_015_accepts_public_output:
   file_docstring: |
-    """Tests in this file validate `conventional_linter` located at `src/agentic_tdd_linter/conventional_linter/run_conventional_linter.py`.
+    """Tests in this file validate `conventional_linter` located at `src/agentic_devkit/tdd_lint/conventional_linter/run_conventional_linter.py`.
     `conventional_linter` is responsible for validating test-path and verification-method classifications.
 
     Terms:
@@ -1397,7 +1397,7 @@ stability_015_accepts_public_output:
 
 stability_016_lint_requires_reviewer:
   file_docstring: |
-    """Tests in this file validate `CLI` located at `src/agentic_tdd_linter/cli/main.py`.
+    """Tests in this file validate `CLI` located at `src/agentic_devkit/cli/main.py`.
     `CLI` is responsible for providing the create-agent-md and lint command interface.
 
     Terms:
@@ -1521,7 +1521,7 @@ stability_016_lint_requires_reviewer:
 
 stability_017_lint_requires_reviewer:
   file_docstring: |
-    """Tests in this file validate `CLI` located at `src/agentic_tdd_linter/cli/main.py`.
+    """Tests in this file validate `CLI` located at `src/agentic_devkit/cli/main.py`.
     `CLI` is responsible for providing the create-agent-md and lint command interface.
 
     Terms:
@@ -1645,7 +1645,7 @@ stability_017_lint_requires_reviewer:
 
 stability_018_requires_reciprocal_references:
   file_docstring: |
-    """Tests in this file validate `render_cross_test_agent_md_file` located at `src/agentic_tdd_linter/agentic_linter/render_cross_test_agent_md_file.py`.
+    """Tests in this file validate `render_cross_test_agent_md_file` located at `src/agentic_devkit/tdd_lint/agentic_linter/render_cross_test_agent_md_file.py`.
     `render_cross_test_agent_md_file` is responsible for creating an isolated cross-test `.agent.md` that documents test-coverage relationships.
 
     Terms:
@@ -1740,7 +1740,7 @@ stability_018_requires_reciprocal_references:
 
 stability_019_requires_reciprocal_references:
   file_docstring: |
-    """Tests in this file validate `render_cross_test_agent_md_file` located at `src/agentic_tdd_linter/agentic_linter/render_cross_test_agent_md_file.py`.
+    """Tests in this file validate `render_cross_test_agent_md_file` located at `src/agentic_devkit/tdd_lint/agentic_linter/render_cross_test_agent_md_file.py`.
     `render_cross_test_agent_md_file` is responsible for creating an isolated cross-test `.agent.md` that documents test-coverage relationships.
 
     Terms:
@@ -2129,7 +2129,7 @@ stability_022_anonymous_agent_review:
 
 stability_023_reports_empty_requirement:
   file_docstring: |
-    """Tests in this file validate `conventional_linter` located at `src/agentic_tdd_linter/conventional_linter/run_conventional_linter.py`.
+    """Tests in this file validate `conventional_linter` located at `src/agentic_devkit/tdd_lint/conventional_linter/run_conventional_linter.py`.
     `conventional_linter` is responsible for enforcing test documentation, naming, and visual-inspection conventions.
 
     Terms:
@@ -2235,7 +2235,7 @@ stability_024_enforces_public_function:
     `test_source_module_structure` is responsible for enforcing repository source-module and test-module structure.
 
     Terms:
-    - `source module`: A source module is a non-`__init__.py` Python file under src/agentic_tdd_linter. For example, tests/cli/test_main.py matches src/agentic_tdd_linter/cli/main.py.
+    - `source module`: A source module is a non-`__init__.py` Python file under src/agentic_devkit. For example, tests/cli/test_main.py matches src/agentic_devkit/cli/main.py.
     - `test module`: A test module is a test_*.py file under tests. For example, tests/cli/test_main.py is a test module.
     - `test-harness module`: A test-harness module is a same-basename non-test Python file beside a test module or inside its folder's test_harness package. For example, test_harness/mock_keyword_identification.py supports test_mock_keyword_identification.py.
     """
@@ -2328,7 +2328,7 @@ stability_025_enforces_public_function:
     `test_source_module_structure` is responsible for enforcing repository source-module and test-module structure.
 
     Terms:
-    - `source module`: A source module is a non-`__init__.py` Python file under src/agentic_tdd_linter. For example, tests/cli/test_main.py matches src/agentic_tdd_linter/cli/main.py.
+    - `source module`: A source module is a non-`__init__.py` Python file under src/agentic_devkit. For example, tests/cli/test_main.py matches src/agentic_devkit/cli/main.py.
     - `test module`: A test module is a test_*.py file under tests. For example, tests/cli/test_main.py is a test module.
     - `test-harness module`: A test-harness module is a same-basename non-test Python file beside a test module or inside its folder's test_harness package. For example, test_harness/mock_keyword_identification.py supports test_mock_keyword_identification.py.
     """
@@ -2433,7 +2433,7 @@ stability_025_enforces_public_function:
 
 stability_026_plain_multiple_modules:
   file_docstring: |
-    """Tests in this file validate `create-agent-md` located at `src/agentic_tdd_linter/cli/run_lint_pipeline.py`.
+    """Tests in this file validate `create-agent-md` located at `src/agentic_devkit/tdd_lint/cli/run_lint_pipeline.py`.
     `create-agent-md` is responsible for loading and validating Python and TypeScript tests before creating their review scorecards.
 
     Terms:
@@ -2453,7 +2453,7 @@ stability_026_plain_multiple_modules:
 
         Verification Detail:
         1. Harness creates one file declaring `parser` and containing a requirement that does not identify parser.
-        2. Harness invokes `agentic-tdd-linter create-agent-md --repo-root <temporary-repository>`.
+        2. Harness invokes `agentic-devkit tdd create-agent-md --repo-root <temporary-repository>`.
         3. Command output contains `multiple_modules_in_test_file`.
         """
 
@@ -2509,7 +2509,7 @@ stability_026_plain_multiple_modules:
 
 stability_027_plain_private_verification:
   file_docstring: |
-    """Tests in this file validate `conventional_linter` located at `src/agentic_tdd_linter/conventional_linter/run_conventional_linter.py`.
+    """Tests in this file validate `conventional_linter` located at `src/agentic_devkit/tdd_lint/conventional_linter/run_conventional_linter.py`.
     `conventional_linter` is responsible for validating evidence declared as private-function output."""
   test: |
     def test_private_verification_without_private_call(self) -> None:

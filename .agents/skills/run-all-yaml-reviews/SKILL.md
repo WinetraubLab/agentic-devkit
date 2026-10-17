@@ -132,7 +132,7 @@ For **single-test** review, run:
 The analyzer compares the completed working-tree sidecar and criterion template with:
 
 - Git HEAD; and
-- the five most recent repository snapshots that changed either `tests/agentic_linter/test_agent_review_example_runner.json` or `src/agentic_tdd_linter/agentic_linter/single_test_review.agent.md.j2`.
+- the five most recent repository snapshots that changed either `tests/agentic_linter/test_agent_review_example_runner.json` or `src/agentic_devkit/tdd_lint/agentic_linter/single_test_review.agent.md.j2`.
 
 Assign every enforced `(YAML case, criterion)` pair to exactly one of seven categories in this priority order. Apply the categories to successful and failing comparisons alike.
 

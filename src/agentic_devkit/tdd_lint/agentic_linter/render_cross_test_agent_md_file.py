@@ -183,7 +183,7 @@ def _build_cross_test_review_scope(
 
 @lru_cache(maxsize=1)
 def _test_relationship_review_template() -> Template:
-    template_source = files("agentic_tdd_linter").joinpath(_TEMPLATE_PATH).read_text(
+    template_source = files("agentic_devkit.tdd_lint").joinpath(_TEMPLATE_PATH).read_text(
         encoding="utf-8"
     )
     environment = Environment(
