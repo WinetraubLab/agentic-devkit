@@ -161,7 +161,7 @@ This project separates review creation from automated validation:
 
 Contributors run this workflow before committing test changes:
 
-1. Run `agentic-tdd-linter create-agent-md` to create `.agent.md` scorecards.
+1. Run `agentic-devkit tdd create-agent-md` to create `.agent.md` scorecards.
 2. Complete every generated scorecard.
 3. Run `lint` to record completed reviews in `tests/agentic_review_manifest.jsonl`.
 4. Commit the updated tests and manifest.
@@ -170,7 +170,7 @@ This workflow creates `.agent.md` files and updates manifest proof.
 
 ### CI/CD validation workflow
 
-CI/CD runs `agentic-tdd-linter lint` after the changes are committed. It validates
+CI/CD runs `agentic-devkit tdd lint` after the changes are committed. It validates
 the committed tests and `tests/agentic_review_manifest.jsonl`. CI/CD does not create
 `.agent.md` files, perform reviews, or record new manifest proof. Missing, stale,
 failed, or version-incompatible proof causes CI/CD to fail and directs the contributor
