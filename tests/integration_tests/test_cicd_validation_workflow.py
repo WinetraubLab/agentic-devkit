@@ -43,8 +43,8 @@ class CicdValidationWorkflowTests(unittest.TestCase):
         7. `CI/CD linter` succeeds without requiring a new review.
 
         Similar Coverage:
-        - Module Difference: `test_build_manifest_from_agent_md_files.py::test_manifest_accepts_old_review_contract`
-          Explanation: The current test verifies historical linter-version metadata remains valid. The named test verifies historical review-contract metadata remains valid; both exercise grandfathered proof through different named modules or contract subjects.
+        - Scenario Difference: `test_build_manifest_from_agent_md_files.py::test_manifest_accepts_old_review_contract`
+          Explanation: The current test verifies historical linter-version metadata remains valid for unchanged tests. The named test verifies historical review-contract metadata remains valid for unchanged tests; these scenarios distinguish the two contracts.
         - Scenario Difference: `test_cicd_validation_workflow.py::test_cicd_accepts_current_proof`
           Explanation: The current test verifies `CI/CD linter` accepts proof from an earlier linter release. The named test verifies `CI/CD linter` accepts proof from the current release; both use happy path, but exercise materially different scenarios.
         - Scenario Difference: `test_cicd_validation_workflow.py::test_cicd_creates_no_packets`
@@ -95,10 +95,8 @@ class CicdValidationWorkflowTests(unittest.TestCase):
                 "PROOF = 'current'\n",
             )
             _write_source(repo_root / "tests" / "test_version.py", test_source)
-            reviewer = "integration:version-reviewer"
             _record_approved_manifest(
                 repo_root,
-                reviewer=reviewer,
                 review_status="pass",
                 review_evidence="approved version fixture",
             )
@@ -137,8 +135,8 @@ class CicdValidationWorkflowTests(unittest.TestCase):
           Explanation: The current test verifies `CI/CD linter` accepts current manifest proof. The named test verifies `CI/CD linter` creates no `.agent.md` files when current manifest proof exists; both use happy path, but exercise materially different scenarios.
         - Scenario Difference: `test_cicd_validation_workflow.py::test_outdated_version_remains_valid`
           Explanation: The current test verifies `CI/CD linter` accepts current manifest proof. The named test verifies `CI/CD linter` accepts proof created under an earlier version; both use happy path, but exercise materially different scenarios.
-        - Module Difference: `test_review_documentation.py::test_github_actions_shows_ci`
-          Explanation: The current test verifies `CI/CD linter` accepts current manifest proof. The named test verifies `test_review_documentation` requires GitHub Actions guidance to describe the `CI/CD validation workflow` as linting committed tests and manifest proof; both exercise materially the same scenario through different named modules or contract subjects.
+        - Scenario Difference: `test_review_documentation.py::test_github_actions_shows_ci`
+          Explanation: The current test verifies CI accepts committed current proof. The named test verifies documentation describes CI validating committed proof; these scenarios distinguish the two contracts.
         - Scenario Difference: `test_build_manifest_from_agent_md_files.py::test_manifest_accepts_old_review_contract`
           Explanation: The current test verifies CI accepts current passing proof. The named test verifies unchanged proof remains valid with historical review-contract metadata; both use happy path, but exercise materially different scenarios.
         - Scenario Difference: `test_pre_commit_review_workflow.py::test_current_manifest_generates_zero_packets`
@@ -182,7 +180,6 @@ class CicdValidationWorkflowTests(unittest.TestCase):
             _write_source(repo_root / "tests" / "test_approved.py", test_source)
             _record_approved_manifest(
                 repo_root,
-                reviewer="integration:ci-reviewer",
                 review_status="pass",
                 review_evidence="approved packetless CI fixture",
             )
@@ -204,7 +201,7 @@ class CicdValidationWorkflowTests(unittest.TestCase):
         2. Harness completes its review.
         3. Harness persists current passing proof in the manifest.
         4. Harness removes the existing '.agent.md' directory before invoking `CI/CD linter`.
-        5. Harness invokes `CI/CD linter` using `agentic-tdd-linter lint --repo-root <temporary-repository> --reviewer integration:ci-reviewer`.
+        5. Harness invokes `CI/CD linter` using `agentic-tdd-linter lint --repo-root <temporary-repository>`.
         6. Packet list contains zero paths after lint.
 
         Similar Coverage:
@@ -212,8 +209,8 @@ class CicdValidationWorkflowTests(unittest.TestCase):
           Explanation: The current test verifies `CI/CD linter` creates no `.agent.md` files when current manifest proof exists. The named test verifies `CI/CD linter` accepts current manifest proof; both use happy path, but exercise materially different scenarios.
         - Scenario Difference: `test_cicd_validation_workflow.py::test_outdated_version_remains_valid`
           Explanation: The current test verifies `CI/CD linter` creates no `.agent.md` files when current proof exists. The named test verifies `CI/CD linter` accepts proof created under an earlier version; both use happy path, but exercise materially different scenarios.
-        - Module Difference: `test_review_documentation.py::test_github_actions_omits_packet_creation`
-          Explanation: The current test verifies `CI/CD linter` creates no `.agent.md` files when current manifest proof exists. The named test verifies `test_review_documentation` requires `CI/CD validation workflow` guidance to exclude the create-agent-md command; both exercise materially the same scenario through different named modules or contract subjects.
+        - Scenario Difference: `test_review_documentation.py::test_github_actions_omits_packet_creation`
+          Explanation: The current test verifies CI lint creates no packets. The named test verifies documentation excludes the packet-creation command from CI guidance; these scenarios distinguish the two contracts.
         - Module Difference: `test_pre_commit_review_workflow.py::test_current_manifest_generates_zero_packets`
           Explanation: The current test verifies CI lint creates no review packets. The named test verifies ordinary generation creates no packets for current proof; both exercise materially the same scenario through different named modules or contract subjects.
         - Scenario Difference: `test_pre_commit_review_workflow.py::test_lint_ignores_obsolete_pending_packets`
@@ -255,7 +252,6 @@ class CicdValidationWorkflowTests(unittest.TestCase):
             _write_source(repo_root / "tests" / "test_approved.py", test_source)
             _record_approved_manifest(
                 repo_root,
-                reviewer="integration:ci-reviewer",
                 review_status="pass",
                 review_evidence="approved packetless CI fixture",
             )
@@ -264,8 +260,6 @@ class CicdValidationWorkflowTests(unittest.TestCase):
             _run_cli(
                 repo_root,
                 "lint",
-                "--reviewer",
-                "integration:ci-reviewer",
             )
             packets = _packet_paths(repo_root)
 
