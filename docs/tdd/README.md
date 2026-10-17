@@ -69,6 +69,7 @@ they verify interactions and the repository itself rather than implement linter 
 ## What It Checks
 
 The TDD linter looks for tests that are:
+
 - vague or hard to understand
 - missing meaningful assertions
 - missing required structured docstring fields
@@ -78,9 +79,10 @@ The TDD linter looks for tests that are:
 
 The goal is to catch weak, vague, or bloated tests before they guide implementation.
 
-## Add It To Your Project
+## Add TDD linting to your project
 
-From the root of your project, copy and run this entire block:
+Install the agent skills described in the [toolkit setup](../../README.md#agent-skills).
+Then run this block from your project root:
 
 ```bash
 bash -c '
