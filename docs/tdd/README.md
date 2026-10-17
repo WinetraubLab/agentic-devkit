@@ -80,7 +80,7 @@ The goal is to catch weak, vague, or bloated tests before they guide implementat
 
 ## Add It To Your Project
 
-From your project root, run this block to install `agentic-devkit` and its shared skills (requires Python 3.11+ and Git).
+From the root of your project, copy and run this entire block:
 
 ```bash
 bash -c '
@@ -88,7 +88,7 @@ set -e
 
 python3 -m venv .venv
 git submodule update --init --remote .agents/skills/shared
-./.venv/bin/pip install git+https://github.com/WinetraubLab/agentic-tdd-linter
+./.venv/bin/pip install git+https://github.com/WinetraubLab/agentic-devkit
 
 printf "\nThen ask your coding agent:\n\nRun the \`\$run-tdd-linter\` skill.\n"
 '
