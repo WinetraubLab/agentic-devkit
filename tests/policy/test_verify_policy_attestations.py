@@ -66,6 +66,63 @@ class PolicyTests(unittest.TestCase):
         verified = verify_policy_attestations(root=root, baseline_revision="HEAD")
         self.assertEqual(hash_policy_scope(root), verified.digest)
 
+    def test_accepts_same_or_fewer_violations(self) -> None:
+        """Test Path: happy path
+
+        Requirement Tested:
+        `policy attestation verifier` accepts reviews reporting no more violating files than the committed review.
+        A review previously listed one file; its next review lists one or none.
+
+        Verification Method: verify public function output
+
+        Verification Detail:
+        Verification succeeds with one reported file and with no reported files against a committed review listing one file.
+
+        Similar Coverage:
+        - Happy/Failure Path Difference: `test_verify_policy_attestations.py::test_rejects_exception_count_above_baseline`
+          Explanation: This test accepts unchanged or lower counts; the named test rejects an increase.
+        - Happy/Failure Path Difference: `test_verify_policy_attestations.py::test_rejects_violations_without_prior_results`
+          Explanation: This test has valid committed results to compare against; the named test has no usable previous results.
+        - Scenario Difference: `test_verify_policy_attestations.py::test_accepts_new_policy_without_violations`
+          Explanation: This test covers an existing policy with a committed violation; the named test introduces a new policy with no violations.
+        """
+        root = _fixture(self, security_exceptions=["src/example.ts"])
+        for files in (["src/example.ts"], []):
+            with self.subTest(reported_files=files):
+                _complete(root / "policy/access/security.md", files)
+                result = verify_policy_attestations(root=root, baseline_revision="HEAD")
+                self.assertEqual("HEAD", result.baseline_revision)
+
+    def test_rejects_new_policy_violations(self) -> None:
+        """Test Path: failure path
+
+        Requirement Tested:
+        `policy attestation verifier` rejects a new policy's attestation if it reports any violations.
+        When introducing a policy, existing violations must be fixed before its first attestation passes.
+
+        Verification Method: verify public function output
+
+        Verification Detail:
+        Verification rejects a violation whether the new policy is uncommitted or was committed with a blank review.
+
+        Similar Coverage:
+        - Happy/Failure Path Difference: `test_verify_policy_attestations.py::test_accepts_new_policy_without_violations`
+          Explanation: Both cover a new policy before its first completed review; this test reports a violation, while the named test reports none.
+        """
+        for committed_without_review in (False, True):
+            with self.subTest(committed_without_review=committed_without_review):
+                root = _fixture(self)
+                source = root / "policy/access/new-policy.policy.yaml"
+                source.write_text("title: New policy\nobjective: Enforce a new rule.\npolicy_content: Follow the new rule.\n")
+                render_policy_documents(root=root)
+                _complete(root / "policy/access/security.md", ["src/example.ts"])
+                _complete(root / "policy/privacy/privacy.md")
+                if committed_without_review:
+                    _commit(root, "Add new policy before its first review")
+                _complete(root / "policy/access/new-policy.md", ["src/example.ts"])
+                with self.assertRaisesRegex(ValueError, r"- policy/access/new-policy\.md"):
+                    verify_policy_attestations(root=root, baseline_revision="HEAD")
+
     def test_replaces_stale_data_type_digest(self) -> None:
         """Test Path: failure path
 
