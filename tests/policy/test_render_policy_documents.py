@@ -90,3 +90,24 @@ class PolicyTests(unittest.TestCase):
                     render_policy_documents(root=root)
                 self.assertFalse((root / "policy/user-interface/back-navigation.md").exists())
 
+    def test_renders_policy_document(self) -> None:
+        """Test Path: happy path
+
+        Requirement Tested:
+        `policy document renderer` fills the shared template with policy content from YAML.
+        Standard usage: A project generates a policy document for its first review.
+
+        Verification Method: verify public function output
+
+        Verification Detail:
+        The test compares the generated temporary document with the expected body and blank attestation.
+
+        Similar Coverage:
+        - Scenario Difference: `test_render_policy_documents.py::test_resets_editable_attestation`
+          Explanation: This test verifies that `policy document renderer` creates Markdown from a YAML policy source and the shared template; the named test instead verifies that `policy document renderer` replaces an existing attestation with an empty attestation during regeneration.
+        """
+        root = _renderer_fixture(self)
+        render_policy_documents(root=root)
+        expected = TEMPLATE.replace("{{ title }}", "Back navigation policy").replace("{{ objective }}", "Keep navigation safe.").replace("{{ policy_content }}", "Use the shared back hook.")
+        self.assertEqual(expected, (root / "policy/user-interface/back-navigation.md").read_text())
+
