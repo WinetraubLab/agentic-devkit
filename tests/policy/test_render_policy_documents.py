@@ -312,7 +312,7 @@ class PolicyTests(unittest.TestCase):
 
         Requirement Tested:
         `policy document renderer` reports an error when checking a policy document edited directly in Markdown.
-        A developer edits generated Markdown instead of its YAML source.
+        When a developer edits generated Markdown instead of its YAML source, the renderer rejects the document check.
 
         Verification Method: verify public function output
 
