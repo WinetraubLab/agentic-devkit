@@ -11,6 +11,7 @@ Terms:
 from __future__ import annotations
 
 import unittest
+import re
 from pathlib import Path
 
 
@@ -95,7 +96,7 @@ class ReviewDocumentationTests(unittest.TestCase):
         )[0]
 
         expected_instruction = "Run the `$run-tdd-linter` skill."
-        self.assertIn(expected_instruction, installation_guide)
+        self.assertRegex(installation_guide, r"(?s)ask your coding agent:.*" + re.escape(expected_instruction))
 
     def test_readme_shows_review_workflow(self) -> None:
         """Test Path: happy path
