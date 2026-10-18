@@ -29,12 +29,40 @@
         self.assertNotIn("policy/README.md", output)
         self.assertNotIn("policy/TODO-SECURITY.md", output)
 
+    def test_respects_policy_specific_review_folders(self) -> None:
+        """Test Path: happy path
+
+        Requirement Tested:
+        `policy attestation verifier` accepts reported files only within that policy's applicable folders.
+        A folder reviewed for other policies must also be added to this policy.
+
+        Verification Method: verify public function output
+
+        Verification Detail:
+        A finding in a globally configured folder fails until the policy's applicable folders include it.
+        """
+        root = _fixture(self)
+        source = root / "policy/access/security.policy.yaml"
+        original = source.read_text()
+        source.write_text(original + "applicable_folders: [src]\n")
+        render_policy_documents(root=root)
+        _complete(root / "policy/access/security.md", ["actions/data-types/example.ts"])
+        _complete(root / "policy/privacy/privacy.md")
+        with self.assertRaisesRegex(ValueError, r"policy/access/security\.md"):
+            verify_policy_attestations(root=root, baseline_revision="HEAD")
+        source.write_text(original + "applicable_folders: [src, actions/data-types]\n")
+        render_policy_documents(root=root)
+        _complete(root / "policy/access/security.md", ["actions/data-types/example.ts"])
+        _complete(root / "policy/privacy/privacy.md")
+        result = verify_policy_attestations(root=root, baseline_revision="HEAD")
+        self.assertEqual("HEAD", result.baseline_revision)
+
     def test_requires_clean_unreviewed_baseline(self) -> None:
         """Test Path: happy path
 
         Requirement Tested:
         `policy attestation verifier` rejects a new policy's attestation if it reports any violations.
-        When introducing a policy, existing violations must be fixed before its first attestation can pass.
+        When introducing a policy, existing violations must be fixed before its first attestation passes.
 
         Verification Method: verify public function output
 
