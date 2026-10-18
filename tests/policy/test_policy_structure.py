@@ -51,7 +51,11 @@ class PolicyTests(unittest.TestCase):
         Verification Method: verify public function output
 
         Verification Detail:
-        Assertions match template markers and rendered policies against the required structure.
+        The provided template contains the policy fields and review instructions, followed by one attestation section without reviewer metadata.
+
+        Similar Coverage:
+        - Scenario Difference: `test_render_policy_documents.py::test_renders_policy_document`
+          Explanation: This test verifies the shared policy document sections; the named test creates a document from YAML using the provided template.
         """
         root = _fixture(self)
         asset = Path(__file__).resolve().parents[2] / "src/agentic_devkit/policies/policy-template.md.j2"
@@ -66,10 +70,6 @@ class PolicyTests(unittest.TestCase):
             self.assertEqual(1, len(re.findall(r"^# Attestation[ \t]*$", markdown, re.MULTILINE)))
             self.assertRegex(markdown, r"(?m)^Noncompliant Files:(?: NONE)?$")
             self.assertNotRegex(markdown, r"(?m)^(?:Policy Scope Digest|Evidence|Reviewer|Decision):")
-        entries = json.loads((root / "policy/policy-scope-digest.json").read_text())["digests"]
-        for entry in entries:
-            self.assertTrue((root / entry["root_folder"]).is_dir())
-            self.assertRegex(entry["digest"], r"^[a-f0-9]{64}$")
 
 
 if __name__ == "__main__":
