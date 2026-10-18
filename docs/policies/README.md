@@ -78,7 +78,7 @@ and code changes.
 ## Add GitHub Actions
 
 Follow the [GitHub Actions guide](../workflows/github-actions.md#policy-verification)
-to check your committed policy attestations on pull requests and pushes.
+to check your committed policy attestations on pull requests.
 
 ## Review workflow
 

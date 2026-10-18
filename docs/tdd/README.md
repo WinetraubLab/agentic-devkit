@@ -72,7 +72,7 @@ A successful run leaves your tests with passing review proof in
 ## Add GitHub Actions
 
 Follow the [GitHub Actions guide](../workflows/github-actions.md#tdd-linting) to check your
-committed review proof on pull requests and pushes.
+committed review proof on pull requests.
 
 ## Review workflow
 

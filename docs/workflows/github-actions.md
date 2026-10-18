@@ -16,7 +16,6 @@ name: Agentic TDD Linter
 
 on:
   pull_request:
-  push:
 
 jobs:
   lint-tests:
@@ -53,7 +52,6 @@ name: Agentic Policy Verification
 
 on:
   pull_request:
-  push:
 
 jobs:
   verify-policies:
@@ -67,8 +65,8 @@ jobs:
 ```
 
 Full Git history makes the pull request's base revision available for comparing
-finding allowances. The verifier automatically uses that revision on pull requests
-and `HEAD` on pushes. Set `POLICY_BASE_REVISION` to use another baseline.
+finding allowances. The verifier automatically uses that revision. Set
+`POLICY_BASE_REVISION` to use another baseline.
 
 The command checks reviewed root folders and digests, generated policy bodies,
 and completed attestations. Commit your policy YAML, generated Markdown with
