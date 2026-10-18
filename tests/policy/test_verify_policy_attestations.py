@@ -52,7 +52,7 @@ class PolicyTests(unittest.TestCase):
 
         Requirement Tested:
         `policy attestation verifier` clears previous review results when a folder is removed from the review list.
-        The remaining folders must be reviewed again.
+        After a configured folder is removed, verification rejects the stale review scope and clears the previous findings.
 
         Verification Method: verify public function output
 
