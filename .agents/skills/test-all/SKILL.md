@@ -10,15 +10,19 @@ from the repository root. Preserve unrelated and concurrent changes. This skill
 orchestrates the existing review skills; follow their instructions rather than
 replacing agent reviews with command execution alone.
 
-## 1. Review all YAML examples
+## 1. Check whether YAML reviews are needed
 
-Use [run-all-yaml-reviews](../run-all-yaml-reviews/SKILL.md) twice:
+Compare all YAML file paths and raw bytes in these folders against local `main`,
+including added, deleted, and untracked YAML files:
 
-1. Single-test reviews.
-2. Test-relationship reviews.
+1. `tests/agentic_linter/fixtures/single_test_review/`
+2. `tests/agentic_linter/fixtures/test_relationship_review/`
 
-Invoking `$test-all` requests both catalogs. Complete each catalog separately,
-including its isolated reviews, expectation comparisons, and required reporting.
+If all YAML files match `main` byte-for-byte, skip YAML reviews and preserve
+existing review artifacts and reports. If any YAML file differs, run
+[run-all-yaml-reviews](../run-all-yaml-reviews/SKILL.md) twice: first in
+single-test mode, then in test-relationship mode. Complete both modes in full.
+If `main` is unavailable, report the comparison as blocked.
 Do not change YAML expectations or review criteria to make comparisons pass.
 
 ## 2. Run TDD lint
@@ -47,21 +51,7 @@ Use the configured project interpreter if the environment has a different path.
 Include policy tests and YAML runner tests; do not silently exclude failing tests.
 Record the test count and command exit status.
 
-## 5. Confirm the final state
+## 5. Report results
 
-Continue independent stages after failures and collect their results. Follow each
-child skill's limits on corrections; report unresolved failures without weakening
-requirements or fabricating review proof.
-
-If a later stage changes files reviewed earlier, rerun the affected tests and
-refresh invalidated TDD or policy reviews using their skills. Repeat a YAML
-catalog only when its fixtures, criteria, or runner implementation changed.
-Do not repeat completed, unaffected reviews. If checks still fail after the child
-skill's correction cycle, report the remaining failures instead of starting an
-unbounded retry loop.
-
-End with a table covering single-test YAML reviews, test-relationship YAML reviews,
-TDD lint, policy attestations, and the full test suite. Mark each as passed,
-failed, blocked, or not applicable, with counts or a concrete reason. Identify
-changed files and unresolved issues. Claim overall success only when every
-applicable check passes for the final working tree.
+Report each stage as passed, failed, blocked, skipped, or not applicable, with
+counts or a brief reason. Note changed files and unresolved issues.
