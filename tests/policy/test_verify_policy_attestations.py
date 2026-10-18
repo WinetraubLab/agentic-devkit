@@ -1,3 +1,45 @@
+"""Tests in this file validate `policy attestation verifier` located at `src/agentic_devkit/policies/verify_policy_attestations.py`.
+`policy attestation verifier` is responsible for digest freshness, exception baselines, and stale-policy review instructions.
+"""
+
+from __future__ import annotations
+
+import json
+import re
+import unittest
+from agentic_devkit.policies.policy_scope import hash_policy_scope
+from agentic_devkit.policies.render_policy_documents import render_policy_documents
+from agentic_devkit.policies.verify_policy_attestations import verify_policy_attestations
+from tests.policy.test_harness.fixtures import _fixture, _complete, _commit, _run_cli
+
+class PolicyTests(unittest.TestCase):
+    def test_scope_changes_reset_attestations(self) -> None:
+        """Test Path: failure path
+
+        Requirement Tested:
+        `policy attestation verifier` clears previous review results when a folder is added to the review list.
+        Even adding an empty folder requires another review.
+
+        Verification Method: verify public function output
+
+        Verification Detail:
+        Verification fails, replaces the digest, and clears attestations despite unchanged indexed content.
+        """
+        root = _fixture(self)
+        before = (root / "policy/policy-scope-digest.json").read_bytes()
+        (root / "extra").mkdir()
+        config = root / "policy/policy-scope-digest.json"
+        document = json.loads(config.read_text())
+        document["digests"].append({"root_folder": "extra", "digest": None})
+        config.write_text(json.dumps(document))
+        with self.assertRaisesRegex(ValueError, "Policy scope changed"):
+            verify_policy_attestations(root=root, baseline_revision="HEAD")
+        self.assertNotEqual(before, (root / "policy/policy-scope-digest.json").read_bytes())
+        self.assertTrue((root / "policy/access/security.md").read_text().endswith("Noncompliant Files:\n"))
+        entries = json.loads(config.read_text())["digests"]
+        added = next(entry for entry in entries if entry["root_folder"] == "extra")
+        self.assertRegex(added["digest"], r"^[a-f0-9]{64}$")
+
     def test_replaces_stale_data_type_digest(self) -> None:
         """Test Path: failure path
 
