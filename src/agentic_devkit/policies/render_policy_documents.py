@@ -92,15 +92,22 @@ def _read_source(path: Path, root: Path) -> dict:
         raise ValueError(f"{label} contains invalid YAML: {error}") from error
     if not isinstance(source, dict):
         raise ValueError(f"{label} must contain a YAML object.")
-    unknown = [str(field) for field in source if field not in (*REQUIRED_FIELDS, "applicable_folders", "exemptions")]
+    unknown = [str(field) for field in source if field not in (*REQUIRED_FIELDS, "review_checklist", "applicable_folders", "exemptions")]
     if unknown:
         raise ValueError(f"{label} contains unknown fields: {', '.join(unknown)}.")
     for field in REQUIRED_FIELDS:
         value = source.get(field)
         if not isinstance(value, str) or not value.strip():
             raise ValueError(f"{label} requires a non-empty {field} string.")
-    if not isinstance(source.get("exemptions", ""), str):
-        raise ValueError(f"{label} exemptions must be a string.")
+    for field, limit in (("review_checklist", 25), ("exemptions", 50)):
+        entries = source.get(field, [])
+        if (not isinstance(entries, list) or (field == "review_checklist" and not entries)
+            or any(not isinstance(item, str) or not item.strip() for item in entries)):
+            raise ValueError(f"{label} requires a {'non-empty ' if field == 'review_checklist' else ''}{field} list of non-empty strings.")
+        for index, item in enumerate(entries, start=1):
+            if len(item.split()) > limit:
+                raise ValueError(f"{label} {field} entry {index} exceeds {limit} words.")
+        source[field] = [" ".join(item.split()) for item in entries]
     return source
 
 
@@ -163,9 +170,8 @@ def render_policy_documents(
         if selected is not None and output_path not in selected:
             continue
         rendered = template.render(
-            **{key: value for key, value in source.items() if key not in {"applicable_folders", "exemptions"}},
+            source,
             applicable_folders=folders, scope_directories=folders,
-            exemptions=source.get("exemptions", "").strip(),
         )
         if check:
             label = output_path.relative_to(root).as_posix()

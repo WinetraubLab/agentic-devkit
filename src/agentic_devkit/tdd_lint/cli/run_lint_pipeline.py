@@ -75,11 +75,10 @@ def run_lint_pipeline(
         tests_by_file=tests_by_file,
         force_all=force_fresh,
     )
-    pending_files = [path for path, tests in pending_by_file.items() if tests]
     ready_by_file: dict[Path, list[ExtractedTestRecord]] = {}
-    for path in pending_files:
+    for path, tests in pending_by_file.items():
         ready_by_file[path] = []
-        for test in pending_by_file[path]:
+        for test in tests:
             issue = _missing_required_artifact_issue(path, test, root, artifact_root)
             if issue is None:
                 ready_by_file[path].append(test)
