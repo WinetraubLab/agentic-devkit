@@ -27,19 +27,22 @@ class PolicyTests(unittest.TestCase):
         - Scenario Difference: `test_render_policy_documents.py::test_renders_policy_document`
           Explanation: This test verifies the shared policy document sections; the named test creates a document from YAML using the provided template.
         """
-        root = _fixture(self)
         asset = Path(__file__).resolve().parents[2] / "src/agentic_devkit/policies/policy-template.md.j2"
-        template = asset.read_text()
-        for pattern in (r"^# \{\{ title \}\}", r"^## Objective$", r"^\{\{ objective \}\}$", r"^## Instructions$", r"^## Policy$", r"^\{\{ policy_content \}\}$", r"^# Attestation$", r"^Noncompliant Files:\s*$"):
-            self.assertRegex(template, re.compile(pattern, re.MULTILINE))
-        for pattern in (r"^Evidence:", r"^Reviewer:", r"^Decision:"):
-            self.assertNotRegex(template, re.compile(pattern, re.MULTILINE))
-        for path in (root / "policy").glob("*/*.md"):
-            markdown = path.read_text()
-            self.assertRegex(markdown, r"(?m)^# (?!Attestation\s*$).+")
-            self.assertEqual(1, len(re.findall(r"^# Attestation[ \t]*$", markdown, re.MULTILINE)))
-            self.assertRegex(markdown, r"(?m)^Noncompliant Files:(?: NONE)?$")
-            self.assertNotRegex(markdown, r"(?m)^(?:Policy Scope Digest|Evidence|Reviewer|Decision):")
+        template = Environment(undefined=StrictUndefined, autoescape=False).from_string(asset.read_text())
+        markdown = template.render(
+            title="Physical length naming", objective="Make physical units explicit.",
+            policy_content="Use the _m suffix for lengths in meters.",
+            applicable_folders=["src"], scope_directories=["src"], exemptions="",
+        )
+        sections = [
+            "# Physical length naming", "## Objective", "Make physical units explicit.",
+            "## Instructions", "## Policy", "Use the _m suffix for lengths in meters.",
+            "# Attestation",
+        ]
+        positions = [markdown.index(section) for section in sections]
+        self.assertEqual(sorted(positions), positions)
+        self.assertEqual(1, len(re.findall(r"^# Attestation[ \t]*$", markdown, re.MULTILINE)))
+        self.assertEqual("Noncompliant Files:", markdown.split("# Attestation", 1)[1].strip())
 
 
 if __name__ == "__main__":

@@ -26,7 +26,7 @@ class PolicyTests(unittest.TestCase):
         Verification requests another review and clears the previous finding list after an empty root is added.
 
         Similar Coverage:
-        - Happy/Failure Path Difference: `test_cli.py::test_render_clears_completed_attestations`
+        - Happy/Failure Path Difference: `test_cli.py::test_render_resets_attestations_and_digest`
           Explanation: This test resets reviews after a root is added; the named test clears completed reviews through the render command.
         - Happy/Failure Path Difference: `test_render_policy_documents.py::test_resets_editable_attestation`
           Explanation: This test resets reviews after a root is added; the named test clears the review after YAML changes while retaining exemptions.
@@ -58,7 +58,7 @@ class PolicyTests(unittest.TestCase):
         Verification requests another review and clears the previous finding list after a root is removed.
 
         Similar Coverage:
-        - Happy/Failure Path Difference: `test_cli.py::test_render_clears_completed_attestations`
+        - Happy/Failure Path Difference: `test_cli.py::test_render_resets_attestations_and_digest`
           Explanation: This test resets reviews after a root is removed; the named test clears completed reviews through the render command.
         - Happy/Failure Path Difference: `test_render_policy_documents.py::test_resets_editable_attestation`
           Explanation: This test resets reviews after a root is removed; the named test clears the review after YAML changes while retaining exemptions.
@@ -68,6 +68,9 @@ class PolicyTests(unittest.TestCase):
           Explanation: This test resets reviews after a root is removed; the named test resets reviews after a tracked data-type file changes.
         """
         root = _fixture(self, security_exceptions=["src/example.ts"], privacy_exceptions=[])
+        policy = root / "policy/access/security.md"
+        self.assertIn("Noncompliant Files:\n- src/example.ts", policy.read_text())  # Input check
+        # The JSON's root_folder entries are the configured review list.
         path = root / "policy/policy-scope-digest.json"
         document = json.loads(path.read_text())
         document["digests"] = [entry for entry in document["digests"]
@@ -75,7 +78,7 @@ class PolicyTests(unittest.TestCase):
         path.write_text(json.dumps(document))
         with self.assertRaisesRegex(ValueError, "Policy scope changed"):
             verify_policy_attestations(root=root, baseline_revision="HEAD")
-        self.assertTrue((root / "policy/access/security.md").read_text().endswith("Noncompliant Files:\n"))
+        self.assertTrue(policy.read_text().endswith("Noncompliant Files:\n"))
 
     def test_accepts_same_or_fewer_violations(self) -> None:
         """Test Path: happy path
@@ -233,7 +236,7 @@ class PolicyTests(unittest.TestCase):
           Explanation: This test clears field-policy attestations after a data-type change. The named test synchronizes the stored digest after that change.
         - Scenario Difference: `test_cli.py::test_excludes_roots_from_cli_instructions`
           Explanation: This test verifies regenerated field-policy attestations. The named test excludes root policy paths from the related CLI output.
-        - Happy/Failure Path Difference: `test_cli.py::test_render_clears_completed_attestations`
+        - Happy/Failure Path Difference: `test_cli.py::test_render_resets_attestations_and_digest`
           Explanation: This test resets reviews after a tracked data-type file changes; the named test clears completed reviews through the render command.
         - Happy/Failure Path Difference: `test_render_policy_documents.py::test_resets_editable_attestation`
           Explanation: This test resets reviews after a tracked data-type file changes; the named test clears the review after YAML changes while retaining exemptions.

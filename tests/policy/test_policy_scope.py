@@ -185,7 +185,7 @@ class ConfiguredScopeTests(unittest.TestCase):
         for document in documents:
             with self.subTest(config=document):
                 (root / "policy/policy-scope-digest.json").write_text(document)
-                with self.assertRaises(ValueError):
+                with self.assertRaises(ValueError):  # Input check
                     hash_policy_scope(root)
 
     def test_hashes_symlinked_scope_folders(self) -> None:

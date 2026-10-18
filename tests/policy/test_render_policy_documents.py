@@ -141,9 +141,9 @@ class PolicyTests(unittest.TestCase):
         for field, value in cases:
             with self.subTest(field=field, value=value):
                 source.write_text(original + field + ": " + json.dumps(value) + "\n")
-                with self.assertRaises(ValueError):
+                with self.assertRaises(ValueError):  # Input check
                     render_policy_documents(root=root)
-                self.assertFalse((root / "policy/user-interface/back-navigation.md").exists())
+                self.assertFalse((root / "policy/user-interface/back-navigation.md").exists())  # Input check
 
     def test_renders_policy_document(self) -> None:
         """Test Path: happy path
@@ -160,7 +160,7 @@ class PolicyTests(unittest.TestCase):
         Similar Coverage:
         - Scenario Difference: `test_render_policy_documents.py::test_resets_editable_attestation`
           Explanation: This test creates a document from YAML using the provided template; the named test clears the review after YAML changes while retaining exemptions.
-        - Scenario Difference: `test_cli.py::test_render_clears_completed_attestations`
+        - Scenario Difference: `test_cli.py::test_render_resets_attestations_and_digest`
           Explanation: This test creates a document from YAML using the provided template; the named test clears completed reviews through the render command.
         - Scenario Difference: `test_policy_structure.py::test_enforces_policy_template_structure`
           Explanation: This test creates a document from YAML using the provided template; the named test verifies the shared policy document sections.
@@ -215,7 +215,7 @@ class PolicyTests(unittest.TestCase):
           Explanation: This test clears the review after YAML changes while retaining exemptions; the named test creates a document from YAML using the provided template.
         - Happy/Failure Path Difference: `test_cli.py::test_reports_missing_policy_documents`
           Explanation: This test verifies that successful regeneration replaces an existing completed attestation with an empty attestation after the YAML source changes; the named test instead verifies that the failure-path verifier CLI instructs the caller to regenerate a missing policy document with empty attestations.
-        - Scenario Difference: `test_cli.py::test_render_clears_completed_attestations`
+        - Scenario Difference: `test_cli.py::test_render_resets_attestations_and_digest`
           Explanation: This test clears the review after YAML changes while retaining exemptions; the named test clears completed reviews through the render command.
         - Scenario Difference: `test_cli.py::test_document_check_preserves_review_results`
           Explanation: This test clears the review after YAML changes while retaining exemptions; the named test preserves recorded findings during document checks.

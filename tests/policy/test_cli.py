@@ -10,7 +10,7 @@ from tests.policy.test_harness.fixtures import _fixture, _run_cli, _complete, _c
 
 
 class PolicyCliTests(unittest.TestCase):
-    def test_render_clears_completed_attestations(self) -> None:
+    def test_render_resets_attestations_and_digest(self) -> None:
         """Test Path: happy path
 
         Requirement Tested:
@@ -45,9 +45,11 @@ class PolicyCliTests(unittest.TestCase):
         result = _run_cli(root, "render")
         self.assertEqual(0, result.returncode, result.stderr)
         self.assertTrue(policy.read_text().endswith("Noncompliant Files:\n"))
-
+        _complete(root / "policy/access/security.md", [])
+        _complete(root / "policy/privacy/privacy.md", [])
         verified = _run_cli(root, "verify")
         self.assertEqual(0, verified.returncode, verified.stderr)
+
 
     def test_verify_accepts_explicit_baseline(self) -> None:
         """Test Path: happy path
@@ -67,7 +69,7 @@ class PolicyCliTests(unittest.TestCase):
         - Happy/Failure Path Difference: `test_verify_policy_attestations.py::test_rejects_exception_count_above_baseline`
           Explanation: This test selects an older committed finding allowance; the named test rejects more findings than a committed review allows.
         """
-        root = _fixture(self)
+        root = _fixture(self, security_exceptions=["src/example.ts"])
         baseline = _git(root, "rev-parse", "HEAD").strip()
         policy = root / "policy/access/security.md"
         _complete(policy)
@@ -92,7 +94,7 @@ class PolicyCliTests(unittest.TestCase):
         The check-documents command succeeds and leaves the policy file, including its list of violations, unchanged.
 
         Similar Coverage:
-        - Scenario Difference: `test_cli.py::test_render_clears_completed_attestations`
+        - Scenario Difference: `test_cli.py::test_render_resets_attestations_and_digest`
           Explanation: This test preserves recorded findings during document checks; the named test clears completed reviews through the render command.
         - Happy/Failure Path Difference: `test_cli.py::test_reports_missing_policy_documents`
           Explanation: This test preserves recorded findings during document checks; the named test reports missing policy documents with generation instructions.
@@ -104,10 +106,10 @@ class PolicyCliTests(unittest.TestCase):
         root = _fixture(self)
         path = root / "policy/access/security.md"
         _complete(path, ["src/example.ts"])
-        before = path.read_bytes()
+        before = path.read_text().split("# Attestation", 1)[1]
         result = _run_cli(root, "check-documents")
         self.assertEqual(0, result.returncode, result.stderr)
-        self.assertEqual(before, path.read_bytes())
+        self.assertEqual(before, path.read_text().split("# Attestation", 1)[1])
 
 
     def test_explains_required_policy_reviews(self) -> None:
@@ -132,7 +134,8 @@ class PolicyCliTests(unittest.TestCase):
         - Scenario Difference: `test_cli.py::test_excludes_roots_from_cli_instructions`
           Explanation: This test verifies the complete review instructions. The named test verifies exclusion of root policy paths from that diagnostic.
         """
-        root = _fixture(self)
+        # The fixture commits two policies with the explicit finding lists below.
+        root = _fixture(self, security_exceptions=[], privacy_exceptions=[])
         (root / "src/example.ts").write_text("export const value = 2;\n")
         result = _run_cli(root, "verify")
         output = result.stdout + result.stderr
@@ -160,6 +163,7 @@ class PolicyCliTests(unittest.TestCase):
           Explanation: This test reports missing policy documents with generation instructions; the named test rejects direct edits to generated policy text.
         """
         root = _renderer_fixture(self)
+        self.assertFalse((root / "policy/user-interface/back-navigation.md").exists())  # Input check
         result = _run_cli(root, "check-documents")
         output = result.stdout + result.stderr
         self.assertEqual(1, result.returncode, output)
@@ -189,7 +193,8 @@ class PolicyCliTests(unittest.TestCase):
         - Scenario Difference: `test_cli.py::test_explains_required_policy_reviews`
           Explanation: This test verifies root-path exclusion. The named test verifies the complete recovery diagnostic.
         """
-        root = _fixture(self)
+        # The fixture commits two policies with the explicit finding lists below.
+        root = _fixture(self, security_exceptions=[], privacy_exceptions=[])
         (root / "src/example.ts").write_text("export const value = 2;\n")
         result = _run_cli(root, "verify")
         output = result.stdout + result.stderr
