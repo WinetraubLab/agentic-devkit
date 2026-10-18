@@ -52,3 +52,25 @@ class PolicyCliTests(unittest.TestCase):
         self.assertEqual(0, result.returncode, result.stderr)
         self.assertIn("Policy attestations do not exceed HEAD", result.stdout)
 
+    def test_document_check_preserves_review_results(self) -> None:
+        """Test Path: happy path
+
+        Requirement Tested:
+        `policy CLI` must not erase the agent's recorded violations when checking that a policy document is up to date.
+        Standard usage: A developer runs check-documents after an agent has recorded policy violations.
+
+        Verification Method: verify public function output
+
+        Verification Detail:
+        The check-documents command succeeds and leaves the policy file, including its list of violations, unchanged.
+        """
+        root = _fixture(self)
+        path = root / "policy/access/security.md"
+        before = path.read_bytes()
+        result = _run_cli(root, "check-documents")
+        self.assertEqual(0, result.returncode, result.stderr)
+        self.assertEqual(before, path.read_bytes())
+
+
+if __name__ == "__main__":
+    unittest.main()
