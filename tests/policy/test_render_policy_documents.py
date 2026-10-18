@@ -114,8 +114,8 @@ class PolicyTests(unittest.TestCase):
         """Test Path: failure path
 
         Requirement Tested:
-        `policy document renderer` rejects policy fields with invalid values.
-        Bad folder selections or accepted exceptions written as numbers or lists prevent generation.
+        `policy document renderer` rejects malformed folder selections and exemptions that are not text.
+        A policy has an invalid folder list or a non-text exemption value.
 
         Verification Method: verify public function output
 
