@@ -1,3 +1,32 @@
+    def test_rejects_exception_count_above_baseline(self) -> None:
+        """Test Path: failure path
+
+        Requirement Tested:
+        `policy attestation verifier` rejects reviews reporting more violating files than the last committed review.
+        The current review reports more files with violations than the review committed at HEAD.
+
+        Verification Method: verify public function output
+
+        Verification Detail:
+        The public verifier invocation throws an error.
+
+        Similar Coverage:
+        - Happy/Failure Path Difference: `test_verify_policy_attestations.py::test_accepts_exception_lists_within_baselines`
+          Explanation: This test rejects a working count that exceeds its committed limit. The named test accepts working counts at their committed limits.
+        - Happy/Failure Path Difference: `test_verify_policy_attestations.py::test_accepts_improvement_below_baseline`
+          Explanation: This test rejects regression from one exception to two. The named test accepts improvement from one exception to zero.
+        - Scenario Difference: `test_verify_policy_attestations.py::test_rejects_missing_count_in_head`
+          Explanation: This test rejects a working count above a present committed count. The named test rejects a committed policy that supplies no count.
+        - Happy/Failure Path Difference: `test_verify_policy_attestations.py::test_accepts_new_policy_without_exceptions`
+          Explanation: This test verifies that `policy attestation verifier` refuses a policy when its exception count exceeds its HEAD baseline. When a policy has two exceptions against a committed baseline of one, `policy attestation verifier` refuses that policy; the named test instead verifies that `policy attestation verifier` accepts each newly added policy whose attestation has an empty noncompliant-file list.
+        - Happy/Failure Path Difference: `test_verify_policy_attestations.py::test_requires_clean_unreviewed_baseline`
+          Explanation: The above-baseline test exceeds a recorded allowance; the clean-baseline test accepts zero findings against an empty attestation.
+        """
+        root = _fixture(self, security_exceptions=["src/example.ts"])
+        _complete(root / "policy/access/security.md", ["src/example.ts", "actions/data-types/example.ts"])
+        with self.assertRaises(ValueError):
+            verify_policy_attestations(root=root, baseline_revision="HEAD")
+
     def test_excludes_roots_from_cli_instructions(self) -> None:
         """Test Path: failure path
 
