@@ -145,7 +145,7 @@ class PolicyCliTests(unittest.TestCase):
         """Test Path: failure path
 
         Requirement Tested:
-        `policy CLI` rejects missing policy documents and explains how to generate them.
+        `policy CLI` explains how to generate policy documents when a document check finds them missing.
         A developer checks policy documents before they have been generated.
 
         Verification Method: verify public function output
