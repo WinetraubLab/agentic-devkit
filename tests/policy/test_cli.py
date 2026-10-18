@@ -72,5 +72,36 @@ class PolicyCliTests(unittest.TestCase):
         self.assertEqual(before, path.read_bytes())
 
 
+    def test_explains_required_policy_reviews(self) -> None:
+        """Test Path: failure path
+
+        Requirement Tested:
+        `policy CLI` explains which policies need another review and what to do next.
+        After code changes, the error lists those policies and the command to rerun.
+
+        Verification Method: verify public function output
+
+        Verification Detail:
+        The diagnostic contains the reset explanation, stored and current digest labels, the no-violation clarification, the affected-policy list, and the rerun instruction in one message.
+
+        Similar Coverage:
+        - Happy/Failure Path Difference: `test_policy_scope.py::test_hashes_only_git_index_files`
+          Explanation: This test emits the review instructions after a scope mismatch. The named test establishes the Git-index boundary that creates that mismatch.
+        - Scenario Difference: `test_verify_policy_attestations.py::test_replaces_stale_data_type_digest`
+          Explanation: This test verifies the review instructions. The named test verifies the synchronized digest stored on disk.
+        - Scenario Difference: `test_verify_policy_attestations.py::test_clears_data_type_attestations`
+          Explanation: This test verifies the review instructions. The named test verifies that the reset clears field-policy reviews.
+        - Scenario Difference: `test_verify_policy_attestations.py::test_regenerates_malformed_policy`
+          Explanation: This test verifies the review instructions. The named test recreates malformed field-policy Markdown during reset.
+        - Scenario Difference: `test_verify_policy_attestations.py::test_excludes_roots_from_cli_instructions`
+          Explanation: This test verifies the complete review instructions. The named test verifies exclusion of root policy paths from that diagnostic.
+        """
+        root = _fixture(self)
+        (root / "src/example.ts").write_text("export const value = 2;\n")
+        result = _run_cli(root, "verify")
+        output = result.stdout + result.stderr
+        self.assertRegex(output, r"(?s)Policy scope changed; all policy attestations were reset\..*Stored policy scope digest: [a-f0-9]{64}.*Current policy scope digest: [a-f0-9]{64}.*This does not mean every listed policy has a violation\..*Policies requiring re-attestation:\n- policy/access/security\.md\n- policy/privacy/privacy\.md.*complete its Noncompliant Files attestation, and rerun agentic-devkit policy verify\.")
+
+
 if __name__ == "__main__":
     unittest.main()
