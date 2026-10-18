@@ -40,6 +40,32 @@ class PolicyTests(unittest.TestCase):
         added = next(entry for entry in entries if entry["root_folder"] == "extra")
         self.assertRegex(added["digest"], r"^[a-f0-9]{64}$")
 
+    def test_removing_root_resets_attestations(self) -> None:
+        """Test Path: failure path
+
+        Requirement Tested:
+        `policy attestation verifier` clears previous review results when a folder is removed from the review list.
+        The remaining folders must be reviewed again.
+
+        Verification Method: verify public function output
+
+        Verification Detail:
+        Verification resets attestations after root removal, then accepts a completed review without resetting it again.
+        """
+        root = _fixture(self)
+        path = root / "policy/policy-scope-digest.json"
+        document = json.loads(path.read_text())
+        document["digests"] = [entry for entry in document["digests"]
+                               if entry["root_folder"] != "actions/data-types"]
+        path.write_text(json.dumps(document))
+        with self.assertRaisesRegex(ValueError, "Policy scope changed"):
+            verify_policy_attestations(root=root, baseline_revision="HEAD")
+        self.assertTrue((root / "policy/access/security.md").read_text().endswith("Noncompliant Files:\n"))
+        _complete(root / "policy/access/security.md")
+        _complete(root / "policy/privacy/privacy.md")
+        verified = verify_policy_attestations(root=root, baseline_revision="HEAD")
+        self.assertEqual(hash_policy_scope(root), verified.digest)
+
     def test_replaces_stale_data_type_digest(self) -> None:
         """Test Path: failure path
 
