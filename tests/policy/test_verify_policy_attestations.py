@@ -157,7 +157,7 @@ class PolicyTests(unittest.TestCase):
         Verification Method: verify public function output
 
         Verification Detail:
-        Verification accepts NONE whether the new policy is uncommitted or was committed with a blank review.
+        The verifier result includes the new policy path after its review reports NONE, whether the policy is uncommitted or was committed with a blank review.
 
         Similar Coverage:
         - Scenario Difference: `test_verify_policy_attestations.py::test_accepts_same_or_fewer_violations`
