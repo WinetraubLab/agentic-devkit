@@ -134,10 +134,11 @@ class ConfiguredScopeTests(unittest.TestCase):
         Invalid JSON, schemas, scope lists, and repository-relative paths each raise ValueError.
         """
         root = _fixture(self)
+        (root / "outside-link").symlink_to(root.parent, target_is_directory=True)
         documents = ["{", "[]", '{}', '{"digests": "src"}', '{"digests": []}']
         for scope in ([None], [1], [""], ["../src"], [str(root / "src")],
                       ["src/../src"], [".git"], ["missing"], ["src/example.ts"],
-                      ["src", "src"], ["src/"], ["src\\nested"]):
+                      ["src", "src"], ["src/"], ["src\\nested"], ["outside-link"]):
             documents.append(json.dumps({"digests": [{"root_folder": name} for name in scope]}))
         for document in documents:
             with self.subTest(config=document):
@@ -145,3 +146,53 @@ class ConfiguredScopeTests(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     hash_policy_scope(root)
 
+    def test_hashes_symlinked_scope_folders(self) -> None:
+        """Test Path: happy path
+
+        Requirement Tested:
+        `policy scope` detects changes to tracked files in linked review folders.
+        Both a linked folder and a subfolder reached through it are supported.
+
+        Verification Method: verify public function output
+
+        Verification Detail:
+        Each linked scope produces a fingerprint that changes when a tracked file in the target folder changes.
+        """
+        for folder in ("linked", "linked/data-types"):
+            with self.subTest(scope=folder):
+                root = _fixture(self)
+                (root / "linked").symlink_to(root / "actions", target_is_directory=True)
+                _git(root, "add", "linked")
+                (root / "policy/policy-scope-digest.json").write_text(
+                    json.dumps({"digests": [{"root_folder": folder}]}))
+                before = hash_policy_scope(root)
+                (root / "actions/data-types/example.ts").write_text("export type Example = number;\n")
+                self.assertNotEqual(before, hash_policy_scope(root))
+
+    def test_detects_retargeted_scope_link(self) -> None:
+        """Test Path: happy path
+
+        Requirement Tested:
+        `policy scope` detects when a reviewed link points to a different folder.
+        Redirecting the link changes the review scope even when both folders are empty.
+
+        Verification Method: verify public function output
+
+        Verification Detail:
+        Switching the link between two empty project folders changes the fingerprint.
+        """
+        root = _fixture(self)
+        (root / "first").mkdir()
+        (root / "second").mkdir()
+        link = root / "linked"
+        link.symlink_to(root / "first", target_is_directory=True)
+        (root / "policy/policy-scope-digest.json").write_text(
+            json.dumps({"digests": [{"root_folder": "linked"}]}))
+        before = hash_policy_scope(root)
+        link.unlink()
+        link.symlink_to(root / "second", target_is_directory=True)
+        self.assertNotEqual(before, hash_policy_scope(root))
+
+
+if __name__ == "__main__":
+    unittest.main()
