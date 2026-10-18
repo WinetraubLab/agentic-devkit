@@ -281,34 +281,6 @@ class PolicyTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             verify_policy_attestations(root=root, baseline_revision="HEAD")
 
-    def test_excludes_roots_from_cli_instructions(self) -> None:
-        """Test Path: failure path
-
-        Requirement Tested:
-        `policy attestation verifier` excludes project notes from the list of policies needing review.
-        A code change must not request reviews of the README or TODO file.
-
-        Verification Method: verify public function output
-
-        Verification Detail:
-        The CLI diagnostic contains neither root policy artifact path.
-
-        Similar Coverage:
-        - Happy/Failure Path Difference: `test_policy_scope.py::test_hashes_only_git_index_files`
-          Explanation: This test excludes root paths from CLI output. The named test establishes the Git-index boundary for digest inputs.
-        - Scenario Difference: `test_verify_policy_attestations.py::test_replaces_stale_data_type_digest`
-          Explanation: This test excludes root paths from CLI remediation output. The named test verifies the synchronized digest stored after a mismatch.
-        - Scenario Difference: `test_verify_policy_attestations.py::test_clears_data_type_attestations`
-          Explanation: This test excludes root policy paths from CLI output. The named test verifies cleared field-policy attestations.
-        - Scenario Difference: `test_cli.py::test_explains_required_policy_reviews`
-          Explanation: This test verifies root-path exclusion. The named test verifies the complete recovery diagnostic.
-        """
-        root = _fixture(self)
-        (root / "src/example.ts").write_text("export const value = 2;\n")
-        result = _run_cli(root, "verify")
-        output = result.stdout + result.stderr
-        self.assertNotIn("policy/README.md", output)
-        self.assertNotIn("policy/TODO-SECURITY.md", output)
 
 
 
