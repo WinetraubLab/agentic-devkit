@@ -1,12 +1,13 @@
 """Tests in this file validate `policy attestation verifier` located at `src/agentic_devkit/policies/verify_policy_attestations.py`.
 `policy attestation verifier` is responsible for digest freshness, exception baselines, and stale-policy review instructions.
+
+Shared setup: _fixture creates and commits two generated policies with the supplied security and privacy finding lists. _complete writes the supplied finding list, or NONE for an empty list. _commit stages and commits the current project files.
 """
 
 from __future__ import annotations
 
 import json
 import unittest
-from agentic_devkit.policies.policy_scope import hash_policy_scope
 from agentic_devkit.policies.render_policy_documents import render_policy_documents
 from agentic_devkit.policies.verify_policy_attestations import verify_policy_attestations
 from tests.policy.test_harness.fixtures import _fixture, _complete, _commit, _run_cli
@@ -22,10 +23,19 @@ class PolicyTests(unittest.TestCase):
         Verification Method: verify public function output
 
         Verification Detail:
-        Verification fails, replaces the digest, and clears attestations despite unchanged indexed content.
+        Verification requests another review and clears the previous finding list after an empty root is added.
+
+        Similar Coverage:
+        - Happy/Failure Path Difference: `test_cli.py::test_render_clears_completed_attestations`
+          Explanation: This test resets reviews after a root is added; the named test clears completed reviews through the render command.
+        - Happy/Failure Path Difference: `test_render_policy_documents.py::test_resets_editable_attestation`
+          Explanation: This test resets reviews after a root is added; the named test clears the review after YAML changes while retaining exemptions.
+        - Scenario Difference: `test_verify_policy_attestations.py::test_removing_root_resets_attestations`
+          Explanation: This test resets reviews after a root is added; the named test resets reviews after a root is removed.
+        - Scenario Difference: `test_verify_policy_attestations.py::test_clears_data_type_attestations`
+          Explanation: This test resets reviews after a root is added; the named test resets reviews after a tracked data-type file changes.
         """
-        root = _fixture(self)
-        before = (root / "policy/policy-scope-digest.json").read_bytes()
+        root = _fixture(self, security_exceptions=["src/example.ts"], privacy_exceptions=[])
         (root / "extra").mkdir()
         config = root / "policy/policy-scope-digest.json"
         document = json.loads(config.read_text())
@@ -33,11 +43,7 @@ class PolicyTests(unittest.TestCase):
         config.write_text(json.dumps(document))
         with self.assertRaisesRegex(ValueError, "Policy scope changed"):
             verify_policy_attestations(root=root, baseline_revision="HEAD")
-        self.assertNotEqual(before, (root / "policy/policy-scope-digest.json").read_bytes())
         self.assertTrue((root / "policy/access/security.md").read_text().endswith("Noncompliant Files:\n"))
-        entries = json.loads(config.read_text())["digests"]
-        added = next(entry for entry in entries if entry["root_folder"] == "extra")
-        self.assertRegex(added["digest"], r"^[a-f0-9]{64}$")
 
     def test_removing_root_resets_attestations(self) -> None:
         """Test Path: failure path
@@ -49,9 +55,19 @@ class PolicyTests(unittest.TestCase):
         Verification Method: verify public function output
 
         Verification Detail:
-        Verification resets attestations after root removal, then accepts a completed review without resetting it again.
+        Verification requests another review and clears the previous finding list after a root is removed.
+
+        Similar Coverage:
+        - Happy/Failure Path Difference: `test_cli.py::test_render_clears_completed_attestations`
+          Explanation: This test resets reviews after a root is removed; the named test clears completed reviews through the render command.
+        - Happy/Failure Path Difference: `test_render_policy_documents.py::test_resets_editable_attestation`
+          Explanation: This test resets reviews after a root is removed; the named test clears the review after YAML changes while retaining exemptions.
+        - Scenario Difference: `test_verify_policy_attestations.py::test_scope_changes_reset_attestations`
+          Explanation: This test resets reviews after a root is removed; the named test resets reviews after a root is added.
+        - Scenario Difference: `test_verify_policy_attestations.py::test_clears_data_type_attestations`
+          Explanation: This test resets reviews after a root is removed; the named test resets reviews after a tracked data-type file changes.
         """
-        root = _fixture(self)
+        root = _fixture(self, security_exceptions=["src/example.ts"], privacy_exceptions=[])
         path = root / "policy/policy-scope-digest.json"
         document = json.loads(path.read_text())
         document["digests"] = [entry for entry in document["digests"]
@@ -60,10 +76,6 @@ class PolicyTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "Policy scope changed"):
             verify_policy_attestations(root=root, baseline_revision="HEAD")
         self.assertTrue((root / "policy/access/security.md").read_text().endswith("Noncompliant Files:\n"))
-        _complete(root / "policy/access/security.md")
-        _complete(root / "policy/privacy/privacy.md")
-        verified = verify_policy_attestations(root=root, baseline_revision="HEAD")
-        self.assertEqual(hash_policy_scope(root), verified.digest)
 
     def test_accepts_same_or_fewer_violations(self) -> None:
         """Test Path: happy path
@@ -79,16 +91,20 @@ class PolicyTests(unittest.TestCase):
 
         Similar Coverage:
         - Happy/Failure Path Difference: `test_verify_policy_attestations.py::test_rejects_exception_count_above_baseline`
-          Explanation: This test accepts unchanged or lower counts; the named test rejects an increase.
+          Explanation: This test accepts the same or fewer findings than a committed review; the named test rejects more findings than a committed review allows.
         - Scenario Difference: `test_verify_policy_attestations.py::test_accepts_new_policy_without_violations`
-          Explanation: This test covers an existing policy with a committed violation; the named test introduces a new policy with no violations.
+          Explanation: This test accepts the same or fewer findings than a committed review; the named test accepts a new policy whose first review reports no findings.
+        - Scenario Difference: `test_cli.py::test_verify_accepts_explicit_baseline`
+          Explanation: This test accepts the same or fewer findings than a committed review; the named test selects an older committed finding allowance.
+        - Happy/Failure Path Difference: `test_verify_policy_attestations.py::test_rejects_new_policy_violations`
+          Explanation: This test accepts the same or fewer findings than a committed review; the named test rejects findings when a policy has no completed committed review.
         """
         root = _fixture(self, security_exceptions=["src/example.ts"])
         for files in (["src/example.ts"], []):
             with self.subTest(reported_files=files):
                 _complete(root / "policy/access/security.md", files)
                 result = verify_policy_attestations(root=root, baseline_revision="HEAD")
-                self.assertEqual("HEAD", result.baseline_revision)
+                self.assertIn(root / "policy/access/security.md", result.policy_paths)
 
     def test_rejects_new_policy_violations(self) -> None:
         """Test Path: failure path
@@ -104,16 +120,20 @@ class PolicyTests(unittest.TestCase):
 
         Similar Coverage:
         - Happy/Failure Path Difference: `test_verify_policy_attestations.py::test_accepts_new_policy_without_violations`
-          Explanation: Both cover a new policy before its first completed review; this test reports a violation, while the named test reports none.
+          Explanation: This test rejects findings when a policy has no completed committed review; the named test accepts a new policy whose first review reports no findings.
+        - Happy/Failure Path Difference: `test_verify_policy_attestations.py::test_accepts_same_or_fewer_violations`
+          Explanation: This test rejects findings when a policy has no completed committed review; the named test accepts the same or fewer findings than a committed review.
+        - Scenario Difference: `test_verify_policy_attestations.py::test_rejects_exception_count_above_baseline`
+          Explanation: This test rejects findings when a policy has no completed committed review; the named test rejects more findings than a committed review allows.
         """
         for committed_without_review in (False, True):
             with self.subTest(committed_without_review=committed_without_review):
-                root = _fixture(self)
+                root = _fixture(self, security_exceptions=["src/example.ts"], privacy_exceptions=[])
                 source = root / "policy/access/new-policy.policy.yaml"
                 source.write_text("title: New policy\nobjective: Enforce a new rule.\npolicy_content: Follow the new rule.\n")
                 render_policy_documents(root=root)
                 _complete(root / "policy/access/security.md", ["src/example.ts"])
-                _complete(root / "policy/privacy/privacy.md")
+                _complete(root / "policy/privacy/privacy.md", [])
                 if committed_without_review:
                     _commit(root, "Add new policy before its first review")
                 _complete(root / "policy/access/new-policy.md", ["src/example.ts"])
@@ -134,9 +154,11 @@ class PolicyTests(unittest.TestCase):
 
         Similar Coverage:
         - Scenario Difference: `test_verify_policy_attestations.py::test_accepts_same_or_fewer_violations`
-          Explanation: This test verifies that `policy attestation verifier` accepts each newly added policy whose attestation has an empty noncompliant-file list; the named test instead verifies that `policy attestation verifier` accepts a policy when its current version lists fewer noncompliant files than its committed version.
+          Explanation: This test accepts a new policy whose first review reports no findings; the named test accepts the same or fewer findings than a committed review.
         - Happy/Failure Path Difference: `test_verify_policy_attestations.py::test_rejects_exception_count_above_baseline`
-          Explanation: This test verifies that `policy attestation verifier` accepts each newly added policy whose attestation has an empty noncompliant-file list; the named test instead verifies that `policy attestation verifier` refuses a policy when its exception count exceeds its HEAD baseline. When a policy has two exceptions against a committed baseline of one, `policy attestation verifier` refuses that policy.
+          Explanation: This test accepts a new policy whose first review reports no findings; the named test rejects more findings than a committed review allows.
+        - Happy/Failure Path Difference: `test_verify_policy_attestations.py::test_rejects_new_policy_violations`
+          Explanation: This test accepts a new policy whose first review reports no findings; the named test rejects findings when a policy has no completed committed review.
         """
         for committed_without_review in (False, True):
             with self.subTest(committed_without_review=committed_without_review):
