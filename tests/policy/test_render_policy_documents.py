@@ -42,6 +42,29 @@ class PolicyTests(unittest.TestCase):
         self.assertEqual(["- `app/`", "- `lib/`", "- `src/`"], section.strip().splitlines())
 
     def test_renders_policy_specific_folders(self) -> None:
+        """Test Path: happy path
+
+        Requirement Tested:
+        `policy document renderer` tells the agent to review selected folders and all their subfolders.
+        A policy names src/vehicles, which contains nested folders.
+
+        Verification Method: verify public function output
+
+        Verification Detail:
+        The Markdown lists src/vehicles and explicitly includes all subfolders in the review instructions, while omitting other configured roots.
+        """
+        root = _renderer_fixture(self)
+        (root / "src/vehicles/parts").mkdir(parents=True)
+        source = root / "policy/user-interface/back-navigation.policy.yaml"
+        source.write_text(source.read_text() + "applicable_folders:\n  - src/vehicles\n")
+        (root / "policy/policy-template.md.j2").unlink()
+        render_policy_documents(root=root)
+        markdown = (root / "policy/user-interface/back-navigation.md").read_text()
+        section = markdown.split("## Applicable folders\n", 1)[1].split("## Instructions", 1)[0]
+        self.assertEqual("- `src/vehicles/`", section.strip())
+        self.assertIn("Review every file under `src/vehicles/`, including all subfolders", markdown)
+        self.assertNotIn("actions/data-types", markdown)
+
     def test_rejects_invalid_applicable_folders(self) -> None:
         """Test Path: failure path
 
