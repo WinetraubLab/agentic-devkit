@@ -24,6 +24,10 @@ class PolicyTests(unittest.TestCase):
 
         Verification Detail:
         The error names review_checklist, the second entry, and its 25-word limit.
+
+        Similar Coverage:
+        - Scenario Difference: `test_render_policy_documents.py::test_rejects_long_exemption_entries`
+          Explanation: This test rejects a checklist entry exceeding 25 words; the named test rejects an exemption entry exceeding 50 words.
         """
         root = _renderer_fixture(self)
         source = root / "policy/user-interface/back-navigation.policy.yaml"
@@ -44,6 +48,10 @@ class PolicyTests(unittest.TestCase):
 
         Verification Detail:
         The error names exemptions, the second entry, and its 50-word limit.
+
+        Similar Coverage:
+        - Scenario Difference: `test_render_policy_documents.py::test_rejects_long_checklist_entries`
+          Explanation: This test rejects an exemption entry exceeding 50 words; the named test rejects a checklist entry exceeding 25 words.
         """
         root = _renderer_fixture(self)
         source = root / "policy/user-interface/back-navigation.policy.yaml"
@@ -184,7 +192,7 @@ class PolicyTests(unittest.TestCase):
         Verification Method: verify public function output
 
         Verification Detail:
-        Each invalid folder selection or non-text exemption raises ValueError without generating a policy document.
+        The renderer raises ValueError and leaves the document absent for malformed folder selections, malformed exemption lists, and blank or non-text exemption entries.
 
         Similar Coverage:
         - Happy/Failure Path Difference: `test_render_policy_documents.py::test_all_expands_configured_roots`
@@ -219,7 +227,8 @@ class PolicyTests(unittest.TestCase):
         Verification Method: verify public function output
 
         Verification Detail:
-        The generated document contains the YAML title, objective, and rules alongside the bundled review instructions despite unrelated project templates.
+        The generated document contains the YAML title, objective, and rules despite unrelated project templates.
+        The document contains one checklist with both YAML items and bundled instructions covering all subfolders.
 
         Similar Coverage:
         - Scenario Difference: `test_render_policy_documents.py::test_resets_editable_attestation`
@@ -270,7 +279,8 @@ class PolicyTests(unittest.TestCase):
         Verification Method: verify public function output
 
         Verification Detail:
-        Regeneration updates policy text, keeps accepted exceptions and their instructions, clears the review results.
+        The regenerated document contains the updated policy text and accepted exemptions before the attestation.
+        The document retains instructions to continue reviewing other violations and ends with an empty finding list.
 
         Similar Coverage:
         - Scenario Difference: `test_render_policy_documents.py::test_renders_policy_document`
