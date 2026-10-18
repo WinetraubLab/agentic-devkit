@@ -161,13 +161,12 @@ class PolicyTests(unittest.TestCase):
 
         Requirement Tested:
         `policy document renderer` clears old review results when generating a policy document again.
-        A policy change needs a fresh review, even when the previous review reported no violations.
+        A policy change needs a fresh review while its accepted exceptions remain in place.
 
         Verification Method: verify public function output
 
         Verification Detail:
-        The regenerated policy document contains changed policy text.
-        The regenerated policy document contains an empty attestation.
+        Regeneration updates policy text, keeps accepted exceptions and their instructions, clears the review results, and leaves the YAML unchanged.
 
         Similar Coverage:
         - Scenario Difference: `test_render_policy_documents.py::test_renders_policy_document`
@@ -176,16 +175,24 @@ class PolicyTests(unittest.TestCase):
           Explanation: This test verifies that successful regeneration replaces an existing completed attestation with an empty attestation after the YAML source changes; the named test instead verifies that the failure-path verifier CLI instructs the caller to regenerate a missing policy document with empty attestations.
         """
         root = _renderer_fixture(self)
+        source = root / "policy/user-interface/back-navigation.policy.yaml"
+        exemption = "src/example.ts may retain its custom back handler until the navigation migration."
+        source.write_text(source.read_text() + "exemptions: " + json.dumps(exemption) + "\n")
         render_policy_documents(root=root)
         output = root / "policy/user-interface/back-navigation.md"
         _complete(output)
-        source = root / "policy/user-interface/back-navigation.policy.yaml"
-        source.write_text(source.read_text().replace("Keep navigation safe.", "Keep navigation consistent."))
+        updated_source = source.read_text().replace("Keep navigation safe.", "Keep navigation consistent.")
+        source.write_text(updated_source)
         render_policy_documents(root=root)
         regenerated = output.read_text()
         self.assertIn("Keep navigation consistent.", regenerated)
+        self.assertIn("## Accepted exemptions", regenerated)
+        self.assertIn(exemption, regenerated)
+        self.assertLess(regenerated.index("## Accepted exemptions"), regenerated.index("# Attestation"))
+        self.assertIn("Continue reviewing for other violations.", regenerated)
         self.assertTrue(regenerated.endswith("Noncompliant Files:\n"))
         self.assertNotIn("Noncompliant Files: NONE", regenerated.split("# Attestation", 1)[1])
+        self.assertEqual(updated_source, source.read_text())
 
     def test_rejects_manual_body_edits(self) -> None:
         """Test Path: failure path
