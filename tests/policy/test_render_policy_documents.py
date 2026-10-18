@@ -198,24 +198,36 @@ class PolicyTests(unittest.TestCase):
         """Test Path: failure path
 
         Requirement Tested:
-        `policy document renderer` rejects policy text changed directly in generated Markdown.
-        A developer edits the generated policy instead of its YAML source.
+        `policy document renderer` rejects policy text or accepted exceptions changed directly in generated Markdown.
+        A developer edits the generated document instead of its YAML source.
 
         Verification Method: verify public function output
 
         Verification Detail:
-        A changed generated sentence produces an error that instructs the caller to regenerate policy documents.
+        Checks reject edits to both a policy rule and an accepted exception, requesting regeneration from YAML.
 
         Similar Coverage:
         - Scenario Difference: `test_cli.py::test_reports_missing_policy_documents`
           Explanation: This test verifies that `policy document renderer` rejects manual edits to generated policy content in check mode; the named test verifies that the policy verifier CLI rejects a missing generated document.
         """
-        root = _renderer_fixture(self)
-        render_policy_documents(root=root)
-        output = root / "policy/user-interface/back-navigation.md"
-        output.write_text(output.read_text().replace("Use the shared back hook.", "Use a custom back function."))
-        with self.assertRaisesRegex(ValueError, "Run agentic-devkit policy render to regenerate them with empty attestations"):
-            render_policy_documents(root=root, check=True)
+        edits = (
+            ("Use the shared back hook.", "Use a custom back function."),
+            ("Custom handler.", "All violations."),
+        )
+        for original, replacement in edits:
+            with self.subTest(edited_text=original):
+                root = _renderer_fixture(self)
+                source = root / "policy/user-interface/back-navigation.policy.yaml"
+                source.write_text(source.read_text() + (
+                    "exemptions: |\n"
+                    "  Custom handler. Retained in src/example.ts for the legacy API.\n"
+                ))
+                render_policy_documents(root=root)
+                output = root / "policy/user-interface/back-navigation.md"
+                output.write_text(output.read_text().replace(original, replacement))
+                with self.assertRaisesRegex(ValueError, "Run agentic-devkit policy render to regenerate them with empty attestations"):
+                    render_policy_documents(root=root, check=True)
+
 
 if __name__ == "__main__":
     unittest.main()
