@@ -7,7 +7,7 @@ from __future__ import annotations
 import json
 import unittest
 from agentic_devkit.policies.render_policy_documents import render_policy_documents
-from tests.policy.test_harness.fixtures import _renderer_fixture, _run_cli, _complete
+from tests.policy.test_harness.fixtures import _renderer_fixture, _complete
 
 class PolicyTests(unittest.TestCase):
     def test_all_expands_configured_roots(self) -> None:
@@ -148,7 +148,7 @@ class PolicyTests(unittest.TestCase):
         Similar Coverage:
         - Scenario Difference: `test_render_policy_documents.py::test_renders_policy_document`
           Explanation: This test verifies that `policy document renderer` replaces an existing attestation with an empty attestation during regeneration; the named test instead verifies that `policy document renderer` creates Markdown from a YAML policy source and the shared template.
-        - Happy/Failure Path Difference: `test_render_policy_documents.py::test_recommends_policy_regeneration`
+        - Happy/Failure Path Difference: `test_cli.py::test_reports_missing_policy_documents`
           Explanation: This test verifies that successful regeneration replaces an existing completed attestation with an empty attestation after the YAML source changes; the named test instead verifies that the failure-path verifier CLI instructs the caller to regenerate a missing policy document with empty attestations.
         """
         root = _renderer_fixture(self)
@@ -176,12 +176,8 @@ class PolicyTests(unittest.TestCase):
         A changed generated sentence produces an error that instructs the caller to regenerate policy documents.
 
         Similar Coverage:
-        - Scenario Difference: `test_render_policy_documents.py::test_detects_stale_policy`
+        - Scenario Difference: `test_cli.py::test_reports_missing_policy_documents`
           Explanation: This test verifies that `policy document renderer` rejects manual edits to generated policy content in check mode; the named test verifies that the policy verifier CLI rejects a missing generated document.
-        - Scenario Difference: `test_render_policy_documents.py::test_reports_stale_policy_diagnostic`
-          Explanation: This test verifies that renderer check mode rejects a manually edited generated document; the named test instead verifies that the verifier CLI reports a missing generated document with the stale-or-manually-edited diagnostic.
-        - Scenario Difference: `test_render_policy_documents.py::test_recommends_policy_regeneration`
-          Explanation: This test verifies that renderer check mode rejects a manually edited generated document and requests regeneration; the named test instead verifies that the verifier CLI gives the complete regeneration command and empty-attestation instruction when a generated document is missing.
         """
         root = _renderer_fixture(self)
         render_policy_documents(root=root)
@@ -190,3 +186,5 @@ class PolicyTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "Run agentic-devkit policy render to regenerate them with empty attestations"):
             render_policy_documents(root=root, check=True)
 
+if __name__ == "__main__":
+    unittest.main()
