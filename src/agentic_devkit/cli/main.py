@@ -8,6 +8,7 @@ import sys
 from pathlib import Path
 from typing import Sequence
 
+from ..policies.cli import add_policy_parser, run_policy_command
 from ..tdd_lint.conventional_linter.run_conventional_linter import LintIssue
 from ..tdd_lint.cli.format_linter_results import format_json, format_text
 from ..tdd_lint.cli.run_lint_pipeline import create_agent_md_files, run_lint_pipeline
@@ -19,7 +20,12 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser = _build_parser()
     args = parser.parse_args(argv)
 
-    if getattr(args, "command", None) not in {"lint", "create-agent-md"}:
+    if args.group == "policy":
+        if args.root is None:
+            args.root = _find_repo_root(Path.cwd())
+        return run_policy_command(args)
+
+    if args.group is None:
         parser.print_help()
         return 2
 
@@ -100,6 +106,7 @@ def _build_parser() -> argparse.ArgumentParser:
         description="Tools for agentic development.",
     )
     groups = parser.add_subparsers(dest="group")
+    add_policy_parser(groups)
     tdd_parser = groups.add_parser("tdd", help="lint and review agent-authored tests")
     subparsers = tdd_parser.add_subparsers(dest="command", required=True)
 
