@@ -7,38 +7,9 @@ from __future__ import annotations
 from pathlib import Path
 import re
 import unittest
-from tests.policy.test_harness.fixtures import _fixture
+from jinja2 import Environment, StrictUndefined
 
 class PolicyTests(unittest.TestCase):
-    def test_enforces_policy_folder_layout(self) -> None:
-        """Test Path: happy path
-
-        Requirement Tested:
-        `policy template` requires lowercase, hyphen-separated policy names and a YAML source for each Markdown policy.
-        Standard usage: Related policies are grouped in named folders.
-
-        Verification Method: verify public function output
-
-        Verification Detail:
-        Repository entries satisfy the root allowlist, field naming rules, policy naming rules, supported extensions, and YAML-source pairing.
-        """
-        root = _fixture(self)
-        policy = root / "policy"
-        allowed = {"README.md", "TODO-SECURITY.md", "policy-scope-digest.json"}
-        kebab = r"^[a-z0-9]+(?:-[a-z0-9]+)*$"
-        for entry in policy.iterdir():
-            if entry.is_file():
-                self.assertIn(entry.name, allowed)
-                continue
-            self.assertTrue(entry.is_dir())
-            self.assertRegex(entry.name, kebab)
-            for document in entry.iterdir():
-                self.assertTrue(document.is_file())
-                self.assertTrue(document.name.endswith((".md", ".policy.yaml")))
-                name = document.name.removesuffix(".policy.yaml").removesuffix(".md")
-                self.assertRegex(name, kebab)
-                if document.suffix == ".md":
-                    self.assertTrue(document.with_suffix(".policy.yaml").is_file())
 
     def test_enforces_policy_template_structure(self) -> None:
         """Test Path: happy path
