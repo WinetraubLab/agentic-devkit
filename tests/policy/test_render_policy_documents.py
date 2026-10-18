@@ -204,7 +204,7 @@ class PolicyTests(unittest.TestCase):
         Verification Method: verify public function output
 
         Verification Detail:
-        Checks reject edits to both a policy rule and an accepted exception, requesting regeneration from YAML.
+        Editing either a policy rule or an accepted exception in Markdown raises an error requesting regeneration from YAML.
 
         Similar Coverage:
         - Scenario Difference: `test_cli.py::test_reports_missing_policy_documents`
