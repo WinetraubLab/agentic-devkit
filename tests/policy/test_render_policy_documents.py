@@ -8,10 +8,54 @@ from __future__ import annotations
 
 import json
 import unittest
+import yaml
 from agentic_devkit.policies.render_policy_documents import render_policy_documents
 from tests.policy.test_harness.fixtures import _renderer_fixture, _complete
 
 class PolicyTests(unittest.TestCase):
+    def test_rejects_long_checklist_entries(self) -> None:
+        """Test Path: failure path
+
+        Requirement Tested:
+        `policy document renderer` rejects checklist entries exceeding 25 words.
+        The second entry contains one word beyond the allowed maximum.
+
+        Verification Method: verify public function output
+
+        Verification Detail:
+        The error names review_checklist, the second entry, and its 25-word limit.
+        """
+        root = _renderer_fixture(self)
+        source = root / "policy/user-interface/back-navigation.policy.yaml"
+        policy = yaml.safe_load(source.read_text())
+        policy["review_checklist"] = ["Short item", " ".join(["word"] * 26)]
+        source.write_text(yaml.safe_dump(policy))
+        with self.assertRaisesRegex(ValueError, "review_checklist entry 2 exceeds 25 words"):
+            render_policy_documents(root=root)
+
+    def test_rejects_long_exemption_entries(self) -> None:
+        """Test Path: failure path
+
+        Requirement Tested:
+        `policy document renderer` rejects exemption entries exceeding 50 words.
+        The second entry contains one word beyond the allowed maximum.
+
+        Verification Method: verify public function output
+
+        Verification Detail:
+        The error names exemptions, the second entry, and its 50-word limit.
+        """
+        root = _renderer_fixture(self)
+        source = root / "policy/user-interface/back-navigation.policy.yaml"
+        policy = yaml.safe_load(source.read_text())
+        policy["exemptions"] = ["Short item", " ".join(["word"] * 51)]
+        source.write_text(yaml.safe_dump(policy))
+        with self.assertRaisesRegex(ValueError, "exemptions entry 2 exceeds 50 words"):
+            render_policy_documents(root=root)
+
+    def test_requires_review_checklist(self) -> None:
+        """Test Path: failure path
+
         Requirement Tested:
         `policy document renderer` requires a nonempty list of text checklist items for every policy.
         Missing lists, empty lists, and invalid checklist items are rejected before generation.
