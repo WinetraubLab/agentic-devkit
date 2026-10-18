@@ -1,3 +1,39 @@
+    def test_replaces_stale_data_type_digest(self) -> None:
+        """Test Path: failure path
+
+        Requirement Tested:
+        `policy attestation verifier` updates saved code fingerprints after reviewed files change.
+        Changing a tracked data-type file causes the stored fingerprints to be replaced.
+
+        Verification Method: verify public function output
+
+        Verification Detail:
+        Before the reset, the stored central digest differs from the digest derived from the changed policy-scope content. After the reset, the stored central digest has the same value as that digest.
+
+        Similar Coverage:
+        - Happy/Failure Path Difference: `test_policy_scope.py::test_hashes_only_git_index_files`
+          Explanation: This test records a recomputed digest after indexed data-type content changes. The named test establishes the Git-index boundary for digest inputs.
+        - Scenario Difference: `test_verify_policy_attestations.py::test_clears_data_type_attestations`
+          Explanation: This test synchronizes the stored digest after a data-type change. The named test clears field-policy attestations after the same kind of change.
+        - Scenario Difference: `test_verify_policy_attestations.py::test_regenerates_malformed_policy`
+          Explanation: This test synchronizes a stale digest. The named test recreates malformed field-policy Markdown during stale-digest regeneration.
+        - Scenario Difference: `test_cli.py::test_explains_required_policy_reviews`
+          Explanation: This test verifies the stored digest state. The named test emits the recovery diagnostic for the same mismatch.
+        - Scenario Difference: `test_verify_policy_attestations.py::test_excludes_roots_from_cli_instructions`
+          Explanation: This test synchronizes a stale digest. The named test excludes root policy paths from CLI remediation output.
+        """
+        root = _fixture(self)
+        stored = (root / "policy/policy-scope-digest.json").read_bytes()
+        (root / "actions/data-types/example.ts").write_text("export type Example = number;\n")
+        changed = hash_policy_scope(root)
+        with self.assertRaisesRegex(ValueError, "Policy scope changed"):
+            verify_policy_attestations(root=root, baseline_revision="HEAD")
+        self.assertNotEqual(stored, (root / "policy/policy-scope-digest.json").read_bytes())
+        _complete(root / "policy/access/security.md")
+        _complete(root / "policy/privacy/privacy.md")
+        verified = verify_policy_attestations(root=root, baseline_revision="HEAD")
+        self.assertEqual(changed, verified.digest)
+
     def test_clears_data_type_attestations(self) -> None:
         """Test Path: failure path
 
