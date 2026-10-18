@@ -13,16 +13,18 @@ Run:
 agentic-devkit policy verify
 ```
 
-Record the result and every policy requiring review. Continue to Step 2 even when
-the command fails or resets attestations.
+Record the result and every policy requiring review. If generated policy documents
+are missing or stale after YAML changes, run `agentic-devkit policy render`, then
+verify again. Continue to Step 2 when verification requests review or resets
+attestations. Resolve configuration errors before reviewing.
 
 ## Step 2: Review attestations
 
-Read `policy/README.md`, then follow the instructions in every policy requiring
-review. Review the complete scope each policy names and fix definite minor
-violations. Write `Noncompliant Files: NONE` on one line when none remain;
-otherwise put sorted file bullets below `Noncompliant Files:`. Normalize every
-reviewed policy to this format.
+Follow the instructions in every policy requiring review. Review the complete
+scope each policy names and fix definite minor violations. Write
+`Noncompliant Files: NONE` on one line when none remain; otherwise put sorted
+file bullets below `Noncompliant Files:`. Normalize every reviewed policy to
+this format.
 
 ## Step 3: Run policy verification again
 
