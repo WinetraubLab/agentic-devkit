@@ -162,17 +162,17 @@ class PolicyTests(unittest.TestCase):
         """
         for committed_without_review in (False, True):
             with self.subTest(committed_without_review=committed_without_review):
-                root = _fixture(self)
+                root = _fixture(self, security_exceptions=["src/example.ts"], privacy_exceptions=[])
                 source = root / "policy/access/new-policy.policy.yaml"
                 source.write_text("title: New policy\nobjective: Enforce a new rule.\npolicy_content: Follow the new rule.\n")
                 render_policy_documents(root=root)
                 _complete(root / "policy/access/security.md", ["src/example.ts"])
-                _complete(root / "policy/privacy/privacy.md")
+                _complete(root / "policy/privacy/privacy.md", [])
                 if committed_without_review:
                     _commit(root, "Add new policy before its first review")
-                _complete(root / "policy/access/new-policy.md")
+                _complete(root / "policy/access/new-policy.md", [])
                 result = verify_policy_attestations(root=root, baseline_revision="HEAD")
-                self.assertEqual("HEAD", result.baseline_revision)
+                self.assertIn(root / "policy/access/new-policy.md", result.policy_paths)
 
     def test_replaces_stale_data_type_digest(self) -> None:
         """Test Path: failure path
