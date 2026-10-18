@@ -1,54 +1,79 @@
-# GitHub Actions Review Proof
+# GitHub Actions
 
-This repository has two separate workflows:
+Use either workflow below, or both, alongside your existing test and coverage
+checks. Install the tool in CI; complete agent reviews locally before pushing.
 
-- The **pre-commit review workflow** creates `.agent.md` scorecards, completes their reviews, and records proof in the manifest before changes are committed.
-- The **CI/CD validation workflow** runs `agentic-devkit tdd lint` against the committed tests and manifest proof.
+## TDD linting
 
-GitHub Actions verifies committed agent-review proof. It performs only the CI/CD validation workflow. It does not perform reviews, create `.agent.md` files, or record new manifest proof. The pre-commit review workflow is documented in the [TDD guide](../tdd/README.md).
+Add TDD linting to your project's CI to check committed tests and manifest proof.
+GitHub Actions verifies committed agent-review proof. See the
+[TDD guide](../tdd/README.md#local-review) for the local review workflow.
 
-The committed proof is the compact JSONL manifest at `tests/agentic_review_manifest.jsonl`.
+Create `.github/workflows/agentic-tdd-linter.yml`:
 
-## Manifest Contents
+```yaml
+name: Agentic TDD Linter
 
-Each JSONL record proves one reviewed test:
+on:
+  pull_request:
+  push:
 
-```json
-{"path": "tests/test_example.py", "test": "test_example", "source_sha256": "...", "status": "pass", "linter_version": "0.1.0", "review_contract_sha256": "..."}
+jobs:
+  lint-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - run: uvx --from "git+https://github.com/WinetraubLab/agentic-devkit" agentic-devkit tdd lint
 ```
 
-The fields mean:
-- `path`: the reviewed test file.
-- `test`: the reviewed test name.
-- `source_sha256`: the exact extracted content of that test function at review time.
-- `status`: the review result. CI accepts only `pass`.
-- `linter_version`: historical metadata identifying the linter version that wrote the attestation.
-- `review_contract_sha256`: a hash of the linter's Python and Jinja source files,
-  `README.md`, `pyproject.toml`, and Markdown files under `docs/` at review time. It
-  does not hash the reviewed test or the completed review response.
+The command checks that every test has passing review proof matching its current
+content. The default test directory is `tests/`; append `--test-root <directory>`
+if yours differs. Use `--manifest <path>` in both local and CI commands if you
+store the manifest elsewhere.
 
-## Workflow Verification
+Commit your tests and `tests/agentic_review_manifest.jsonl`. Local `.agent.md`
+review packets are not required in CI. Unchanged tests retain their reviews when
+you update the linter or review rules.
 
-In CI, verify the manifest:
+If the check fails, run `$run-tdd-linter` locally, resolve the reported issues,
+and commit the updated tests and manifest. CI does not perform reviews or
+generate review packets.
 
-```bash
-agentic-devkit tdd lint
+## Policy verification
+
+Add policy verification to check that your policy attestations match the reviewed
+code and that reported violations do not exceed the baseline. First
+[set up policy reviews](../policies/README.md#set-up-policy-reviews-to-your-project).
+
+Create `.github/workflows/agentic-policy.yml`:
+
+```yaml
+name: Agentic Policy Verification
+
+on:
+  pull_request:
+  push:
+
+jobs:
+  verify-policies:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: astral-sh/setup-uv@v5
+      - run: uvx --from "git+https://github.com/WinetraubLab/agentic-devkit" agentic-devkit policy verify
 ```
 
-You can run that command directly as a workflow step, or call it from dogfood tests that are already part of the normal unit suite. This repository uses the dogfood test path, so the unit test workflow only needs:
+Full Git history makes the pull request's base revision available for comparing
+finding allowances. The verifier automatically uses that revision on pull requests
+and `HEAD` on pushes. Set `POLICY_BASE_REVISION` to use another baseline.
 
-```bash
-python -m unittest discover -s tests
-```
+The command checks reviewed root folders and digests, generated policy bodies,
+and completed attestations. Commit your policy YAML, generated Markdown with
+completed attestations, and `policy/policy-scope-digest.json` with your code changes.
 
-The workflow verifies the committed manifest against the committed repository state:
-1. The manifest must include a record for each checked test.
-2. Each `source_sha256` must match the committed test function's extracted content.
-3. Each record must have `status: pass`.
-
-The recorded `linter_version` and `review_contract_sha256` identify the linter and
-review policy used for the original review. Changes to the linter or review policy do
-not require a new review. A new review is required only when `source_sha256` no longer
-matches the current test content.
-
-When those checks pass, CI succeeds without the local `.agent.md` files. When proof is missing or stale, `lint` exits with failure and tells the coding agent to run the `$run-tdd-linter` skill. It never creates `.agent.md` files in CI.
+If the check fails, run `$review-policy-attestations` locally, complete the
+required reviews, and commit the updated results. CI verifies the saved results;
+it does not perform the agent's compliance review.
