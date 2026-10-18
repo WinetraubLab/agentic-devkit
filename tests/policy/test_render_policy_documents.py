@@ -7,7 +7,7 @@ from __future__ import annotations
 import json
 import unittest
 from agentic_devkit.policies.render_policy_documents import render_policy_documents
-from tests.policy.test_harness.fixtures import _renderer_fixture, _run_cli, TEMPLATE
+from tests.policy.test_harness.fixtures import _renderer_fixture, _run_cli, _complete
 
 class PolicyTests(unittest.TestCase):
     def test_all_expands_configured_roots(self) -> None:
@@ -28,7 +28,6 @@ class PolicyTests(unittest.TestCase):
         config.write_text(json.dumps({"digests": [{"root_folder": folder} for folder in ("app", "src")]}))
         source = root / "policy/user-interface/back-navigation.policy.yaml"
         source.write_text(source.read_text() + "applicable_folders: all\n")
-        (root / "policy/policy-template.md.j2").unlink()
         render_policy_documents(root=root)
         output = root / "policy/user-interface/back-navigation.md"
         section = output.read_text().split("## Applicable folders\n", 1)[1].split("## Instructions", 1)[0]
@@ -57,7 +56,6 @@ class PolicyTests(unittest.TestCase):
         (root / "src/vehicles/parts").mkdir(parents=True)
         source = root / "policy/user-interface/back-navigation.policy.yaml"
         source.write_text(source.read_text() + "applicable_folders:\n  - src/vehicles\n")
-        (root / "policy/policy-template.md.j2").unlink()
         render_policy_documents(root=root)
         markdown = (root / "policy/user-interface/back-navigation.md").read_text()
         section = markdown.split("## Applicable folders\n", 1)[1].split("## Instructions", 1)[0]
@@ -94,20 +92,27 @@ class PolicyTests(unittest.TestCase):
         """Test Path: happy path
 
         Requirement Tested:
-        `policy document renderer` fills the shared template with policy content from YAML.
-        Standard usage: A project generates a policy document for its first review.
+        `policy document renderer` fills the provided Jinja template with policy content from YAML.
+        Project files with template-like names do not replace the provided template.
 
         Verification Method: verify public function output
 
         Verification Detail:
-        The test compares the generated temporary document with the expected body and blank attestation.
+        The document contains the YAML content, shared review instructions, and an empty review section despite unrelated project templates.
 
         Similar Coverage:
         - Scenario Difference: `test_render_policy_documents.py::test_resets_editable_attestation`
           Explanation: This test verifies that `policy document renderer` creates Markdown from a YAML policy source and the shared template; the named test instead verifies that `policy document renderer` replaces an existing attestation with an empty attestation during regeneration.
         """
         root = _renderer_fixture(self)
+        (root / "policy/policy-template.md.j2").write_text("Unrelated project template")
+        (root / "policy/policy-template.md.njk").write_text("Unrelated legacy template")
         render_policy_documents(root=root)
-        expected = TEMPLATE.replace("{{ title }}", "Back navigation policy").replace("{{ objective }}", "Keep navigation safe.").replace("{{ policy_content }}", "Use the shared back hook.")
-        self.assertEqual(expected, (root / "policy/user-interface/back-navigation.md").read_text())
+        markdown = (root / "policy/user-interface/back-navigation.md").read_text()
+        self.assertTrue(markdown.startswith("# Back navigation policy\n"))
+        self.assertIn("Keep navigation safe.", markdown)
+        self.assertIn("Use the shared back hook.", markdown)
+        self.assertIn("## Instructions\n", markdown)
+        self.assertIn("including all subfolders", markdown)
+        self.assertTrue(markdown.endswith("Noncompliant Files:\n"))
 
