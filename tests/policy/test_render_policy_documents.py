@@ -57,13 +57,13 @@ class PolicyTests(unittest.TestCase):
         """Test Path: failure path
 
         Requirement Tested:
-        `policy document renderer` requires a nonempty list of text checklist items for every policy.
-        Missing lists, empty lists, and invalid checklist items are rejected before generation.
+        `policy document renderer` requires a nonempty list of nonblank text checklist items for every policy.
+        When a policy lacks a valid checklist list, the renderer rejects the policy.
 
         Verification Method: verify public function output
 
         Verification Detail:
-        Rendering reports the required checklist field for each invalid input.
+        The renderer raises ValueError naming the required checklist field for each invalid policy.
         """
         root = _renderer_fixture(self)
         source = root / "policy/user-interface/back-navigation.policy.yaml"
@@ -178,8 +178,8 @@ class PolicyTests(unittest.TestCase):
         """Test Path: failure path
 
         Requirement Tested:
-        `policy document renderer` rejects malformed folder selections and exemption lists.
-        A policy has an invalid folder list or a non-text exemption value.
+        `policy document renderer` rejects malformed folder selections and exemption lists without generating a policy document.
+        When a policy has an invalid folder selection or exemption list, the renderer rejects the policy.
 
         Verification Method: verify public function output
 
