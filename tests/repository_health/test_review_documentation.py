@@ -1,11 +1,11 @@
 """Tests in this file validate `test_review_documentation` located at `tests/repository_health/test_review_documentation.py`.
-`test_review_documentation` is responsible for requiring docs/tdd/README.md and docs/workflows/github-actions.md to document the supported pre-commit review and CI/CD validation workflows.
+`test_review_documentation` is responsible for requiring docs/tdd/README.md and docs/workflows/github-actions.md to document the supported pre-commit review and CI verifications.
 
 Terms:
 - `.agent.md`: An .agent.md file contains one generated agent-review scorecard. For example, the pre-commit workflow creates and reviews .agent.md files before lint records proof.
 - `$run-tdd-linter`: The $run-tdd-linter skill runs the repository's agentic TDD review workflow. For example, a coding agent invokes it after installation.
-- `pre-commit review workflow`: The pre-commit review workflow orders three stages: run `agentic-devkit tdd create-agent-md` to create `.agent.md` files, complete their scorecards, and run lint to persist proof.
-- `CI/CD validation workflow`: The CI/CD validation workflow validates committed tests and manifest proof without creating scorecards. For example, GitHub Actions runs lint after changes are committed.
+- `local review`: The local review orders three stages: run `agentic-devkit tdd create-agent-md` to create `.agent.md` files, complete their scorecards, and run lint to persist proof.
+- `CI verification`: The CI verification validates committed tests and manifest proof without creating scorecards. For example, GitHub Actions runs lint after changes are committed.
 """
 
 from __future__ import annotations
@@ -19,51 +19,51 @@ class ReviewDocumentationTests(unittest.TestCase):
         """Test Path: happy path
 
         Requirement Tested:
-        `test_review_documentation` requires the TDD README to include a level-three `pre-commit review workflow` heading.
+        `test_review_documentation` requires the TDD README to include a level-three `local review` heading.
         Standard usage: The scenario demonstrates baseline behavior.
 
         Verification Method: verify public function output
 
         Verification Detail:
-        README.md contains the complete heading line `### Pre-commit review workflow`.
+        README.md contains the complete heading line `### Local review`.
 
         Similar Coverage:
         - Module Difference: `test_review_documentation.py::test_readme_names_cicd_workflow`
-          Explanation: The current test verifies `test_review_documentation` requires README to include a level-three `pre-commit review workflow` heading. The named test verifies `test_review_documentation` requires README to include a level-three `CI/CD validation workflow` heading; both exercise materially the same scenario through different named modules or contract subjects.
+          Explanation: The current test verifies `test_review_documentation` requires README to include a level-three `local review` heading. The named test verifies `test_review_documentation` requires README to include a level-three `CI verification` heading; both exercise materially the same scenario through different named modules or contract subjects.
         - Scenario Difference: `test_review_documentation.py::test_readme_shows_review_workflow`
-          Explanation: The current test verifies `test_review_documentation` requires README to include a level-three `pre-commit review workflow` heading. The named test verifies `test_review_documentation` requires README to list the `pre-commit review workflow` in this order: create `.agent.md` files, review them, then persist manifest proof through lint; both use happy path, but exercise materially different scenarios.
+          Explanation: The current test verifies `test_review_documentation` requires README to include a level-three `local review` heading. The named test verifies `test_review_documentation` requires README to list the `local review` in this order: create `.agent.md` files, review them, then persist manifest proof through lint; both use happy path, but exercise materially different scenarios.
         """
 
         repo_root = Path(__file__).resolve().parents[2]
         readme = (repo_root / "docs" / "tdd" / "README.md").read_text(encoding="utf-8")
 
-        self.assertIn("### Pre-commit review workflow", readme.splitlines())
+        self.assertIn("### Local review", readme.splitlines())
 
     def test_readme_names_cicd_workflow(self) -> None:
         """Test Path: happy path
 
         Requirement Tested:
-        `test_review_documentation` requires the TDD README to include a level-three `CI/CD validation workflow` heading.
+        `test_review_documentation` requires the TDD README to include a level-three `CI verification` heading.
         Standard usage: The scenario demonstrates baseline behavior.
 
         Verification Method: verify public function output
 
         Verification Detail:
-        README.md contains the complete heading line `### CI/CD validation workflow`.
+        README.md contains the complete heading line `### CI verification`.
 
         Similar Coverage:
         - Scenario Difference: `test_review_documentation.py::test_github_actions_omits_packet_creation`
-          Explanation: The current test verifies `test_review_documentation` requires README to include a level-three `CI/CD validation workflow` heading. The named test verifies `test_review_documentation` requires `CI/CD validation workflow` guidance to exclude the create-agent-md command; both use happy path, but exercise materially different scenarios.
+          Explanation: The current test verifies `test_review_documentation` requires README to include a level-three `CI verification` heading. The named test verifies `test_review_documentation` requires `CI verification` guidance to exclude the create-agent-md command; both use happy path, but exercise materially different scenarios.
         - Scenario Difference: `test_review_documentation.py::test_github_actions_shows_ci`
-          Explanation: The current test verifies `test_review_documentation` requires README to include a level-three `CI/CD validation workflow` heading. The named test verifies `test_review_documentation` requires GitHub Actions guidance to describe the `CI/CD validation workflow` as linting committed tests and manifest proof; both use happy path, but exercise materially different scenarios.
+          Explanation: The current test verifies `test_review_documentation` requires README to include a level-three `CI verification` heading. The named test verifies `test_review_documentation` requires GitHub Actions guidance to describe the `CI verification` as linting committed tests and manifest proof; both use happy path, but exercise materially different scenarios.
         - Module Difference: `test_review_documentation.py::test_readme_names_pre_commit_workflow`
-          Explanation: The current test verifies `test_review_documentation` requires README to include a level-three `CI/CD validation workflow` heading. The named test verifies `test_review_documentation` requires README to include a level-three `pre-commit review workflow` heading; both exercise materially the same scenario through different named modules or contract subjects.
+          Explanation: The current test verifies `test_review_documentation` requires README to include a level-three `CI verification` heading. The named test verifies `test_review_documentation` requires README to include a level-three `local review` heading; both exercise materially the same scenario through different named modules or contract subjects.
         """
 
         repo_root = Path(__file__).resolve().parents[2]
         readme = (repo_root / "docs" / "tdd" / "README.md").read_text(encoding="utf-8")
 
-        self.assertIn("### CI/CD validation workflow", readme.splitlines())
+        self.assertIn("### CI verification", readme.splitlines())
 
     def test_readme_directs_tdd_linter_skill(self) -> None:
         """Test Path: happy path
@@ -75,7 +75,7 @@ class ReviewDocumentationTests(unittest.TestCase):
         Verification Method: verify public function output
 
         Verification Detail:
-        README.md installation commands instruct users to ask the coding agent to run `$run-tdd-linter`.
+        README.md installation guidance instructs users to ask the coding agent to run `$run-tdd-linter`.
 
         Similar Coverage:
         - Happy/Failure Path Difference: `test_pre_commit_review_workflow.py::test_lint_before_packet_creation_scenario`
@@ -90,34 +90,31 @@ class ReviewDocumentationTests(unittest.TestCase):
 
         repo_root = Path(__file__).resolve().parents[2]
         readme = (repo_root / "docs" / "tdd" / "README.md").read_text(encoding="utf-8")
-        installation_guide = readme.split("## Add It To Your Project", 1)[1].split(
-            "## Install It On GitHub Actions On Your Project", 1
+        installation_guide = readme.split("## Set up TDD linting to your project", 1)[1].split(
+            "## Add GitHub Actions", 1
         )[0]
 
-        expected_instruction = (
-            "Then ask your coding agent:\\n\\n"
-            "Run the \\`\\$run-tdd-linter\\` skill."
-        )
+        expected_instruction = "Run the `$run-tdd-linter` skill."
         self.assertIn(expected_instruction, installation_guide)
 
     def test_readme_shows_review_workflow(self) -> None:
         """Test Path: happy path
 
         Requirement Tested:
-        `test_review_documentation` requires the TDD README reference guidance to describe the `pre-commit review workflow` in this order: create `.agent.md` files, review them, then persist manifest proof through lint.
+        `test_review_documentation` requires the TDD README reference guidance to describe the `local review` in this order: create `.agent.md` files, review them, then persist manifest proof through lint.
         Standard usage: The scenario demonstrates baseline behavior.
 
         Verification Method: verify public function output
 
         Verification Detail:
-        The Pre-commit review workflow section contains `agentic-devkit tdd create-agent-md` before `Complete every generated scorecard`.
+        The Local review section contains `agentic-devkit tdd create-agent-md` before `Complete every generated scorecard`.
         The section contains `Complete every generated scorecard` before `lint`.
 
         Similar Coverage:
         - Scenario Difference: `test_pre_commit_review_workflow.py::test_nominal_review_scenario`
           Explanation: The current test verifies README documents the ordered review and recording stages. The named test verifies a fully passing run records the approved test; these scenarios distinguish the two contracts.
         - Scenario Difference: `test_review_documentation.py::test_readme_names_pre_commit_workflow`
-          Explanation: The current test verifies `test_review_documentation` requires README to list the `pre-commit review workflow` in this order: create `.agent.md` files, review them, then persist manifest proof through lint. The named test verifies `test_review_documentation` requires README to include a level-three `pre-commit review workflow` heading; both use happy path, but exercise materially different scenarios.
+          Explanation: The current test verifies `test_review_documentation` requires README to list the `local review` in this order: create `.agent.md` files, review them, then persist manifest proof through lint. The named test verifies `test_review_documentation` requires README to include a level-three `local review` heading; both use happy path, but exercise materially different scenarios.
         - Scenario Difference: `test_review_documentation.py::test_readme_directs_tdd_linter_skill`
           Explanation: The current test verifies the reference guidance retains the ordered manual pre-commit workflow. The named test verifies the installation guidance delegates review to the installed skill; both use happy path, but exercise README review guidance through materially different entry points.
         - Happy/Failure Path Difference: `test_pre_commit_review_workflow.py::test_records_passing_review_beside_failure`
@@ -126,8 +123,8 @@ class ReviewDocumentationTests(unittest.TestCase):
 
         repo_root = Path(__file__).resolve().parents[2]
         guide = (repo_root / "docs" / "tdd" / "README.md").read_text(encoding="utf-8")
-        pre_commit_guide = guide.split("### Pre-commit review workflow", 1)[1].split(
-            "### CI/CD validation workflow", 1
+        pre_commit_guide = guide.split("### Local review", 1)[1].split(
+            "### CI verification", 1
         )[0]
         step_markers = (
             "agentic-devkit tdd create-agent-md",
@@ -142,7 +139,7 @@ class ReviewDocumentationTests(unittest.TestCase):
         """Test Path: happy path
 
         Requirement Tested:
-        `test_review_documentation` requires GitHub Actions guidance to describe the `CI/CD validation workflow` as linting committed tests and manifest proof.
+        `test_review_documentation` requires GitHub Actions guidance to describe the `CI verification` as linting committed tests and manifest proof.
         Standard usage: The scenario demonstrates baseline behavior.
 
         Verification Method: verify public function output
@@ -156,9 +153,9 @@ class ReviewDocumentationTests(unittest.TestCase):
         - Scenario Difference: `test_cicd_validation_workflow.py::test_cicd_accepts_current_proof`
           Explanation: The current test verifies documentation describes CI validating committed proof. The named test verifies CI accepts committed current proof; these scenarios distinguish the two contracts.
         - Scenario Difference: `test_review_documentation.py::test_github_actions_omits_packet_creation`
-          Explanation: The current test verifies `test_review_documentation` requires GitHub Actions guidance to describe the `CI/CD validation workflow` as linting committed tests and manifest proof. The named test verifies `test_review_documentation` requires `CI/CD validation workflow` guidance to exclude the create-agent-md command; both use happy path, but exercise materially different scenarios.
+          Explanation: The current test verifies `test_review_documentation` requires GitHub Actions guidance to describe the `CI verification` as linting committed tests and manifest proof. The named test verifies `test_review_documentation` requires `CI verification` guidance to exclude the create-agent-md command; both use happy path, but exercise materially different scenarios.
         - Scenario Difference: `test_review_documentation.py::test_readme_names_cicd_workflow`
-          Explanation: The current test verifies `test_review_documentation` requires GitHub Actions guidance to describe the `CI/CD validation workflow` as linting committed tests and manifest proof. The named test verifies `test_review_documentation` requires README to include a level-three `CI/CD validation workflow` heading; both use happy path, but exercise materially different scenarios.
+          Explanation: The current test verifies `test_review_documentation` requires GitHub Actions guidance to describe the `CI verification` as linting committed tests and manifest proof. The named test verifies `test_review_documentation` requires README to include a level-three `CI verification` heading; both use happy path, but exercise materially different scenarios.
         """
 
         repo_root = Path(__file__).resolve().parents[2]
@@ -176,7 +173,7 @@ class ReviewDocumentationTests(unittest.TestCase):
         """Test Path: happy path
 
         Requirement Tested:
-        `test_review_documentation` requires `CI/CD validation workflow` guidance to exclude the create-agent-md command.
+        `test_review_documentation` requires `CI verification` guidance to exclude the create-agent-md command.
         Standard usage: The scenario demonstrates baseline behavior.
 
         Verification Method: verify public function output
@@ -188,9 +185,9 @@ class ReviewDocumentationTests(unittest.TestCase):
         - Scenario Difference: `test_cicd_validation_workflow.py::test_cicd_creates_no_packets`
           Explanation: The current test verifies documentation excludes the packet-creation command from CI guidance. The named test verifies CI lint creates no packets; these scenarios distinguish the two contracts.
         - Scenario Difference: `test_review_documentation.py::test_github_actions_shows_ci`
-          Explanation: The current test verifies `test_review_documentation` requires `CI/CD validation workflow` guidance to exclude the create-agent-md command. The named test verifies `test_review_documentation` requires GitHub Actions guidance to describe the `CI/CD validation workflow` as linting committed tests and manifest proof; both use happy path, but exercise materially different scenarios.
+          Explanation: The current test verifies `test_review_documentation` requires `CI verification` guidance to exclude the create-agent-md command. The named test verifies `test_review_documentation` requires GitHub Actions guidance to describe the `CI verification` as linting committed tests and manifest proof; both use happy path, but exercise materially different scenarios.
         - Scenario Difference: `test_review_documentation.py::test_readme_names_cicd_workflow`
-          Explanation: The current test verifies `test_review_documentation` requires `CI/CD validation workflow` guidance to exclude the create-agent-md command. The named test verifies `test_review_documentation` requires README to include a level-three `CI/CD validation workflow` heading; both use happy path, but exercise materially different scenarios.
+          Explanation: The current test verifies `test_review_documentation` requires `CI verification` guidance to exclude the create-agent-md command. The named test verifies `test_review_documentation` requires README to include a level-three `CI verification` heading; both use happy path, but exercise materially different scenarios.
         """
 
         repo_root = Path(__file__).resolve().parents[2]
