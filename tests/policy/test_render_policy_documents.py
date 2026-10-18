@@ -162,8 +162,6 @@ class PolicyTests(unittest.TestCase):
           Explanation: This test creates a document from YAML using the provided template; the named test clears the review after YAML changes while retaining exemptions.
         - Scenario Difference: `test_cli.py::test_render_resets_attestations_and_digest`
           Explanation: This test creates a document from YAML using the provided template; the named test clears completed reviews through the render command.
-        - Scenario Difference: `test_policy_structure.py::test_enforces_policy_template_structure`
-          Explanation: This test creates a document from YAML using the provided template; the named test verifies the shared policy document sections.
         """
         root = _renderer_fixture(self, policy_source=(
             "title: Back navigation policy\n"

@@ -20,7 +20,7 @@ class PolicyCliTests(unittest.TestCase):
         Verification Method: verify public function output
 
         Verification Detail:
-        The render command returns zero and replaces the previous finding list with an empty attestation.
+        The render command clears the previous findings and saves a fingerprint that verification accepts after the new reviews are completed.
 
         Similar Coverage:
         - Scenario Difference: `test_cli.py::test_document_check_preserves_review_results`
@@ -35,8 +35,6 @@ class PolicyCliTests(unittest.TestCase):
           Explanation: This test clears completed reviews through the render command; the named test resets reviews after a root is removed.
         - Happy/Failure Path Difference: `test_verify_policy_attestations.py::test_clears_data_type_attestations`
           Explanation: This test clears completed reviews through the render command; the named test resets reviews after a tracked data-type file changes.
-        - Scenario Difference: `test_cli.py::test_render_updates_scope_digest`
-          Explanation: This test clears completed reviews through the render command; the named test saves the current code fingerprint through the render command.
         """
         root = _fixture(self, security_exceptions=["src/example.ts"])
         policy = root / "policy/access/security.md"
@@ -91,7 +89,7 @@ class PolicyCliTests(unittest.TestCase):
         Verification Method: verify public function output
 
         Verification Detail:
-        The check-documents command succeeds and leaves the policy file, including its list of violations, unchanged.
+        The check-documents command returns zero and preserves the attestation section, including its list of violations.
 
         Similar Coverage:
         - Scenario Difference: `test_cli.py::test_render_resets_attestations_and_digest`
@@ -102,6 +100,12 @@ class PolicyCliTests(unittest.TestCase):
           Explanation: This test preserves recorded findings during document checks; the named test clears the review after YAML changes while retaining exemptions.
         - Happy/Failure Path Difference: `test_render_policy_documents.py::test_rejects_manual_body_edits`
           Explanation: This test preserves recorded findings during document checks; the named test rejects direct edits to generated policy text.
+        - Happy/Failure Path Difference: `test_verify_policy_attestations.py::test_scope_changes_reset_attestations`
+          Explanation: This test preserves completed attestations during a document check; the named test resets completed attestations after a review root is added.
+        - Happy/Failure Path Difference: `test_verify_policy_attestations.py::test_removing_root_resets_attestations`
+          Explanation: This test preserves completed attestations during a document check; the named test resets completed attestations after a review root is removed.
+        - Happy/Failure Path Difference: `test_verify_policy_attestations.py::test_clears_data_type_attestations`
+          Explanation: This test preserves completed attestations during a document check; the named test resets completed attestations after a tracked data-type file changes.
         """
         root = _fixture(self)
         path = root / "policy/access/security.md"
@@ -122,7 +126,7 @@ class PolicyCliTests(unittest.TestCase):
         Verification Method: verify public function output
 
         Verification Detail:
-        The error lists the affected policies and instructs the agent to complete their attestations before running verification again.
+        The error lists the affected policies, requests completed Noncompliant Files attestations, and gives the command to rerun verification.
 
         Similar Coverage:
         - Happy/Failure Path Difference: `test_policy_scope.py::test_hashes_only_git_index_files`

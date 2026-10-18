@@ -34,6 +34,8 @@ class PolicyTests(unittest.TestCase):
           Explanation: This test resets reviews after a root is added; the named test resets reviews after a root is removed.
         - Scenario Difference: `test_verify_policy_attestations.py::test_clears_data_type_attestations`
           Explanation: This test resets reviews after a root is added; the named test resets reviews after a tracked data-type file changes.
+        - Happy/Failure Path Difference: `test_cli.py::test_document_check_preserves_review_results`
+          Explanation: This test resets completed attestations after a review root is added; the named test preserves completed attestations during a document check.
         """
         root = _fixture(self, security_exceptions=["src/example.ts"], privacy_exceptions=[])
         (root / "extra").mkdir()
@@ -55,7 +57,7 @@ class PolicyTests(unittest.TestCase):
         Verification Method: verify public function output
 
         Verification Detail:
-        Verification requests another review and clears the previous finding list after a root is removed.
+        Verification raises the scope-change error and leaves the previous finding list empty after the configured root is removed.
 
         Similar Coverage:
         - Happy/Failure Path Difference: `test_cli.py::test_render_resets_attestations_and_digest`
@@ -66,6 +68,8 @@ class PolicyTests(unittest.TestCase):
           Explanation: This test resets reviews after a root is removed; the named test resets reviews after a root is added.
         - Scenario Difference: `test_verify_policy_attestations.py::test_clears_data_type_attestations`
           Explanation: This test resets reviews after a root is removed; the named test resets reviews after a tracked data-type file changes.
+        - Happy/Failure Path Difference: `test_cli.py::test_document_check_preserves_review_results`
+          Explanation: This test resets completed attestations after a review root is removed; the named test preserves completed attestations during a document check.
         """
         root = _fixture(self, security_exceptions=["src/example.ts"], privacy_exceptions=[])
         policy = root / "policy/access/security.md"
@@ -190,7 +194,7 @@ class PolicyTests(unittest.TestCase):
         The saved fingerprints match those computed from the changed working-tree content.
 
         Similar Coverage:
-        - Happy/Failure Path Difference: `test_cli.py::test_render_updates_scope_digest`
+        - Happy/Failure Path Difference: `test_cli.py::test_render_resets_attestations_and_digest`
           Explanation: This test saves updated fingerprints after a tracked data-type file changes; the named test saves the current code fingerprint through the render command.
         - Happy/Failure Path Difference: `test_policy_scope.py::test_hashes_only_git_index_files`
           Explanation: This test saves updated fingerprints after a tracked data-type file changes; the named test ignores new files until Git stages them.
@@ -244,6 +248,8 @@ class PolicyTests(unittest.TestCase):
           Explanation: This test resets reviews after a tracked data-type file changes; the named test resets reviews after a root is added.
         - Scenario Difference: `test_verify_policy_attestations.py::test_removing_root_resets_attestations`
           Explanation: This test resets reviews after a tracked data-type file changes; the named test resets reviews after a root is removed.
+        - Happy/Failure Path Difference: `test_cli.py::test_document_check_preserves_review_results`
+          Explanation: This test resets completed attestations after a tracked data-type file changes; the named test preserves completed attestations during a document check.
         """
         root = _fixture(self, security_exceptions=["src/example.ts"], privacy_exceptions=["actions/data-types/example.ts"])
         policies = list((root / "policy").glob("*/*.md"))
