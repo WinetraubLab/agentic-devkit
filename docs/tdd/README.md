@@ -36,39 +36,10 @@ Use the installed `$simplify-implementation` skill for the complete refactor-pha
 
 The key assumption is that generated implementation code may be too large or complex for humans to review line by line. Instead, human review should focus on the tests, because the tests define the intended behavior. If the tests are clear, complete, and correct, then the generated implementation can be judged by whether it satisfies those tests.
 
-## Repository Structure
-
-Production code is grouped by responsibility:
-
-```text
-src/agentic_devkit/
-    cli/main.py           # Toolkit command routing
-    version.py            # Toolkit version
-    tdd_lint/
-        indexing_test_functions/ # Test discovery and extraction
-        conventional_linter/     # Deterministic lint rules
-        agentic_linter/          # Agent-review generation and proof
-        cli/                     # TDD pipeline and reporting
-```
-
-Tests use the same boundaries and add two test-only groups:
-
-```text
-tests/
-    indexing_test_functions/ # Tests for discovery and function indexing
-    conventional_linter/  # Tests for deterministic lint rules
-    agentic_linter/       # Tests for the agent-review subsystem
-    cli/                  # Tests for CLI behavior
-    integration_tests/    # End-to-end and dogfood tests
-    repository_health/    # Fixture, manifest, workflow, and documentation health
-```
-
-`integration_tests` and `repository_health` have no production-code counterparts:
-they verify interactions and the repository itself rather than implement linter behavior.
-
 ## What It Checks
 
 The TDD linter looks for tests that are:
+
 - vague or hard to understand
 - missing meaningful assertions
 - missing required structured docstring fields
@@ -78,31 +49,63 @@ The TDD linter looks for tests that are:
 
 The goal is to catch weak, vague, or bloated tests before they guide implementation.
 
-## Add It To Your Project
+## Set up TDD linting to your project
 
-From the root of your project, copy and run this entire block:
+[Install the toolkit](../../README.md#installation) and the
+[`run-tdd-linter` agent skill](../../README.md#agent-skills) in your project.
 
-```bash
-bash -c '
-set -e
+Keep your Python or TypeScript tests under `tests/`, for example
+`tests/test_lengths.py` or `tests/lengths.test.ts`. Follow the
+[Test Docstring Contract](#test-docstring-contract) when writing them. If your
+tests live elsewhere, tell the agent which directory to use; the CLI supports
+`--test-root <directory>`.
 
-python3 -m venv .venv
-git submodule update --init --remote .agents/skills/shared
-./.venv/bin/pip install git+https://github.com/WinetraubLab/agentic-devkit
+From your project root, ask your coding agent:
 
-printf "\nThen ask your coding agent:\n\nRun the \`\$run-tdd-linter\` skill.\n"
-'
+```text
+Run the `$run-tdd-linter` skill.
 ```
 
-The skill generates and reviews the `.agent.md` scorecards, runs the linter,
-and iterates on test corrections until the workflow converges. Shared Codex skills are distributed separately through the project's
-`.agents/skills/shared` Git submodule.
+A successful run leaves your tests with passing review proof in
+`tests/agentic_review_manifest.jsonl`. Commit that manifest with your test changes.
 
-After the first successful run, add `./.venv/bin/agentic-devkit tdd lint` after the project's normal test suite. This preserves existing tests and linters while checking agent-authored tests alongside test and coverage results.
+## Add GitHub Actions
+
+Follow the [GitHub Actions guide](../workflows/github-actions.md#tdd-linting) to check your
+committed review proof on pull requests.
+
+## Review workflow
+
+Use local reviews to create proof, then CI to validate it:
+
+### Local review
+
+Before committing changes to your tests, run `$run-tdd-linter`. The skill follows
+these steps:
+
+1. Run `agentic-devkit tdd create-agent-md` to create `.agent.md` scorecards.
+2. Complete every generated scorecard.
+3. Run `lint` to record completed reviews in `tests/agentic_review_manifest.jsonl`.
+4. Commit the updated tests and manifest.
+
+This workflow creates `.agent.md` files and updates manifest proof.
+
+### CI verification
+
+CI/CD runs `agentic-devkit tdd lint` after the changes are committed. It validates
+the committed tests and `tests/agentic_review_manifest.jsonl`. CI/CD does not create
+`.agent.md` files, perform reviews, or record new manifest proof. Missing, stale,
+or failed proof causes CI/CD to fail. Run the `$run-tdd-linter` skill locally
+to complete the required reviews, then commit the updated manifest.
+
+## Review commands
+
+After the first successful review, run `agentic-devkit tdd lint` alongside your
+normal tests and coverage checks. Use the skill when reviews need updating.
 
 Each generated `.agent.md` file reviews one Python `test_...` function or TypeScript `test(...)` call. A source file with multiple tests produces one independent review artifact per test.
 
-By default, both commands scan the test suite but process only tests without current passing manifest proof. Pass files or directories to limit the scope. Use `--fresh` to ignore previous review proof. For `create-agent-md`, this regenerates every packet in the selected scope, including the cross-test packet:
+By default, `tdd lint` and `tdd create-agent-md` scan the test suite but process only tests without current passing manifest proof. Pass files or directories to limit the scope. Use `--fresh` to ignore previous review proof. For `create-agent-md`, this regenerates every packet in the selected scope, including the cross-test packet:
 
 ```bash
 agentic-devkit tdd create-agent-md --fresh tests/test_example.py
@@ -122,59 +125,6 @@ test therefore regenerates only that test's packet while preserving manifest pro
 other tests in the same file. Manifest proof records the linter version and review
 contract as historical metadata. Reviews remain valid across linter-policy changes
 and require renewal only when their reviewed test content changes.
-
-## Install It On GitHub Actions On Your Project
-
-Paste this prompt into your coding agent:
-
-````text
-Add `.github/workflows/agentic-tdd-linter.yml` to this project.
-
-Use this workflow:
-
-```yaml
-name: Agentic TDD Linter
-
-on:
-  pull_request:
-  push:
-
-jobs:
-  lint-tests:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v5
-      - run: uvx --from "git+https://github.com/WinetraubLab/agentic-devkit" agentic-devkit tdd lint
-```
-
-Before committing, run `agentic-devkit tdd create-agent-md`, review any generated packets, and run `agentic-devkit tdd lint`. Commit the refreshed `tests/agentic_review_manifest.jsonl` with the test changes.
-````
-
-Full proof flow: [GitHub Actions Review Proof](../workflows/github-actions.md).
-
-## Two Review Workflows
-
-This project separates review creation from automated validation:
-
-### Pre-commit review workflow
-
-Contributors run this workflow before committing test changes:
-
-1. Run `agentic-devkit tdd create-agent-md` to create `.agent.md` scorecards.
-2. Complete every generated scorecard.
-3. Run `lint` to record completed reviews in `tests/agentic_review_manifest.jsonl`.
-4. Commit the updated tests and manifest.
-
-This workflow creates `.agent.md` files and updates manifest proof.
-
-### CI/CD validation workflow
-
-CI/CD runs `agentic-devkit tdd lint` after the changes are committed. It validates
-the committed tests and `tests/agentic_review_manifest.jsonl`. CI/CD does not create
-`.agent.md` files, perform reviews, or record new manifest proof. Missing, stale,
-failed, or version-incompatible proof causes CI/CD to fail and directs the contributor
-to run the `$run-tdd-linter` skill.
 
 ## Test Docstring Contract
 
@@ -209,6 +159,7 @@ Inspection Instructions:
 ```
 
 Instructions:
+
 - Begin every test-file docstring with the exact module declaration and responsibility sentences shown above.
 - Use a repository-relative path that identifies an existing module.
 - Begin every first `Requirement Tested` sentence with the exact backticked module name declared by the file.
