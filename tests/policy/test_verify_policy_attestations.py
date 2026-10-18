@@ -5,7 +5,6 @@
 from __future__ import annotations
 
 import json
-import re
 import unittest
 from agentic_devkit.policies.policy_scope import hash_policy_scope
 from agentic_devkit.policies.render_policy_documents import render_policy_documents
@@ -81,8 +80,6 @@ class PolicyTests(unittest.TestCase):
         Similar Coverage:
         - Happy/Failure Path Difference: `test_verify_policy_attestations.py::test_rejects_exception_count_above_baseline`
           Explanation: This test accepts unchanged or lower counts; the named test rejects an increase.
-        - Happy/Failure Path Difference: `test_verify_policy_attestations.py::test_rejects_violations_without_prior_results`
-          Explanation: This test has valid committed results to compare against; the named test has no usable previous results.
         - Scenario Difference: `test_verify_policy_attestations.py::test_accepts_new_policy_without_violations`
           Explanation: This test covers an existing policy with a committed violation; the named test introduces a new policy with no violations.
         """
@@ -138,8 +135,6 @@ class PolicyTests(unittest.TestCase):
         Similar Coverage:
         - Scenario Difference: `test_verify_policy_attestations.py::test_accepts_same_or_fewer_violations`
           Explanation: This test verifies that `policy attestation verifier` accepts each newly added policy whose attestation has an empty noncompliant-file list; the named test instead verifies that `policy attestation verifier` accepts a policy when its current version lists fewer noncompliant files than its committed version.
-        - Happy/Failure Path Difference: `test_verify_policy_attestations.py::test_rejects_violations_without_prior_results`
-          Explanation: This test verifies that `policy attestation verifier` accepts each newly added policy whose attestation has an empty noncompliant-file list; the named test instead verifies that `policy attestation verifier` terminates verification when a committed policy omits its noncompliant-file count. When a committed policy contains a legacy decision instead of that count, `policy attestation verifier` terminates verification with an error.
         - Happy/Failure Path Difference: `test_verify_policy_attestations.py::test_rejects_exception_count_above_baseline`
           Explanation: This test verifies that `policy attestation verifier` accepts each newly added policy whose attestation has an empty noncompliant-file list; the named test instead verifies that `policy attestation verifier` refuses a policy when its exception count exceeds its HEAD baseline. When a policy has two exceptions against a committed baseline of one, `policy attestation verifier` refuses that policy.
         """
@@ -278,8 +273,6 @@ class PolicyTests(unittest.TestCase):
         Similar Coverage:
         - Happy/Failure Path Difference: `test_verify_policy_attestations.py::test_accepts_same_or_fewer_violations`
           Explanation: This test rejects regression from one exception to two. The named test accepts improvement from one exception to zero.
-        - Scenario Difference: `test_verify_policy_attestations.py::test_rejects_violations_without_prior_results`
-          Explanation: This test rejects a working count above a present committed count. The named test rejects a committed policy that supplies no count.
         - Happy/Failure Path Difference: `test_verify_policy_attestations.py::test_accepts_new_policy_without_violations`
           Explanation: This test verifies that `policy attestation verifier` refuses a policy when its exception count exceeds its HEAD baseline. When a policy has two exceptions against a committed baseline of one, `policy attestation verifier` refuses that policy; the named test instead verifies that `policy attestation verifier` accepts each newly added policy whose attestation has an empty noncompliant-file list.
         """
