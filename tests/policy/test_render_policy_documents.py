@@ -63,6 +63,27 @@ class PolicyTests(unittest.TestCase):
         self.assertIn("Review every file under `src/vehicles/`, including all subfolders", markdown)
         self.assertNotIn("actions/data-types", markdown)
 
+    def test_renders_linked_applicable_folders(self) -> None:
+        """Test Path: happy path
+
+        Requirement Tested:
+        `policy document renderer` accepts applicable folders reached through symbolic links.
+        A policy names a linked folder whose target is inside the configured review roots.
+
+        Verification Method: verify public function output
+
+        Verification Detail:
+        The document lists the linked path and instructs the agent to review it and all subfolders.
+        """
+        root = _renderer_fixture(self)
+        (root / "linked").symlink_to(root / "actions", target_is_directory=True)
+        source = root / "policy/user-interface/back-navigation.policy.yaml"
+        source.write_text(source.read_text() + "applicable_folders: [linked/data-types]\n")
+        render_policy_documents(root=root)
+        markdown = (root / "policy/user-interface/back-navigation.md").read_text()
+        self.assertIn("- `linked/data-types/`", markdown)
+        self.assertIn("Review every file under `linked/data-types/`, including all subfolders", markdown)
+
     def test_rejects_invalid_applicable_folders(self) -> None:
         """Test Path: failure path
 
