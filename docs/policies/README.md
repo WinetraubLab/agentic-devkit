@@ -135,9 +135,8 @@ policy_content: |
 review_checklist:
   - Parameters representing physical lengths in meters end in _m.
   - Counts and parameters measured in other units are not flagged.
-exemptions: | # Optional accepted violations; retained across review resets.
-  src/legacy-car.py may retain car_length without the _m suffix
-  until callers migrate to car_length_m.
+exemptions: # Optional accepted violations; retained across review resets.
+  - src/legacy-car.py may retain car_length until callers migrate to car_length_m.
 ```
 
 Rendering inserts these values into the bundled `policy-template.md.j2`, which
