@@ -85,7 +85,7 @@ class PolicyTests(unittest.TestCase):
         """Test Path: happy path
 
         Requirement Tested:
-        `policy document renderer` lists linked applicable folders as the scope of recursive review.
+        `policy document renderer` lists linked folders within configured review roots as the scope of recursive review.
         A policy names a linked folder whose target is inside the configured review roots.
 
         Verification Method: verify public function output
