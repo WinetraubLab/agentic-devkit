@@ -178,8 +178,6 @@ class PolicyTests(unittest.TestCase):
         Similar Coverage:
         - Scenario Difference: `test_render_policy_documents.py::test_detects_stale_policy`
           Explanation: This test verifies that `policy document renderer` rejects manual edits to generated policy content in check mode; the named test verifies that the policy verifier CLI rejects a missing generated document.
-        - Scenario Difference: `test_render_policy_documents.py::test_preserves_manual_edits_during_checks`
-          Explanation: This test verifies that check mode rejects manually edited generated content with a regeneration error; the named test instead verifies that the same rejected check leaves the manually edited document unchanged.
         - Scenario Difference: `test_render_policy_documents.py::test_reports_stale_policy_diagnostic`
           Explanation: This test verifies that renderer check mode rejects a manually edited generated document; the named test instead verifies that the verifier CLI reports a missing generated document with the stale-or-manually-edited diagnostic.
         - Scenario Difference: `test_render_policy_documents.py::test_recommends_policy_regeneration`
