@@ -116,3 +116,19 @@ class PolicyTests(unittest.TestCase):
         self.assertIn("including all subfolders", markdown)
         self.assertTrue(markdown.endswith("Noncompliant Files:\n"))
 
+    def test_reports_changed_policy_document_path(self) -> None:
+        """Test Path: happy path
+
+        Requirement Tested:
+        `policy document renderer` returns the path of each policy document it creates.
+        Standard usage: Generating one document returns that document's path.
+
+        Verification Method: verify public function output
+
+        Verification Detail:
+        The changed-path result contains exactly the generated policy-document path.
+        """
+        root = _renderer_fixture(self)
+        result = render_policy_documents(root=root)
+        self.assertEqual([root / "policy/user-interface/back-navigation.md"], result.changed_paths)
+
