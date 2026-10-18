@@ -19,7 +19,7 @@
           Explanation: This test excludes root policy paths from CLI output. The named test verifies cleared field-policy attestations.
         - Scenario Difference: `test_verify_policy_attestations.py::test_regenerates_malformed_policy`
           Explanation: This test excludes root paths from CLI remediation output. The named test recreates malformed field-policy Markdown.
-        - Scenario Difference: `test_verify_policy_attestations.py::test_prints_recovery_diagnostic`
+        - Scenario Difference: `test_cli.py::test_explains_required_policy_reviews`
           Explanation: This test verifies root-path exclusion. The named test verifies the complete recovery diagnostic.
         """
         root = _fixture(self)
