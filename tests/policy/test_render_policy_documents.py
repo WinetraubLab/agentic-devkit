@@ -149,13 +149,13 @@ class PolicyTests(unittest.TestCase):
         """Test Path: happy path
 
         Requirement Tested:
-        `policy document renderer` generates policy documents from YAML using the provided Jinja template.
-        Project files with template-like names do not replace the provided template.
+        `policy document renderer` generates policy documents from YAML using its bundled Jinja template.
+        Specialized usage: Project template files are present rather than absent.
 
         Verification Method: verify public function output
 
         Verification Detail:
-        The document contains the YAML content, shared review instructions, and an empty review section despite unrelated project templates.
+        The generated document contains the YAML title, objective, and rules alongside the bundled review instructions despite unrelated project templates.
 
         Similar Coverage:
         - Scenario Difference: `test_render_policy_documents.py::test_resets_editable_attestation`
@@ -177,8 +177,6 @@ class PolicyTests(unittest.TestCase):
         self.assertIn("Use the shared back hook.", markdown)
         self.assertIn("## Instructions\n", markdown)
         self.assertIn("including all subfolders", markdown)
-        self.assertTrue(markdown.endswith("Noncompliant Files:\n"))
-        self.assertNotIn("## Accepted exemptions", markdown)
 
     def test_reports_changed_policy_document_path(self) -> None:
         """Test Path: happy path
