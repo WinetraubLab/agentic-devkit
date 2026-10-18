@@ -63,8 +63,8 @@ class ConfiguredScopeTests(unittest.TestCase):
         """Test Path: happy path
 
         Requirement Tested:
-        `policy scope` includes files when their folder is added to the review list.
-        Changes in that folder start affecting the code fingerprint once it is included.
+        `policy scope` includes a folder's current tracked-file contents in its fingerprint only when that folder is selected for review.
+        Specialized usage: An excluded folder becomes a review root, so uncommitted edits to its tracked file start changing the fingerprint.
 
         Verification Method: verify public function output
 
