@@ -116,8 +116,8 @@ class PolicyCliTests(unittest.TestCase):
         """Test Path: failure path
 
         Requirement Tested:
-        `policy CLI` explains which policies need another review and what to do next.
-        After code changes, the error lists those policies and the command to rerun.
+        `policy CLI` identifies outdated policy reviews and explains how to complete their Noncompliant Files attestations.
+        When the saved code fingerprint is outdated, verification lists the affected policies and the command to rerun after review.
 
         Verification Method: verify public function output
 
