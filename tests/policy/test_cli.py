@@ -5,7 +5,7 @@
 import json
 import unittest
 
-from tests.policy.test_harness.fixtures import _fixture, _run_cli, _complete, _commit, _git
+from tests.policy.test_harness.fixtures import _fixture, _run_cli, _complete, _commit, _git, _renderer_fixture
 
 
 class PolicyCliTests(unittest.TestCase):
@@ -107,6 +107,26 @@ class PolicyCliTests(unittest.TestCase):
         result = _run_cli(root, "verify")
         output = result.stdout + result.stderr
         self.assertRegex(output, r"(?s)Policy scope changed; all policy attestations were reset\..*Stored policy scope digest: [a-f0-9]{64}.*Current policy scope digest: [a-f0-9]{64}.*This does not mean every listed policy has a violation\..*Policies requiring re-attestation:\n- policy/access/security\.md\n- policy/privacy/privacy\.md.*complete its Noncompliant Files attestation, and rerun agentic-devkit policy verify\.")
+
+    def test_reports_missing_policy_documents(self) -> None:
+        """Test Path: failure path
+
+        Requirement Tested:
+        `policy CLI` rejects missing policy documents and explains how to generate them.
+        A developer checks policy documents before they have been generated.
+
+        Verification Method: verify public function output
+
+        Verification Detail:
+        The command fails, explains that generated documents are stale or missing, and gives the command for generating fresh review documents.
+        """
+        root = _renderer_fixture(self)
+        result = _run_cli(root, "check-documents")
+        output = result.stdout + result.stderr
+        self.assertEqual(1, result.returncode, output)
+        self.assertIn("Generated policy documents are stale or were edited manually", output)
+        self.assertIn("Run agentic-devkit policy render to regenerate them with empty attestations", output)
+
 
 
 if __name__ == "__main__":
