@@ -137,7 +137,7 @@ class PolicyTests(unittest.TestCase):
             with self.subTest(committed_without_review=committed_without_review):
                 root = _fixture(self, security_exceptions=["src/example.ts"], privacy_exceptions=[])
                 source = root / "policy/access/new-policy.policy.yaml"
-                source.write_text("title: New policy\nobjective: Enforce a new rule.\npolicy_content: Follow the new rule.\n")
+                source.write_text("title: New policy\nobjective: Enforce a new rule.\npolicy_content: Follow the new rule.\nreview_checklist:\n  - Follows the new rule.\n")
                 render_policy_documents(root=root)
                 _complete(root / "policy/access/security.md", ["src/example.ts"])
                 _complete(root / "policy/privacy/privacy.md", [])
@@ -157,7 +157,7 @@ class PolicyTests(unittest.TestCase):
         Verification Method: verify public function output
 
         Verification Detail:
-        Verification accepts NONE whether the new policy is uncommitted or was committed with a blank review.
+        The verifier result includes the new policy path after its review reports NONE, whether the policy is uncommitted or was committed with a blank review.
 
         Similar Coverage:
         - Scenario Difference: `test_verify_policy_attestations.py::test_accepts_same_or_fewer_violations`
@@ -171,7 +171,7 @@ class PolicyTests(unittest.TestCase):
             with self.subTest(committed_without_review=committed_without_review):
                 root = _fixture(self, security_exceptions=["src/example.ts"], privacy_exceptions=[])
                 source = root / "policy/access/new-policy.policy.yaml"
-                source.write_text("title: New policy\nobjective: Enforce a new rule.\npolicy_content: Follow the new rule.\n")
+                source.write_text("title: New policy\nobjective: Enforce a new rule.\npolicy_content: Follow the new rule.\nreview_checklist:\n  - Follows the new rule.\n")
                 render_policy_documents(root=root)
                 _complete(root / "policy/access/security.md", ["src/example.ts"])
                 _complete(root / "policy/privacy/privacy.md", [])

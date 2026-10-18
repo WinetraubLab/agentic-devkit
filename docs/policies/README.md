@@ -132,9 +132,11 @@ policy_content: |
   For example, use car_length_m and tree_height_m.
   Apply this rule based on what the parameter represents, not just its name.
   Counts and lengths measured in other units are outside this rule.
-exemptions: | # Optional accepted violations; retained across review resets.
-  src/legacy-car.py may retain car_length without the _m suffix
-  until callers migrate to car_length_m.
+review_checklist:
+  - Parameters representing physical lengths in meters end in _m.
+  - Counts and parameters measured in other units are not flagged.
+exemptions: # Optional accepted violations; retained across review resets.
+  - src/legacy-car.py may retain car_length until callers migrate to car_length_m.
 ```
 
 Rendering inserts these values into the bundled `policy-template.md.j2`, which

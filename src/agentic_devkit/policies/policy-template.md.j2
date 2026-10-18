@@ -22,13 +22,17 @@
 
 {{ policy_content }}
 
+### Review checklist
+
+{% for item in review_checklist %}- [ ] {{ item }}
+{% endfor %}
 {% if exemptions -%}
 ## Accepted exemptions
 
 Do not report the accepted violations described below. Continue reviewing for other violations.
 
-{{ exemptions }}
-
+{% for exemption in exemptions %}- {{ exemption }}
+{% endfor %}
 {% endif -%}
 # Attestation
 

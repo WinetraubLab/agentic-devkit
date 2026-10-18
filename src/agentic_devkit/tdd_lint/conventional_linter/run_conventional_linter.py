@@ -368,7 +368,7 @@ def _field_block_value(docstring: str, field_name: str) -> str:
     prefix = f"{field_name}:"
     lines = [line.strip() for line in docstring.splitlines()]
     for index, text in enumerate(lines):
-        if text != prefix and not text.startswith(prefix):
+        if not text.startswith(prefix):
             continue
         values: list[str] = []
         inline_value = text.removeprefix(prefix).strip()
@@ -394,7 +394,7 @@ def _field_is_own_line(docstring: str, field_name: str) -> bool:
 
 
 def _is_field_line(text: str) -> bool:
-    return any(text == f"{field}:" or text.startswith(f"{field}:") for field in KNOWN_FIELDS)
+    return any(text.startswith(f"{field}:") for field in KNOWN_FIELDS)
 
 
 def _field_headers_are_separated(docstring: str) -> bool:

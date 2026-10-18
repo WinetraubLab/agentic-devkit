@@ -8,10 +8,82 @@ from __future__ import annotations
 
 import json
 import unittest
+import yaml
 from agentic_devkit.policies.render_policy_documents import render_policy_documents
 from tests.policy.test_harness.fixtures import _renderer_fixture, _complete
 
 class PolicyTests(unittest.TestCase):
+    def test_rejects_long_checklist_entries(self) -> None:
+        """Test Path: failure path
+
+        Requirement Tested:
+        `policy document renderer` rejects checklist entries exceeding 25 words.
+        The second entry contains one word beyond the allowed maximum.
+
+        Verification Method: verify public function output
+
+        Verification Detail:
+        The error names review_checklist, the second entry, and its 25-word limit.
+
+        Similar Coverage:
+        - Scenario Difference: `test_render_policy_documents.py::test_rejects_long_exemption_entries`
+          Explanation: This test rejects a checklist entry exceeding 25 words; the named test rejects an exemption entry exceeding 50 words.
+        """
+        root = _renderer_fixture(self)
+        source = root / "policy/user-interface/back-navigation.policy.yaml"
+        policy = yaml.safe_load(source.read_text())
+        policy["review_checklist"] = ["Short item", " ".join(["word"] * 26)]
+        source.write_text(yaml.safe_dump(policy))
+        with self.assertRaisesRegex(ValueError, "review_checklist entry 2 exceeds 25 words"):
+            render_policy_documents(root=root)
+
+    def test_rejects_long_exemption_entries(self) -> None:
+        """Test Path: failure path
+
+        Requirement Tested:
+        `policy document renderer` rejects exemption entries exceeding 50 words.
+        The second entry contains one word beyond the allowed maximum.
+
+        Verification Method: verify public function output
+
+        Verification Detail:
+        The error names exemptions, the second entry, and its 50-word limit.
+
+        Similar Coverage:
+        - Scenario Difference: `test_render_policy_documents.py::test_rejects_long_checklist_entries`
+          Explanation: This test rejects an exemption entry exceeding 50 words; the named test rejects a checklist entry exceeding 25 words.
+        """
+        root = _renderer_fixture(self)
+        source = root / "policy/user-interface/back-navigation.policy.yaml"
+        policy = yaml.safe_load(source.read_text())
+        policy["exemptions"] = ["Short item", " ".join(["word"] * 51)]
+        source.write_text(yaml.safe_dump(policy))
+        with self.assertRaisesRegex(ValueError, "exemptions entry 2 exceeds 50 words"):
+            render_policy_documents(root=root)
+
+    def test_requires_review_checklist(self) -> None:
+        """Test Path: failure path
+
+        Requirement Tested:
+        `policy document renderer` requires a nonempty list of nonblank text checklist items for every policy.
+        When a policy lacks a valid checklist list, the renderer rejects the policy.
+
+        Verification Method: verify public function output
+
+        Verification Detail:
+        The renderer raises ValueError naming the required checklist field for each invalid policy.
+        """
+        root = _renderer_fixture(self)
+        source = root / "policy/user-interface/back-navigation.policy.yaml"
+        policy = yaml.safe_load(source.read_text())
+        policy.pop("review_checklist")
+        cases = [{}, *({"review_checklist": value} for value in ("", "  ", None, [], {}, True, 1, [""], ["  "], [None], [1], [True], [{}], ["Valid item", ""]))]
+        for fields in cases:
+            with self.subTest(fields=fields):
+                source.write_text(yaml.safe_dump({**policy, **fields}))
+                with self.assertRaisesRegex(ValueError, "requires a non-empty review_checklist list"):
+                    render_policy_documents(root=root)
+
     def test_all_expands_configured_roots(self) -> None:
         """Test Path: happy path
 
@@ -114,13 +186,13 @@ class PolicyTests(unittest.TestCase):
         """Test Path: failure path
 
         Requirement Tested:
-        `policy document renderer` rejects malformed folder selections and exemptions that are not text.
-        A policy has an invalid folder list or a non-text exemption value.
+        `policy document renderer` rejects malformed folder selections and exemption lists without generating a policy document.
+        When a policy has an invalid folder selection or exemption list, the renderer rejects the policy.
 
         Verification Method: verify public function output
 
         Verification Detail:
-        Each invalid folder selection or non-text exemption raises ValueError without generating a policy document.
+        The renderer raises ValueError and leaves the document absent for malformed folder selections, malformed exemption lists, and blank or non-text exemption entries.
 
         Similar Coverage:
         - Happy/Failure Path Difference: `test_render_policy_documents.py::test_all_expands_configured_roots`
@@ -137,7 +209,7 @@ class PolicyTests(unittest.TestCase):
         selections = (None, "everything", [], [1], ["../src"], [str(root / "src")],
                       ["outside"], ["src/missing"], ["src/example.ts"], ["src", "src"])
         cases = [("applicable_folders", value) for value in selections]
-        cases += [("exemptions", value) for value in (None, {}, [], ["src/example.ts"], 15, True)]
+        cases += [("exemptions", value) for value in (None, {}, "free text", [""], ["  "], [None], [1], [True], [{}], 15, True)]
         for field, value in cases:
             with self.subTest(field=field, value=value):
                 source.write_text(original + field + ": " + json.dumps(value) + "\n")
@@ -155,7 +227,8 @@ class PolicyTests(unittest.TestCase):
         Verification Method: verify public function output
 
         Verification Detail:
-        The generated document contains the YAML title, objective, and rules alongside the bundled review instructions despite unrelated project templates.
+        The generated document contains the YAML title, objective, and rules despite unrelated project templates.
+        The document contains one checklist with both YAML items and bundled instructions covering all subfolders.
 
         Similar Coverage:
         - Scenario Difference: `test_render_policy_documents.py::test_resets_editable_attestation`
@@ -166,7 +239,7 @@ class PolicyTests(unittest.TestCase):
         root = _renderer_fixture(self, policy_source=(
             "title: Back navigation policy\n"
             "objective: Keep navigation safe.\n"
-            "policy_content: Use the shared back hook.\n"
+            "policy_content: Use the shared back hook.\nreview_checklist:\n  - Uses the shared back hook.\n  - Direct visits use the fallback route.\n"
         ))
         (root / "policy/policy-template.md.j2").write_text("Unrelated project template")
         (root / "policy/policy-template.md.njk").write_text("Unrelated legacy template")
@@ -175,6 +248,8 @@ class PolicyTests(unittest.TestCase):
         self.assertTrue(markdown.startswith("# Back navigation policy\n"))
         self.assertIn("Keep navigation safe.", markdown)
         self.assertIn("Use the shared back hook.", markdown)
+        self.assertIn("### Review checklist\n\n- [ ] Uses the shared back hook.\n- [ ] Direct visits use the fallback route.", markdown)
+        self.assertEqual(1, markdown.count("### Review checklist"))
         self.assertIn("## Instructions\n", markdown)
         self.assertIn("including all subfolders", markdown)
 
@@ -204,7 +279,8 @@ class PolicyTests(unittest.TestCase):
         Verification Method: verify public function output
 
         Verification Detail:
-        Regeneration updates policy text, keeps accepted exceptions and their instructions, clears the review results.
+        The regenerated document contains the updated policy text and accepted exemptions before the attestation.
+        The document retains instructions to continue reviewing other violations and ends with an empty finding list.
 
         Similar Coverage:
         - Scenario Difference: `test_render_policy_documents.py::test_renders_policy_document`
@@ -225,7 +301,7 @@ class PolicyTests(unittest.TestCase):
         root = _renderer_fixture(self)
         source = root / "policy/user-interface/back-navigation.policy.yaml"
         exemption = "src/example.ts may retain its custom back handler until the navigation migration."
-        source.write_text(source.read_text() + "exemptions: " + json.dumps(exemption) + "\n")
+        source.write_text(source.read_text() + "exemptions: " + json.dumps([exemption, "src/example.ts may retain its legacy route name until the same migration."]) + "\n")
         render_policy_documents(root=root)
         output = root / "policy/user-interface/back-navigation.md"
         _complete(output, [])
@@ -235,7 +311,7 @@ class PolicyTests(unittest.TestCase):
         regenerated = output.read_text()
         self.assertIn("Keep navigation consistent.", regenerated)
         self.assertIn("## Accepted exemptions", regenerated)
-        self.assertIn(exemption, regenerated)
+        self.assertIn("- " + exemption + "\n- src/example.ts may retain its legacy route name", regenerated)
         self.assertLess(regenerated.index("## Accepted exemptions"), regenerated.index("# Attestation"))
         self.assertIn("Continue reviewing for other violations.", regenerated)
         self.assertTrue(regenerated.endswith("Noncompliant Files:\n"))
@@ -246,12 +322,12 @@ class PolicyTests(unittest.TestCase):
 
         Requirement Tested:
         `policy document renderer` reports an error when checking a policy document edited directly in Markdown.
-        A developer checks a document after editing its rules or accepted exemptions in Markdown instead of YAML.
+        When a developer edits generated Markdown instead of its YAML source, the renderer rejects the document check.
 
         Verification Method: verify public function output
 
         Verification Detail:
-        Editing either a policy rule or an accepted exception in Markdown raises an error requesting regeneration from YAML.
+        Editing a policy rule, checklist item, or accepted exception in Markdown raises an error requesting regeneration from YAML.
 
         Similar Coverage:
         - Scenario Difference: `test_cli.py::test_reports_missing_policy_documents`
@@ -261,6 +337,7 @@ class PolicyTests(unittest.TestCase):
         """
         edits = (
             ("Use the shared back hook.", "Use a custom back function."),
+            ("Uses the shared back hook.", "Uses a custom back handler."),
             ("Custom handler.", "All violations."),
         )
         for original, replacement in edits:
@@ -268,8 +345,8 @@ class PolicyTests(unittest.TestCase):
                 root = _renderer_fixture(self)
                 source = root / "policy/user-interface/back-navigation.policy.yaml"
                 source.write_text(source.read_text() + (
-                    "exemptions: |\n"
-                    "  Custom handler. Retained in src/example.ts for the legacy API.\n"
+                    "exemptions:\n"
+                    "  - Custom handler. Retained in src/example.ts for the legacy API.\n"
                 ))
                 render_policy_documents(root=root)
                 output = root / "policy/user-interface/back-navigation.md"
