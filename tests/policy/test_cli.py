@@ -1,15 +1,16 @@
 """Tests in this file validate `policy CLI` located at `src/agentic_devkit/policies/cli.py`.
 `policy CLI` is responsible for exposing policy operations through agentic-devkit.
+
+Shared setup: _fixture creates and commits two generated policies; security_exceptions sets the committed security finding list. _complete writes the supplied finding list, or NONE for an empty list. _run_cli executes the public policy command with --root pointing to the supplied repository.
 """
 
-import json
 import unittest
 
 from tests.policy.test_harness.fixtures import _fixture, _run_cli, _complete, _commit, _git, _renderer_fixture
 
 
 class PolicyCliTests(unittest.TestCase):
-    def test_render_resets_attestations_and_digest(self) -> None:
+    def test_render_clears_completed_attestations(self) -> None:
         """Test Path: happy path
 
         Requirement Tested:
@@ -19,20 +20,32 @@ class PolicyCliTests(unittest.TestCase):
         Verification Method: verify public function output
 
         Verification Detail:
-        The command succeeds, clears the completed attestation, and writes the scope digest.
+        The render command returns zero and replaces the previous finding list with an empty attestation.
+
+        Similar Coverage:
+        - Scenario Difference: `test_cli.py::test_document_check_preserves_review_results`
+          Explanation: This test clears completed reviews through the render command; the named test preserves recorded findings during document checks.
+        - Scenario Difference: `test_render_policy_documents.py::test_renders_policy_document`
+          Explanation: This test clears completed reviews through the render command; the named test creates a document from YAML using the provided template.
+        - Scenario Difference: `test_render_policy_documents.py::test_resets_editable_attestation`
+          Explanation: This test clears completed reviews through the render command; the named test clears the review after YAML changes while retaining exemptions.
+        - Happy/Failure Path Difference: `test_verify_policy_attestations.py::test_scope_changes_reset_attestations`
+          Explanation: This test clears completed reviews through the render command; the named test resets reviews after a root is added.
+        - Happy/Failure Path Difference: `test_verify_policy_attestations.py::test_removing_root_resets_attestations`
+          Explanation: This test clears completed reviews through the render command; the named test resets reviews after a root is removed.
+        - Happy/Failure Path Difference: `test_verify_policy_attestations.py::test_clears_data_type_attestations`
+          Explanation: This test clears completed reviews through the render command; the named test resets reviews after a tracked data-type file changes.
+        - Scenario Difference: `test_cli.py::test_render_updates_scope_digest`
+          Explanation: This test clears completed reviews through the render command; the named test saves the current code fingerprint through the render command.
         """
-        root = _fixture(self)
+        root = _fixture(self, security_exceptions=["src/example.ts"])
+        policy = root / "policy/access/security.md"
+        self.assertIn("Noncompliant Files:\n- src/example.ts", policy.read_text())  # Input check
         (root / "src/example.ts").write_text("export const value = 2;\n")
         result = _run_cli(root, "render")
         self.assertEqual(0, result.returncode, result.stderr)
-        self.assertTrue((root / "policy/access/security.md").read_text().endswith("Noncompliant Files:\n"))
-        entries = json.loads((root / "policy/policy-scope-digest.json").read_text())["digests"]
-        self.assertEqual({"src", "actions/data-types", "actions/technical-skills"},
-                         {entry["root_folder"] for entry in entries})
-        for entry in entries:
-            self.assertRegex(entry["digest"], r"^[a-f0-9]{64}$")
-        _complete(root / "policy/access/security.md")
-        _complete(root / "policy/privacy/privacy.md")
+        self.assertTrue(policy.read_text().endswith("Noncompliant Files:\n"))
+
         verified = _run_cli(root, "verify")
         self.assertEqual(0, verified.returncode, verified.stderr)
 
