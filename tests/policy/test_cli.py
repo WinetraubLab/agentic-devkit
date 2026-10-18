@@ -60,6 +60,12 @@ class PolicyCliTests(unittest.TestCase):
 
         Verification Detail:
         The current review fails against HEAD but passes when --baseline-ref selects the older commit.
+
+        Similar Coverage:
+        - Scenario Difference: `test_verify_policy_attestations.py::test_accepts_same_or_fewer_violations`
+          Explanation: This test selects an older committed finding allowance; the named test accepts the same or fewer findings than a committed review.
+        - Happy/Failure Path Difference: `test_verify_policy_attestations.py::test_rejects_exception_count_above_baseline`
+          Explanation: This test selects an older committed finding allowance; the named test rejects more findings than a committed review allows.
         """
         root = _fixture(self)
         baseline = _git(root, "rev-parse", "HEAD").strip()
@@ -84,9 +90,20 @@ class PolicyCliTests(unittest.TestCase):
 
         Verification Detail:
         The check-documents command succeeds and leaves the policy file, including its list of violations, unchanged.
+
+        Similar Coverage:
+        - Scenario Difference: `test_cli.py::test_render_clears_completed_attestations`
+          Explanation: This test preserves recorded findings during document checks; the named test clears completed reviews through the render command.
+        - Happy/Failure Path Difference: `test_cli.py::test_reports_missing_policy_documents`
+          Explanation: This test preserves recorded findings during document checks; the named test reports missing policy documents with generation instructions.
+        - Scenario Difference: `test_render_policy_documents.py::test_resets_editable_attestation`
+          Explanation: This test preserves recorded findings during document checks; the named test clears the review after YAML changes while retaining exemptions.
+        - Happy/Failure Path Difference: `test_render_policy_documents.py::test_rejects_manual_body_edits`
+          Explanation: This test preserves recorded findings during document checks; the named test rejects direct edits to generated policy text.
         """
         root = _fixture(self)
         path = root / "policy/access/security.md"
+        _complete(path, ["src/example.ts"])
         before = path.read_bytes()
         result = _run_cli(root, "check-documents")
         self.assertEqual(0, result.returncode, result.stderr)
@@ -103,7 +120,7 @@ class PolicyCliTests(unittest.TestCase):
         Verification Method: verify public function output
 
         Verification Detail:
-        The diagnostic contains the reset explanation, stored and current digest labels, the no-violation clarification, the affected-policy list, and the rerun instruction in one message.
+        The error lists the affected policies and instructs the agent to complete their attestations before running verification again.
 
         Similar Coverage:
         - Happy/Failure Path Difference: `test_policy_scope.py::test_hashes_only_git_index_files`
@@ -112,14 +129,17 @@ class PolicyCliTests(unittest.TestCase):
           Explanation: This test verifies the review instructions. The named test verifies the synchronized digest stored on disk.
         - Scenario Difference: `test_verify_policy_attestations.py::test_clears_data_type_attestations`
           Explanation: This test verifies the review instructions. The named test verifies that the reset clears field-policy reviews.
-        - Scenario Difference: `test_verify_policy_attestations.py::test_excludes_roots_from_cli_instructions`
+        - Scenario Difference: `test_cli.py::test_excludes_roots_from_cli_instructions`
           Explanation: This test verifies the complete review instructions. The named test verifies exclusion of root policy paths from that diagnostic.
         """
         root = _fixture(self)
         (root / "src/example.ts").write_text("export const value = 2;\n")
         result = _run_cli(root, "verify")
         output = result.stdout + result.stderr
-        self.assertRegex(output, r"(?s)Policy scope changed; all policy attestations were reset\..*Stored policy scope digest: [a-f0-9]{64}.*Current policy scope digest: [a-f0-9]{64}.*This does not mean every listed policy has a violation\..*Policies requiring re-attestation:\n- policy/access/security\.md\n- policy/privacy/privacy\.md.*complete its Noncompliant Files attestation, and rerun agentic-devkit policy verify\.")
+        self.assertEqual(1, result.returncode, output)
+        self.assertRegex(output, r"Policies requiring re-attestation:\n- policy/access/security\.md\n- policy/privacy/privacy\.md")
+        self.assertIn("complete its Noncompliant Files attestation", output)
+        self.assertIn("rerun agentic-devkit policy verify", output)
 
     def test_reports_missing_policy_documents(self) -> None:
         """Test Path: failure path
