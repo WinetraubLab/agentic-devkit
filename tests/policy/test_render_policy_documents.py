@@ -78,7 +78,7 @@ class PolicyTests(unittest.TestCase):
         markdown = (root / "policy/user-interface/back-navigation.md").read_text()
         section = markdown.split("## Applicable folders\n", 1)[1].split("## Instructions", 1)[0]
         self.assertEqual("- `src/vehicles/`", section.strip())
-        self.assertIn("Review every file under `src/vehicles/`, including all subfolders", markdown)
+        self.assertIn("folders listed under `## Applicable folders`, including all subfolders", markdown)
         self.assertNotIn("actions/data-types", markdown)
 
     def test_renders_linked_applicable_folders(self) -> None:
@@ -108,7 +108,7 @@ class PolicyTests(unittest.TestCase):
         render_policy_documents(root=root)
         markdown = (root / "policy/user-interface/back-navigation.md").read_text()
         self.assertIn("- `linked/data-types/`", markdown)
-        self.assertIn("Review every file under `linked/data-types/`, including all subfolders", markdown)
+        self.assertIn("folders listed under `## Applicable folders`, including all subfolders", markdown)
 
     def test_rejects_invalid_policy_fields(self) -> None:
         """Test Path: failure path
