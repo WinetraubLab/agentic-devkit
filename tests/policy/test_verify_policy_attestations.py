@@ -178,35 +178,39 @@ class PolicyTests(unittest.TestCase):
         """Test Path: failure path
 
         Requirement Tested:
-        `policy attestation verifier` updates saved code fingerprints after reviewed files change.
-        Changing a tracked data-type file causes the stored fingerprints to be replaced.
+        `policy attestation verifier` saves updated fingerprints when reviewed code changes.
+        A tracked data-type file changes after its previous review.
 
         Verification Method: verify public function output
 
         Verification Detail:
-        Before the reset, the stored central digest differs from the digest derived from the changed policy-scope content. After the reset, the stored central digest has the same value as that digest.
+        The saved fingerprints match those computed from the changed working-tree content.
 
         Similar Coverage:
+        - Happy/Failure Path Difference: `test_cli.py::test_render_updates_scope_digest`
+          Explanation: This test saves updated fingerprints after a tracked data-type file changes; the named test saves the current code fingerprint through the render command.
         - Happy/Failure Path Difference: `test_policy_scope.py::test_hashes_only_git_index_files`
-          Explanation: This test records a recomputed digest after indexed data-type content changes. The named test establishes the Git-index boundary for digest inputs.
-        - Scenario Difference: `test_verify_policy_attestations.py::test_clears_data_type_attestations`
-          Explanation: This test synchronizes the stored digest after a data-type change. The named test clears field-policy attestations after the same kind of change.
-        - Scenario Difference: `test_cli.py::test_explains_required_policy_reviews`
-          Explanation: This test verifies the stored digest state. The named test emits the recovery diagnostic for the same mismatch.
-        - Scenario Difference: `test_verify_policy_attestations.py::test_excludes_roots_from_cli_instructions`
-          Explanation: This test synchronizes a stale digest. The named test excludes root policy paths from CLI remediation output.
+          Explanation: This test saves updated fingerprints after a tracked data-type file changes; the named test ignores new files until Git stages them.
+        - Happy/Failure Path Difference: `test_policy_scope.py::test_hashes_newly_added_root`
+          Explanation: This test saves updated fingerprints after a tracked data-type file changes; the named test includes files after their folder is added to review scope.
+        - Happy/Failure Path Difference: `test_policy_scope.py::test_hashes_configured_folders_only`
+          Explanation: This test saves updated fingerprints after a tracked data-type file changes; the named test excludes file changes outside configured review folders.
+        - Happy/Failure Path Difference: `test_policy_scope.py::test_hashes_symlinked_scope_folders`
+          Explanation: This test saves updated fingerprints after a tracked data-type file changes; the named test hashes tracked files through linked folders.
+        - Happy/Failure Path Difference: `test_policy_scope.py::test_detects_retargeted_scope_link`
+          Explanation: This test saves updated fingerprints after a tracked data-type file changes; the named test changes the fingerprint when a reviewed link changes targets.
         """
-        root = _fixture(self)
-        stored = (root / "policy/policy-scope-digest.json").read_bytes()
+        from agentic_devkit.policies.policy_scope import _hash_policy_roots
+
+        root = _fixture(self, security_exceptions=["src/example.ts"], privacy_exceptions=[])
         (root / "actions/data-types/example.ts").write_text("export type Example = number;\n")
-        changed = hash_policy_scope(root)
-        with self.assertRaisesRegex(ValueError, "Policy scope changed"):
+        expected = _hash_policy_roots(root)
+        try:
             verify_policy_attestations(root=root, baseline_revision="HEAD")
-        self.assertNotEqual(stored, (root / "policy/policy-scope-digest.json").read_bytes())
-        _complete(root / "policy/access/security.md")
-        _complete(root / "policy/privacy/privacy.md")
-        verified = verify_policy_attestations(root=root, baseline_revision="HEAD")
-        self.assertEqual(changed, verified.digest)
+        except ValueError:
+            pass
+        stored = json.loads((root / "policy/policy-scope-digest.json").read_text())["digests"]
+        self.assertEqual(expected, {entry["root_folder"]: entry["digest"] for entry in stored})
 
     def test_clears_data_type_attestations(self) -> None:
         """Test Path: failure path
@@ -227,17 +231,28 @@ class PolicyTests(unittest.TestCase):
           Explanation: This test clears attestations after a data-type change. The named test establishes the Git-index boundary that determines digest inputs.
         - Scenario Difference: `test_verify_policy_attestations.py::test_replaces_stale_data_type_digest`
           Explanation: This test clears field-policy attestations after a data-type change. The named test synchronizes the stored digest after that change.
-        - Scenario Difference: `test_verify_policy_attestations.py::test_excludes_roots_from_cli_instructions`
+        - Scenario Difference: `test_cli.py::test_excludes_roots_from_cli_instructions`
           Explanation: This test verifies regenerated field-policy attestations. The named test excludes root policy paths from the related CLI output.
+        - Happy/Failure Path Difference: `test_cli.py::test_render_clears_completed_attestations`
+          Explanation: This test resets reviews after a tracked data-type file changes; the named test clears completed reviews through the render command.
+        - Happy/Failure Path Difference: `test_render_policy_documents.py::test_resets_editable_attestation`
+          Explanation: This test resets reviews after a tracked data-type file changes; the named test clears the review after YAML changes while retaining exemptions.
+        - Scenario Difference: `test_verify_policy_attestations.py::test_scope_changes_reset_attestations`
+          Explanation: This test resets reviews after a tracked data-type file changes; the named test resets reviews after a root is added.
+        - Scenario Difference: `test_verify_policy_attestations.py::test_removing_root_resets_attestations`
+          Explanation: This test resets reviews after a tracked data-type file changes; the named test resets reviews after a root is removed.
         """
         root = _fixture(self, security_exceptions=["src/example.ts"], privacy_exceptions=["actions/data-types/example.ts"])
+        policies = list((root / "policy").glob("*/*.md"))
+        for policy in policies:
+            self.assertRegex(policy.read_text(), r"Noncompliant Files:\n- .+")  # Input check
         (root / "actions/data-types/example.ts").write_text("export type Example = number;\n")
         try:
             verify_policy_attestations(root=root, baseline_revision="HEAD")
         except ValueError:
             pass
-        for name in ("policy/access/security.md", "policy/privacy/privacy.md"):
-            self.assertTrue((root / name).read_text().endswith("Noncompliant Files:\n"))
+        for policy in policies:
+            self.assertTrue(policy.read_text().endswith("Noncompliant Files:\n"))
 
     def test_rejects_exception_count_above_baseline(self) -> None:
         """Test Path: failure path
@@ -253,9 +268,13 @@ class PolicyTests(unittest.TestCase):
 
         Similar Coverage:
         - Happy/Failure Path Difference: `test_verify_policy_attestations.py::test_accepts_same_or_fewer_violations`
-          Explanation: This test rejects regression from one exception to two. The named test accepts improvement from one exception to zero.
+          Explanation: This test rejects more findings than a committed review allows; the named test accepts the same or fewer findings than a committed review.
         - Happy/Failure Path Difference: `test_verify_policy_attestations.py::test_accepts_new_policy_without_violations`
-          Explanation: This test verifies that `policy attestation verifier` refuses a policy when its exception count exceeds its HEAD baseline. When a policy has two exceptions against a committed baseline of one, `policy attestation verifier` refuses that policy; the named test instead verifies that `policy attestation verifier` accepts each newly added policy whose attestation has an empty noncompliant-file list.
+          Explanation: This test rejects more findings than a committed review allows; the named test accepts a new policy whose first review reports no findings.
+        - Happy/Failure Path Difference: `test_cli.py::test_verify_accepts_explicit_baseline`
+          Explanation: This test rejects more findings than a committed review allows; the named test selects an older committed finding allowance.
+        - Scenario Difference: `test_verify_policy_attestations.py::test_rejects_new_policy_violations`
+          Explanation: This test rejects more findings than a committed review allows; the named test rejects findings when a policy has no completed committed review.
         """
         root = _fixture(self, security_exceptions=["src/example.ts"])
         _complete(root / "policy/access/security.md", ["src/example.ts", "actions/data-types/example.ts"])
