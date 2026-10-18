@@ -42,3 +42,28 @@ class PolicyTests(unittest.TestCase):
         self.assertEqual(["- `app/`", "- `lib/`", "- `src/`"], section.strip().splitlines())
 
     def test_renders_policy_specific_folders(self) -> None:
+    def test_rejects_invalid_applicable_folders(self) -> None:
+        """Test Path: failure path
+
+        Requirement Tested:
+        `policy document renderer` rejects invalid folder selections in a policy.
+        Examples include repeated folders, missing folders, and folders outside the configured roots.
+
+        Verification Method: verify public function output
+
+        Verification Detail:
+        Each invalid selection raises ValueError without generating the policy document.
+        """
+        root = _renderer_fixture(self)
+        (root / "outside").mkdir()
+        source = root / "policy/user-interface/back-navigation.policy.yaml"
+        original = source.read_text()
+        selections = (None, "everything", [], [1], ["../src"], [str(root / "src")],
+                      ["outside"], ["src/missing"], ["src/example.ts"], ["src", "src"])
+        for folders in selections:
+            with self.subTest(folders=folders):
+                source.write_text(original + "applicable_folders: " + json.dumps(folders) + "\n")
+                with self.assertRaisesRegex(ValueError, "applicable"):
+                    render_policy_documents(root=root)
+                self.assertFalse((root / "policy/user-interface/back-navigation.md").exists())
+
