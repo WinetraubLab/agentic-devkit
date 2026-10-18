@@ -132,6 +132,37 @@ class PolicyTests(unittest.TestCase):
         result = render_policy_documents(root=root)
         self.assertEqual([root / "policy/user-interface/back-navigation.md"], result.changed_paths)
 
+    def test_resets_editable_attestation(self) -> None:
+        """Test Path: happy path
+
+        Requirement Tested:
+        `policy document renderer` clears old review results when generating a policy document again.
+        A policy change needs a fresh review, even when the previous review reported no violations.
+
+        Verification Method: verify public function output
+
+        Verification Detail:
+        The regenerated policy document contains changed policy text.
+        The regenerated policy document contains an empty attestation.
+
+        Similar Coverage:
+        - Scenario Difference: `test_render_policy_documents.py::test_renders_policy_document`
+          Explanation: This test verifies that `policy document renderer` replaces an existing attestation with an empty attestation during regeneration; the named test instead verifies that `policy document renderer` creates Markdown from a YAML policy source and the shared template.
+        - Happy/Failure Path Difference: `test_render_policy_documents.py::test_recommends_policy_regeneration`
+          Explanation: This test verifies that successful regeneration replaces an existing completed attestation with an empty attestation after the YAML source changes; the named test instead verifies that the failure-path verifier CLI instructs the caller to regenerate a missing policy document with empty attestations.
+        """
+        root = _renderer_fixture(self)
+        render_policy_documents(root=root)
+        output = root / "policy/user-interface/back-navigation.md"
+        _complete(output)
+        source = root / "policy/user-interface/back-navigation.policy.yaml"
+        source.write_text(source.read_text().replace("Keep navigation safe.", "Keep navigation consistent."))
+        render_policy_documents(root=root)
+        regenerated = output.read_text()
+        self.assertIn("Keep navigation consistent.", regenerated)
+        self.assertTrue(regenerated.endswith("Noncompliant Files:\n"))
+        self.assertNotIn("Noncompliant Files: NONE", regenerated.split("# Attestation", 1)[1])
+
     def test_rejects_manual_body_edits(self) -> None:
         """Test Path: failure path
 
