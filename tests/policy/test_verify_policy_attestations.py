@@ -123,6 +123,40 @@ class PolicyTests(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError, r"- policy/access/new-policy\.md"):
                     verify_policy_attestations(root=root, baseline_revision="HEAD")
 
+    def test_accepts_new_policy_without_violations(self) -> None:
+        """Test Path: happy path
+
+        Requirement Tested:
+        `policy attestation verifier` accepts a new policy when its first review finds no files breaking the rule.
+        A developer introduces a rule and finds no files that break it.
+
+        Verification Method: verify public function output
+
+        Verification Detail:
+        Verification accepts NONE whether the new policy is uncommitted or was committed with a blank review.
+
+        Similar Coverage:
+        - Scenario Difference: `test_verify_policy_attestations.py::test_accepts_same_or_fewer_violations`
+          Explanation: This test verifies that `policy attestation verifier` accepts each newly added policy whose attestation has an empty noncompliant-file list; the named test instead verifies that `policy attestation verifier` accepts a policy when its current version lists fewer noncompliant files than its committed version.
+        - Happy/Failure Path Difference: `test_verify_policy_attestations.py::test_rejects_violations_without_prior_results`
+          Explanation: This test verifies that `policy attestation verifier` accepts each newly added policy whose attestation has an empty noncompliant-file list; the named test instead verifies that `policy attestation verifier` terminates verification when a committed policy omits its noncompliant-file count. When a committed policy contains a legacy decision instead of that count, `policy attestation verifier` terminates verification with an error.
+        - Happy/Failure Path Difference: `test_verify_policy_attestations.py::test_rejects_exception_count_above_baseline`
+          Explanation: This test verifies that `policy attestation verifier` accepts each newly added policy whose attestation has an empty noncompliant-file list; the named test instead verifies that `policy attestation verifier` refuses a policy when its exception count exceeds its HEAD baseline. When a policy has two exceptions against a committed baseline of one, `policy attestation verifier` refuses that policy.
+        """
+        for committed_without_review in (False, True):
+            with self.subTest(committed_without_review=committed_without_review):
+                root = _fixture(self)
+                source = root / "policy/access/new-policy.policy.yaml"
+                source.write_text("title: New policy\nobjective: Enforce a new rule.\npolicy_content: Follow the new rule.\n")
+                render_policy_documents(root=root)
+                _complete(root / "policy/access/security.md", ["src/example.ts"])
+                _complete(root / "policy/privacy/privacy.md")
+                if committed_without_review:
+                    _commit(root, "Add new policy before its first review")
+                _complete(root / "policy/access/new-policy.md")
+                result = verify_policy_attestations(root=root, baseline_revision="HEAD")
+                self.assertEqual("HEAD", result.baseline_revision)
+
     def test_replaces_stale_data_type_digest(self) -> None:
         """Test Path: failure path
 
