@@ -180,7 +180,7 @@ class PolicyCliTests(unittest.TestCase):
 
         Requirement Tested:
         `policy CLI` excludes project notes from the list of policies needing review.
-        A code change must not request reviews of the README or TODO file.
+        When changed code makes previous attestations stale, the review list excludes the project README and TODO file.
 
         Verification Method: verify public function output
 
