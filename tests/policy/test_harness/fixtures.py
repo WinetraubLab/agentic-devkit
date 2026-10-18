@@ -50,7 +50,7 @@ def _renderer_fixture(
     (root / "src/example.ts").write_text("export const value = 1;\n")
     (root / "policy/user-interface/back-navigation.policy.yaml").write_text(
         policy_source if policy_source is not None else
-        "title: Back navigation policy\nobjective: Keep navigation safe.\npolicy_content: Use the shared back hook.\n"
+        "title: Back navigation policy\nobjective: Keep navigation safe.\npolicy_content: Use the shared back hook.\nreview_checklist:\n  - Uses the shared back hook.\n"
     )
     return root
 
@@ -69,7 +69,7 @@ def _fixture(
         (root / f"policy/{field}").mkdir()
         stem = "security" if field == "access" else "privacy"
         (root / f"policy/{field}/{stem}.policy.yaml").write_text(
-            f"title: {title}\nobjective: {objective}\npolicy_content: {content}\n"
+            f"title: {title}\nobjective: {objective}\npolicy_content: {content}\nreview_checklist:\n  - Follows the policy.\n"
         )
     (root / "actions/data-types/example.ts").write_text("export type Example = string;\n")
     (root / "policy/README.md").write_text("# Policy instructions\n\nRoot Markdown is not enforced.\n")
