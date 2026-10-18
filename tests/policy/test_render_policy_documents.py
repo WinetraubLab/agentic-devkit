@@ -247,8 +247,8 @@ class PolicyTests(unittest.TestCase):
         """Test Path: failure path
 
         Requirement Tested:
-        `policy document renderer` rejects policy text or accepted exceptions changed directly in generated Markdown.
-        A developer edits the generated document instead of its YAML source.
+        `policy document renderer` reports an error when checking a policy document edited directly in Markdown.
+        A developer checks a document after editing its rules or accepted exemptions in Markdown instead of YAML.
 
         Verification Method: verify public function output
 
