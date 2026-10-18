@@ -1,0 +1,35 @@
+# {{ title }}
+
+## Objective
+
+{{ objective }}
+
+## Applicable folders
+
+{% for folder in applicable_folders %}- `{{ folder }}/`
+{% endfor %}
+## Instructions
+
+1. Review every file under {% for directory in scope_directories %}`{{ directory }}/`{% if not loop.last %}, {% endif %}{% endfor %}, including all subfolders, and verify that it follows the rules in `## Policy`.
+2. If you find a definite, minor violation, fix it.
+3. If a violation requires a major or architectural change, list the file under
+   `Noncompliant Files`.
+4. Do not treat ambiguous or gray-area cases as violations. Report only definite
+   policy violations.
+5. If no definite violations remain, write `Noncompliant Files: NONE`.
+
+## Policy
+
+{{ policy_content }}
+
+{% if exemptions -%}
+## Accepted exemptions
+
+Do not report the accepted violations described below. Continue reviewing for other violations.
+
+{{ exemptions }}
+
+{% endif -%}
+# Attestation
+
+Noncompliant Files:
