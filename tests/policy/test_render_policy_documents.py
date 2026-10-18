@@ -134,7 +134,7 @@ class PolicyTests(unittest.TestCase):
         """Test Path: failure path
 
         Requirement Tested:
-        `policy document renderer` rejects malformed folder selections and exemptions that are not text.
+        `policy document renderer` rejects malformed folder selections and exemption lists.
         A policy has an invalid folder list or a non-text exemption value.
 
         Verification Method: verify public function output
@@ -157,7 +157,7 @@ class PolicyTests(unittest.TestCase):
         selections = (None, "everything", [], [1], ["../src"], [str(root / "src")],
                       ["outside"], ["src/missing"], ["src/example.ts"], ["src", "src"])
         cases = [("applicable_folders", value) for value in selections]
-        cases += [("exemptions", value) for value in (None, {}, [], ["src/example.ts"], 15, True)]
+        cases += [("exemptions", value) for value in (None, {}, "free text", [""], ["  "], [None], [1], [True], [{}], 15, True)]
         for field, value in cases:
             with self.subTest(field=field, value=value):
                 source.write_text(original + field + ": " + json.dumps(value) + "\n")
@@ -186,7 +186,7 @@ class PolicyTests(unittest.TestCase):
         root = _renderer_fixture(self, policy_source=(
             "title: Back navigation policy\n"
             "objective: Keep navigation safe.\n"
-            "policy_content: Use the shared back hook.\n"
+            "policy_content: Use the shared back hook.\nreview_checklist:\n  - Uses the shared back hook.\n  - Direct visits use the fallback route.\n"
         ))
         (root / "policy/policy-template.md.j2").write_text("Unrelated project template")
         (root / "policy/policy-template.md.njk").write_text("Unrelated legacy template")
@@ -195,6 +195,8 @@ class PolicyTests(unittest.TestCase):
         self.assertTrue(markdown.startswith("# Back navigation policy\n"))
         self.assertIn("Keep navigation safe.", markdown)
         self.assertIn("Use the shared back hook.", markdown)
+        self.assertIn("### Review checklist\n\n- [ ] Uses the shared back hook.\n- [ ] Direct visits use the fallback route.", markdown)
+        self.assertEqual(1, markdown.count("### Review checklist"))
         self.assertIn("## Instructions\n", markdown)
         self.assertIn("including all subfolders", markdown)
 
@@ -245,7 +247,7 @@ class PolicyTests(unittest.TestCase):
         root = _renderer_fixture(self)
         source = root / "policy/user-interface/back-navigation.policy.yaml"
         exemption = "src/example.ts may retain its custom back handler until the navigation migration."
-        source.write_text(source.read_text() + "exemptions: " + json.dumps(exemption) + "\n")
+        source.write_text(source.read_text() + "exemptions: " + json.dumps([exemption, "src/example.ts may retain its legacy route name until the same migration."]) + "\n")
         render_policy_documents(root=root)
         output = root / "policy/user-interface/back-navigation.md"
         _complete(output, [])
@@ -255,7 +257,7 @@ class PolicyTests(unittest.TestCase):
         regenerated = output.read_text()
         self.assertIn("Keep navigation consistent.", regenerated)
         self.assertIn("## Accepted exemptions", regenerated)
-        self.assertIn(exemption, regenerated)
+        self.assertIn("- " + exemption + "\n- src/example.ts may retain its legacy route name", regenerated)
         self.assertLess(regenerated.index("## Accepted exemptions"), regenerated.index("# Attestation"))
         self.assertIn("Continue reviewing for other violations.", regenerated)
         self.assertTrue(regenerated.endswith("Noncompliant Files:\n"))
