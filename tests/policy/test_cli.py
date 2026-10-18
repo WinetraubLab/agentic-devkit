@@ -152,6 +152,12 @@ class PolicyCliTests(unittest.TestCase):
 
         Verification Detail:
         The command fails, explains that generated documents are stale or missing, and gives the command for generating fresh review documents.
+
+        Similar Coverage:
+        - Happy/Failure Path Difference: `test_cli.py::test_document_check_preserves_review_results`
+          Explanation: This test reports missing policy documents with generation instructions; the named test preserves recorded findings during document checks.
+        - Scenario Difference: `test_render_policy_documents.py::test_rejects_manual_body_edits`
+          Explanation: This test reports missing policy documents with generation instructions; the named test rejects direct edits to generated policy text.
         """
         root = _renderer_fixture(self)
         result = _run_cli(root, "check-documents")
