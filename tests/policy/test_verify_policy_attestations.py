@@ -1,3 +1,36 @@
+    def test_clears_data_type_attestations(self) -> None:
+        """Test Path: failure path
+
+        Requirement Tested:
+        `policy attestation verifier` clears previous review results after reviewed code changes.
+        Changing a tracked data-type file starts fresh reviews for every policy.
+
+        Verification Method: verify public function output
+
+        Verification Detail:
+        Before the reset, both field policies contain attested files in their Noncompliant Files sections. After the reset, both generated field policies contain an empty Noncompliant Files section at the end.
+
+        Similar Coverage:
+        - Scenario Difference: `test_verify_policy_attestations.py::test_regenerates_malformed_policy`
+          Explanation: This test clears every generated field-policy attestation after a data-type change. The named test specifically recreates one malformed field policy with an empty attestation.
+        - Scenario Difference: `test_cli.py::test_explains_required_policy_reviews`
+          Explanation: This test observes reset field policies. The named test emits the recovery diagnostic for those policies.
+        - Happy/Failure Path Difference: `test_policy_scope.py::test_hashes_only_git_index_files`
+          Explanation: This test clears attestations after a data-type change. The named test establishes the Git-index boundary that determines digest inputs.
+        - Scenario Difference: `test_verify_policy_attestations.py::test_replaces_stale_data_type_digest`
+          Explanation: This test clears field-policy attestations after a data-type change. The named test synchronizes the stored digest after that change.
+        - Scenario Difference: `test_verify_policy_attestations.py::test_excludes_roots_from_cli_instructions`
+          Explanation: This test verifies regenerated field-policy attestations. The named test excludes root policy paths from the related CLI output.
+        """
+        root = _fixture(self, security_exceptions=["src/example.ts"], privacy_exceptions=["actions/data-types/example.ts"])
+        (root / "actions/data-types/example.ts").write_text("export type Example = number;\n")
+        try:
+            verify_policy_attestations(root=root, baseline_revision="HEAD")
+        except ValueError:
+            pass
+        for name in ("policy/access/security.md", "policy/privacy/privacy.md"):
+            self.assertTrue((root / name).read_text().endswith("Noncompliant Files:\n"))
+
     def test_regenerates_malformed_policy(self) -> None:
         """Test Path: failure path
 
