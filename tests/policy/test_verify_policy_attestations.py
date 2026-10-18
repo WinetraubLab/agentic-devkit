@@ -137,7 +137,7 @@ class PolicyTests(unittest.TestCase):
             with self.subTest(committed_without_review=committed_without_review):
                 root = _fixture(self, security_exceptions=["src/example.ts"], privacy_exceptions=[])
                 source = root / "policy/access/new-policy.policy.yaml"
-                source.write_text("title: New policy\nobjective: Enforce a new rule.\npolicy_content: Follow the new rule.\n")
+                source.write_text("title: New policy\nobjective: Enforce a new rule.\npolicy_content: Follow the new rule.\nreview_checklist:\n  - Follows the new rule.\n")
                 render_policy_documents(root=root)
                 _complete(root / "policy/access/security.md", ["src/example.ts"])
                 _complete(root / "policy/privacy/privacy.md", [])
@@ -171,7 +171,7 @@ class PolicyTests(unittest.TestCase):
             with self.subTest(committed_without_review=committed_without_review):
                 root = _fixture(self, security_exceptions=["src/example.ts"], privacy_exceptions=[])
                 source = root / "policy/access/new-policy.policy.yaml"
-                source.write_text("title: New policy\nobjective: Enforce a new rule.\npolicy_content: Follow the new rule.\n")
+                source.write_text("title: New policy\nobjective: Enforce a new rule.\npolicy_content: Follow the new rule.\nreview_checklist:\n  - Follows the new rule.\n")
                 render_policy_documents(root=root)
                 _complete(root / "policy/access/security.md", ["src/example.ts"])
                 _complete(root / "policy/privacy/privacy.md", [])
