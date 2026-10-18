@@ -99,8 +99,6 @@ class PolicyCliTests(unittest.TestCase):
           Explanation: This test verifies the review instructions. The named test verifies the synchronized digest stored on disk.
         - Scenario Difference: `test_verify_policy_attestations.py::test_clears_data_type_attestations`
           Explanation: This test verifies the review instructions. The named test verifies that the reset clears field-policy reviews.
-        - Scenario Difference: `test_verify_policy_attestations.py::test_regenerates_malformed_policy`
-          Explanation: This test verifies the review instructions. The named test recreates malformed field-policy Markdown during reset.
         - Scenario Difference: `test_verify_policy_attestations.py::test_excludes_roots_from_cli_instructions`
           Explanation: This test verifies the complete review instructions. The named test verifies exclusion of root policy paths from that diagnostic.
         """

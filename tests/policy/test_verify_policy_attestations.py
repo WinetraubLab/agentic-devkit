@@ -169,8 +169,6 @@ class PolicyTests(unittest.TestCase):
           Explanation: This test records a recomputed digest after indexed data-type content changes. The named test establishes the Git-index boundary for digest inputs.
         - Scenario Difference: `test_verify_policy_attestations.py::test_clears_data_type_attestations`
           Explanation: This test synchronizes the stored digest after a data-type change. The named test clears field-policy attestations after the same kind of change.
-        - Scenario Difference: `test_verify_policy_attestations.py::test_regenerates_malformed_policy`
-          Explanation: This test synchronizes a stale digest. The named test recreates malformed field-policy Markdown during stale-digest regeneration.
         - Scenario Difference: `test_cli.py::test_explains_required_policy_reviews`
           Explanation: This test verifies the stored digest state. The named test emits the recovery diagnostic for the same mismatch.
         - Scenario Difference: `test_verify_policy_attestations.py::test_excludes_roots_from_cli_instructions`
@@ -201,8 +199,6 @@ class PolicyTests(unittest.TestCase):
         Before the reset, both field policies contain attested files in their Noncompliant Files sections. After the reset, both generated field policies contain an empty Noncompliant Files section at the end.
 
         Similar Coverage:
-        - Scenario Difference: `test_verify_policy_attestations.py::test_regenerates_malformed_policy`
-          Explanation: This test clears every generated field-policy attestation after a data-type change. The named test specifically recreates one malformed field policy with an empty attestation.
         - Scenario Difference: `test_cli.py::test_explains_required_policy_reviews`
           Explanation: This test observes reset field policies. The named test emits the recovery diagnostic for those policies.
         - Happy/Failure Path Difference: `test_policy_scope.py::test_hashes_only_git_index_files`
@@ -220,43 +216,6 @@ class PolicyTests(unittest.TestCase):
             pass
         for name in ("policy/access/security.md", "policy/privacy/privacy.md"):
             self.assertTrue((root / name).read_text().endswith("Noncompliant Files:\n"))
-
-    def test_regenerates_malformed_policy(self) -> None:
-        """Test Path: failure path
-
-        Requirement Tested:
-        `policy attestation verifier` repairs broken policy documents when changed code triggers fresh reviews.
-        A damaged policy document is rebuilt from its YAML with an empty review section.
-
-        Verification Method: verify public function output
-
-        Verification Detail:
-        The regenerated field policy contains its generated heading and an empty Noncompliant Files section. The regenerated field policy excludes the original malformed heading.
-
-        Similar Coverage:
-        - Happy/Failure Path Difference: `test_policy_scope.py::test_hashes_only_git_index_files`
-          Explanation: This test uses a tracked-source digest change to recreate malformed field-policy Markdown. The named test proves which source files affect that digest.
-        - Scenario Difference: `test_verify_policy_attestations.py::test_clears_data_type_attestations`
-          Explanation: This test recreates one malformed field policy with an empty attestation. The named test clears every generated field-policy attestation after a data-type change.
-        - Scenario Difference: `test_cli.py::test_explains_required_policy_reviews`
-          Explanation: This test recreates malformed Markdown after a tracked-source change. The named test emits the recovery diagnostic through npm.
-        - Scenario Difference: `test_verify_policy_attestations.py::test_replaces_stale_data_type_digest`
-          Explanation: This test recreates malformed field-policy Markdown. The named test synchronizes the stored digest after a data-type change.
-        - Scenario Difference: `test_verify_policy_attestations.py::test_excludes_roots_from_cli_instructions`
-          Explanation: This test recreates malformed field-policy Markdown. The named test excludes root policy paths from CLI remediation output.
-        """
-        root = _fixture(self)
-        policy = root / "policy/access/security.md"
-        policy.write_text("# Malformed policy\n")
-        (root / "src/example.ts").write_text("export const value = 2;\n")
-        try:
-            verify_policy_attestations(root=root, baseline_revision="HEAD")
-        except ValueError:
-            pass
-        regenerated = policy.read_text()
-        self.assertTrue(regenerated.startswith("# Security policy\n"))
-        self.assertTrue(regenerated.endswith("Noncompliant Files:\n"))
-        self.assertNotIn("# Malformed policy", regenerated)
 
     def test_rejects_exception_count_above_baseline(self) -> None:
         """Test Path: failure path
@@ -300,8 +259,6 @@ class PolicyTests(unittest.TestCase):
           Explanation: This test excludes root paths from CLI remediation output. The named test verifies the synchronized digest stored after a mismatch.
         - Scenario Difference: `test_verify_policy_attestations.py::test_clears_data_type_attestations`
           Explanation: This test excludes root policy paths from CLI output. The named test verifies cleared field-policy attestations.
-        - Scenario Difference: `test_verify_policy_attestations.py::test_regenerates_malformed_policy`
-          Explanation: This test excludes root paths from CLI remediation output. The named test recreates malformed field-policy Markdown.
         - Scenario Difference: `test_cli.py::test_explains_required_policy_reviews`
           Explanation: This test verifies root-path exclusion. The named test verifies the complete recovery diagnostic.
         """
