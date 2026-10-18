@@ -1,0 +1,4 @@
+interface:
+  display_name: "Test All"
+  short_description: "Run all tests, TDD lint, policies, and YAML reviews"
+  default_prompt: "Use $test-all to run the complete repository validation workflow."
