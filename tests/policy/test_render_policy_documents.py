@@ -268,12 +268,12 @@ class PolicyTests(unittest.TestCase):
 
         Requirement Tested:
         `policy document renderer` reports an error when checking a policy document edited directly in Markdown.
-        A developer checks a document after editing its rules or accepted exemptions in Markdown instead of YAML.
+        A developer checks a document after editing its rules, checklist, or accepted exemptions in Markdown instead of YAML.
 
         Verification Method: verify public function output
 
         Verification Detail:
-        Editing either a policy rule or an accepted exception in Markdown raises an error requesting regeneration from YAML.
+        Editing a policy rule, checklist item, or accepted exception in Markdown raises an error requesting regeneration from YAML.
 
         Similar Coverage:
         - Scenario Difference: `test_cli.py::test_reports_missing_policy_documents`
@@ -283,6 +283,7 @@ class PolicyTests(unittest.TestCase):
         """
         edits = (
             ("Use the shared back hook.", "Use a custom back function."),
+            ("Uses the shared back hook.", "Uses a custom back handler."),
             ("Custom handler.", "All violations."),
         )
         for original, replacement in edits:
@@ -290,8 +291,8 @@ class PolicyTests(unittest.TestCase):
                 root = _renderer_fixture(self)
                 source = root / "policy/user-interface/back-navigation.policy.yaml"
                 source.write_text(source.read_text() + (
-                    "exemptions: |\n"
-                    "  Custom handler. Retained in src/example.ts for the legacy API.\n"
+                    "exemptions:\n"
+                    "  - Custom handler. Retained in src/example.ts for the legacy API.\n"
                 ))
                 render_policy_documents(root=root)
                 output = root / "policy/user-interface/back-navigation.md"
