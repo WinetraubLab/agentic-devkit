@@ -12,6 +12,26 @@ from agentic_devkit.policies.render_policy_documents import render_policy_docume
 from tests.policy.test_harness.fixtures import _renderer_fixture, _complete
 
 class PolicyTests(unittest.TestCase):
+        Requirement Tested:
+        `policy document renderer` requires a nonempty list of text checklist items for every policy.
+        Missing lists, empty lists, and invalid checklist items are rejected before generation.
+
+        Verification Method: verify public function output
+
+        Verification Detail:
+        Rendering reports the required checklist field for each invalid input.
+        """
+        root = _renderer_fixture(self)
+        source = root / "policy/user-interface/back-navigation.policy.yaml"
+        policy = yaml.safe_load(source.read_text())
+        policy.pop("review_checklist")
+        cases = [{}, *({"review_checklist": value} for value in ("", "  ", None, [], {}, True, 1, [""], ["  "], [None], [1], [True], [{}], ["Valid item", ""]))]
+        for fields in cases:
+            with self.subTest(fields=fields):
+                source.write_text(yaml.safe_dump({**policy, **fields}))
+                with self.assertRaisesRegex(ValueError, "requires a non-empty review_checklist list"):
+                    render_policy_documents(root=root)
+
     def test_all_expands_configured_roots(self) -> None:
         """Test Path: happy path
 
