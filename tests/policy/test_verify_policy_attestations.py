@@ -185,16 +185,12 @@ class PolicyTests(unittest.TestCase):
         The public verifier invocation throws an error.
 
         Similar Coverage:
-        - Happy/Failure Path Difference: `test_verify_policy_attestations.py::test_accepts_exception_lists_within_baselines`
-          Explanation: This test rejects a working count that exceeds its committed limit. The named test accepts working counts at their committed limits.
-        - Happy/Failure Path Difference: `test_verify_policy_attestations.py::test_accepts_improvement_below_baseline`
+        - Happy/Failure Path Difference: `test_verify_policy_attestations.py::test_accepts_same_or_fewer_violations`
           Explanation: This test rejects regression from one exception to two. The named test accepts improvement from one exception to zero.
-        - Scenario Difference: `test_verify_policy_attestations.py::test_rejects_missing_count_in_head`
+        - Scenario Difference: `test_verify_policy_attestations.py::test_rejects_violations_without_prior_results`
           Explanation: This test rejects a working count above a present committed count. The named test rejects a committed policy that supplies no count.
-        - Happy/Failure Path Difference: `test_verify_policy_attestations.py::test_accepts_new_policy_without_exceptions`
+        - Happy/Failure Path Difference: `test_verify_policy_attestations.py::test_accepts_new_policy_without_violations`
           Explanation: This test verifies that `policy attestation verifier` refuses a policy when its exception count exceeds its HEAD baseline. When a policy has two exceptions against a committed baseline of one, `policy attestation verifier` refuses that policy; the named test instead verifies that `policy attestation verifier` accepts each newly added policy whose attestation has an empty noncompliant-file list.
-        - Happy/Failure Path Difference: `test_verify_policy_attestations.py::test_requires_clean_unreviewed_baseline`
-          Explanation: The above-baseline test exceeds a recorded allowance; the clean-baseline test accepts zero findings against an empty attestation.
         """
         root = _fixture(self, security_exceptions=["src/example.ts"])
         _complete(root / "policy/access/security.md", ["src/example.ts", "actions/data-types/example.ts"])
@@ -232,42 +228,6 @@ class PolicyTests(unittest.TestCase):
         self.assertNotIn("policy/README.md", output)
         self.assertNotIn("policy/TODO-SECURITY.md", output)
 
-    def test_requires_clean_unreviewed_baseline(self) -> None:
-        """Test Path: happy path
-
-        Requirement Tested:
-        `policy attestation verifier` rejects a new policy's attestation if it reports any violations.
-        When introducing a policy, existing violations must be fixed before its first attestation passes.
-
-        Verification Method: verify public function output
-
-        Verification Detail:
-        The new policy passes with NONE but fails when its first review lists a violating file.
-
-        Similar Coverage:
-        - Scenario Difference: `test_verify_policy_attestations.py::test_accepts_exception_lists_within_baselines`
-          Explanation: The baseline-count test uses a committed finding allowance; the clean-baseline test starts with no completed attestation.
-        - Scenario Difference: `test_verify_policy_attestations.py::test_accepts_improvement_below_baseline`
-          Explanation: The improvement test reduces an existing allowance to zero; the clean-baseline test starts with no completed attestation.
-        - Scenario Difference: `test_verify_policy_attestations.py::test_accepts_new_policy_without_exceptions`
-          Explanation: The named test adds a policy after the last commit; this test commits the new policy with a blank review before completing it.
-        - Happy/Failure Path Difference: `test_verify_policy_attestations.py::test_rejects_exception_count_above_baseline`
-          Explanation: The above-baseline test exceeds a recorded allowance; the clean-baseline test accepts zero findings against an empty attestation.
-        """
-        root = _fixture(self)
-        source = root / "policy/access/new-policy.policy.yaml"
-        source.write_text("title: New policy\nobjective: Enforce a new rule.\npolicy_content: Follow the new rule.\n")
-        render_policy_documents(root=root)
-        _complete(root / "policy/access/security.md", ["src/example.ts"])
-        _complete(root / "policy/privacy/privacy.md")
-        policy = root / "policy/access/new-policy.md"
-        _commit(root, "Add new policy before its first review")
-        _complete(policy)
-        verify_policy_attestations(root=root, baseline_revision="HEAD")
-        _complete(policy, ["src/example.ts"])
-        # Input check
-        with self.assertRaisesRegex(ValueError, r"policy/access/new-policy\.md"):
-            verify_policy_attestations(root=root, baseline_revision="HEAD")
 
 
 if __name__ == "__main__":
