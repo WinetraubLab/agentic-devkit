@@ -85,7 +85,7 @@ class PolicyCliTests(unittest.TestCase):
         """Test Path: happy path
 
         Requirement Tested:
-        `policy CLI` must not erase the agent's recorded violations when checking that a policy document is up to date.
+        `policy CLI` preserves the complete attestation when checking that a policy document is up to date.
         Standard usage: A developer runs check-documents after an agent has recorded policy violations.
 
         Verification Method: verify public function output
