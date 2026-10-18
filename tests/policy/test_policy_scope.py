@@ -1,5 +1,7 @@
 """Tests in this file validate `policy scope` located at `src/agentic_devkit/policies/policy_scope.py`.
-`policy scope` is responsible for hashing only indexed paths and their current working-tree content.
+`policy scope` is responsible for validating review folders and hashing their indexed files using current working-tree content.
+
+Shared setup: _fixture creates a Git repository with indexed source and data-type files plus configured review folders. _git runs Git in that repository. Tests supply the file changes, links, and scope configurations relevant to their scenarios.
 """
 
 from __future__ import annotations
@@ -24,13 +26,21 @@ class PolicyTests(unittest.TestCase):
 
         Similar Coverage:
         - Happy/Failure Path Difference: `test_verify_policy_attestations.py::test_replaces_stale_data_type_digest`
-          Explanation: This test establishes the Git-index boundary for digest inputs. The named test records a recomputed digest after indexed data-type content changes.
+          Explanation: This test ignores new files until Git stages them; the named test saves updated fingerprints after a tracked data-type file changes.
         - Happy/Failure Path Difference: `test_cli.py::test_explains_required_policy_reviews`
           Explanation: This test establishes which source files affect the digest. The named test emits the recovery diagnostic after the CLI detects a tracked-source change.
         - Happy/Failure Path Difference: `test_verify_policy_attestations.py::test_clears_data_type_attestations`
           Explanation: This test establishes which source files affect the digest. The named test clears field-policy attestations after a data-type change.
-        - Happy/Failure Path Difference: `test_verify_policy_attestations.py::test_excludes_roots_from_cli_instructions`
+        - Happy/Failure Path Difference: `test_cli.py::test_excludes_roots_from_cli_instructions`
           Explanation: This test establishes which source files affect the digest. The named test excludes root policy paths from CLI remediation output.
+        - Scenario Difference: `test_policy_scope.py::test_hashes_newly_added_root`
+          Explanation: This test ignores new files until Git stages them; the named test includes files after their folder is added to review scope.
+        - Scenario Difference: `test_policy_scope.py::test_hashes_configured_folders_only`
+          Explanation: This test ignores new files until Git stages them; the named test excludes file changes outside configured review folders.
+        - Scenario Difference: `test_policy_scope.py::test_hashes_symlinked_scope_folders`
+          Explanation: This test ignores new files until Git stages them; the named test hashes tracked files through linked folders.
+        - Scenario Difference: `test_policy_scope.py::test_detects_retargeted_scope_link`
+          Explanation: This test ignores new files until Git stages them; the named test changes the fingerprint when a reviewed link changes targets.
         """
         root = _fixture(self)
         initial = hash_policy_scope(root)
@@ -60,6 +70,18 @@ class ConfiguredScopeTests(unittest.TestCase):
 
         Verification Detail:
         Changes outside scope preserve the digest; adding the root and later editing its indexed file each change the digest.
+
+        Similar Coverage:
+        - Scenario Difference: `test_policy_scope.py::test_hashes_only_git_index_files`
+          Explanation: This test includes files after their folder is added to review scope; the named test ignores new files until Git stages them.
+        - Scenario Difference: `test_policy_scope.py::test_hashes_configured_folders_only`
+          Explanation: This test includes files after their folder is added to review scope; the named test excludes file changes outside configured review folders.
+        - Scenario Difference: `test_policy_scope.py::test_hashes_symlinked_scope_folders`
+          Explanation: This test includes files after their folder is added to review scope; the named test hashes tracked files through linked folders.
+        - Scenario Difference: `test_policy_scope.py::test_detects_retargeted_scope_link`
+          Explanation: This test includes files after their folder is added to review scope; the named test changes the fingerprint when a reviewed link changes targets.
+        - Happy/Failure Path Difference: `test_verify_policy_attestations.py::test_replaces_stale_data_type_digest`
+          Explanation: This test includes files after their folder is added to review scope; the named test saves updated fingerprints after a tracked data-type file changes.
         """
         root = _fixture(self)
         (root / "app").mkdir()
@@ -91,6 +113,18 @@ class ConfiguredScopeTests(unittest.TestCase):
 
         Verification Detail:
         Changes outside app preserve the digest; changes to indexed app content change it.
+
+        Similar Coverage:
+        - Scenario Difference: `test_policy_scope.py::test_hashes_only_git_index_files`
+          Explanation: This test excludes file changes outside configured review folders; the named test ignores new files until Git stages them.
+        - Scenario Difference: `test_policy_scope.py::test_hashes_newly_added_root`
+          Explanation: This test excludes file changes outside configured review folders; the named test includes files after their folder is added to review scope.
+        - Scenario Difference: `test_policy_scope.py::test_hashes_symlinked_scope_folders`
+          Explanation: This test excludes file changes outside configured review folders; the named test hashes tracked files through linked folders.
+        - Scenario Difference: `test_policy_scope.py::test_detects_retargeted_scope_link`
+          Explanation: This test excludes file changes outside configured review folders; the named test changes the fingerprint when a reviewed link changes targets.
+        - Happy/Failure Path Difference: `test_verify_policy_attestations.py::test_replaces_stale_data_type_digest`
+          Explanation: This test excludes file changes outside configured review folders; the named test saves updated fingerprints after a tracked data-type file changes.
         """
         root = _fixture(self)
         (root / "app").mkdir()
@@ -114,7 +148,11 @@ class ConfiguredScopeTests(unittest.TestCase):
         Verification Method: verify public function output
 
         Verification Detail:
-        The public hash function raises an error naming policy/policy-scope-digest.json.
+        The error instructs the developer to create policy/policy-scope-digest.json.
+
+        Similar Coverage:
+        - Scenario Difference: `test_policy_scope.py::test_rejects_invalid_scope_configuration`
+          Explanation: This test reports a missing scope file with creation instructions; the named test rejects malformed scope settings.
         """
         root = _fixture(self)
         (root / "policy/policy-scope-digest.json").unlink()
@@ -132,6 +170,10 @@ class ConfiguredScopeTests(unittest.TestCase):
 
         Verification Detail:
         Invalid JSON, schemas, scope lists, and repository-relative paths each raise ValueError.
+
+        Similar Coverage:
+        - Scenario Difference: `test_policy_scope.py::test_requires_scope_configuration`
+          Explanation: This test rejects malformed scope settings; the named test reports a missing scope file with creation instructions.
         """
         root = _fixture(self)
         (root / "outside-link").symlink_to(root.parent, target_is_directory=True)
@@ -157,6 +199,18 @@ class ConfiguredScopeTests(unittest.TestCase):
 
         Verification Detail:
         Each linked scope produces a fingerprint that changes when a tracked file in the target folder changes.
+
+        Similar Coverage:
+        - Scenario Difference: `test_policy_scope.py::test_hashes_only_git_index_files`
+          Explanation: This test hashes tracked files through linked folders; the named test ignores new files until Git stages them.
+        - Scenario Difference: `test_policy_scope.py::test_hashes_newly_added_root`
+          Explanation: This test hashes tracked files through linked folders; the named test includes files after their folder is added to review scope.
+        - Scenario Difference: `test_policy_scope.py::test_hashes_configured_folders_only`
+          Explanation: This test hashes tracked files through linked folders; the named test excludes file changes outside configured review folders.
+        - Scenario Difference: `test_policy_scope.py::test_detects_retargeted_scope_link`
+          Explanation: This test hashes tracked files through linked folders; the named test changes the fingerprint when a reviewed link changes targets.
+        - Happy/Failure Path Difference: `test_verify_policy_attestations.py::test_replaces_stale_data_type_digest`
+          Explanation: This test hashes tracked files through linked folders; the named test saves updated fingerprints after a tracked data-type file changes.
         """
         for folder in ("linked", "linked/data-types"):
             with self.subTest(scope=folder):
@@ -165,8 +219,11 @@ class ConfiguredScopeTests(unittest.TestCase):
                 _git(root, "add", "linked")
                 (root / "policy/policy-scope-digest.json").write_text(
                     json.dumps({"digests": [{"root_folder": folder}]}))
+                target = root / "actions/data-types/example.ts"
+                target.write_text("export type Example = string;\n")
+                _git(root, "add", "actions/data-types/example.ts")
                 before = hash_policy_scope(root)
-                (root / "actions/data-types/example.ts").write_text("export type Example = number;\n")
+                target.write_text("export type Example = number;\n")
                 self.assertNotEqual(before, hash_policy_scope(root))
 
     def test_detects_retargeted_scope_link(self) -> None:
@@ -180,6 +237,18 @@ class ConfiguredScopeTests(unittest.TestCase):
 
         Verification Detail:
         Switching the link between two empty project folders changes the fingerprint.
+
+        Similar Coverage:
+        - Scenario Difference: `test_policy_scope.py::test_hashes_only_git_index_files`
+          Explanation: This test changes the fingerprint when a reviewed link changes targets; the named test ignores new files until Git stages them.
+        - Scenario Difference: `test_policy_scope.py::test_hashes_newly_added_root`
+          Explanation: This test changes the fingerprint when a reviewed link changes targets; the named test includes files after their folder is added to review scope.
+        - Scenario Difference: `test_policy_scope.py::test_hashes_configured_folders_only`
+          Explanation: This test changes the fingerprint when a reviewed link changes targets; the named test excludes file changes outside configured review folders.
+        - Scenario Difference: `test_policy_scope.py::test_hashes_symlinked_scope_folders`
+          Explanation: This test changes the fingerprint when a reviewed link changes targets; the named test hashes tracked files through linked folders.
+        - Happy/Failure Path Difference: `test_verify_policy_attestations.py::test_replaces_stale_data_type_digest`
+          Explanation: This test changes the fingerprint when a reviewed link changes targets; the named test saves updated fingerprints after a tracked data-type file changes.
         """
         root = _fixture(self)
         (root / "first").mkdir()
