@@ -132,3 +132,32 @@ class PolicyTests(unittest.TestCase):
         result = render_policy_documents(root=root)
         self.assertEqual([root / "policy/user-interface/back-navigation.md"], result.changed_paths)
 
+    def test_rejects_manual_body_edits(self) -> None:
+        """Test Path: failure path
+
+        Requirement Tested:
+        `policy document renderer` rejects policy text changed directly in generated Markdown.
+        A developer edits the generated policy instead of its YAML source.
+
+        Verification Method: verify public function output
+
+        Verification Detail:
+        A changed generated sentence produces an error that instructs the caller to regenerate policy documents.
+
+        Similar Coverage:
+        - Scenario Difference: `test_render_policy_documents.py::test_detects_stale_policy`
+          Explanation: This test verifies that `policy document renderer` rejects manual edits to generated policy content in check mode; the named test verifies that the policy verifier CLI rejects a missing generated document.
+        - Scenario Difference: `test_render_policy_documents.py::test_preserves_manual_edits_during_checks`
+          Explanation: This test verifies that check mode rejects manually edited generated content with a regeneration error; the named test instead verifies that the same rejected check leaves the manually edited document unchanged.
+        - Scenario Difference: `test_render_policy_documents.py::test_reports_stale_policy_diagnostic`
+          Explanation: This test verifies that renderer check mode rejects a manually edited generated document; the named test instead verifies that the verifier CLI reports a missing generated document with the stale-or-manually-edited diagnostic.
+        - Scenario Difference: `test_render_policy_documents.py::test_recommends_policy_regeneration`
+          Explanation: This test verifies that renderer check mode rejects a manually edited generated document and requests regeneration; the named test instead verifies that the verifier CLI gives the complete regeneration command and empty-attestation instruction when a generated document is missing.
+        """
+        root = _renderer_fixture(self)
+        render_policy_documents(root=root)
+        output = root / "policy/user-interface/back-navigation.md"
+        output.write_text(output.read_text().replace("Use the shared back hook.", "Use a custom back function."))
+        with self.assertRaisesRegex(ValueError, "Run agentic-devkit policy render to regenerate them with empty attestations"):
+            render_policy_documents(root=root, check=True)
+
