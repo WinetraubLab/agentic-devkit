@@ -5,7 +5,7 @@
 import json
 import unittest
 
-from tests.policy.test_harness.fixtures import _fixture, _run_cli, _complete
+from tests.policy.test_harness.fixtures import _fixture, _run_cli, _complete, _commit, _git
 
 
 class PolicyCliTests(unittest.TestCase):
@@ -40,17 +40,25 @@ class PolicyCliTests(unittest.TestCase):
         """Test Path: happy path
 
         Requirement Tested:
-        `policy CLI` verifies attestations against the selected Git revision.
-        Specialized usage: A developer runs verification with --baseline-ref HEAD to compare findings against the latest commit.
+        `policy CLI` uses the selected commit when checking reported violations.
+        A developer selects an older review allowing one violating file instead of the latest review allowing none.
 
         Verification Method: verify public function output
 
         Verification Detail:
-        Verification succeeds and reports HEAD as the selected baseline.
+        The current review fails against HEAD but passes when --baseline-ref selects the older commit.
         """
-        result = _run_cli(_fixture(self), "verify", "--baseline-ref", "HEAD")
+        root = _fixture(self)
+        baseline = _git(root, "rev-parse", "HEAD").strip()
+        policy = root / "policy/access/security.md"
+        _complete(policy)
+        _commit(root, "Record a review without violations")
+        _complete(policy, ["src/example.ts"])
+        default = _run_cli(root, "verify")
+        self.assertEqual(1, default.returncode, default.stdout + default.stderr)
+        result = _run_cli(root, "verify", "--baseline-ref", baseline)
         self.assertEqual(0, result.returncode, result.stderr)
-        self.assertIn("Policy attestations do not exceed HEAD", result.stdout)
+        self.assertIn(f"Policy attestations do not exceed {baseline}", result.stdout)
 
     def test_document_check_preserves_review_results(self) -> None:
         """Test Path: happy path
