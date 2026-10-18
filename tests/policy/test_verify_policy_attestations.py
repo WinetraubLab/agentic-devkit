@@ -185,8 +185,8 @@ class PolicyTests(unittest.TestCase):
         """Test Path: failure path
 
         Requirement Tested:
-        `policy attestation verifier` saves updated fingerprints when reviewed code changes.
-        A tracked data-type file changes after its previous review.
+        `policy attestation verifier` saves fresh fingerprints when tracked files in the review scope change.
+        An uncommitted change to a tracked data-type file makes its previous fingerprint stale.
 
         Verification Method: verify public function output
 
