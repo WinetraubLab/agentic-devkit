@@ -40,7 +40,8 @@ class PolicyCliTests(unittest.TestCase):
         """Test Path: happy path
 
         Requirement Tested:
-        `policy CLI` verifies attestations using the caller's baseline revision.
+        `policy CLI` verifies attestations against the selected Git revision.
+        Specialized usage: A developer runs verification with --baseline-ref HEAD to compare findings against the latest commit.
 
         Verification Method: verify public function output
 
