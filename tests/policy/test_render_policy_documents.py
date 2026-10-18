@@ -84,17 +84,17 @@ class PolicyTests(unittest.TestCase):
         self.assertIn("- `linked/data-types/`", markdown)
         self.assertIn("Review every file under `linked/data-types/`, including all subfolders", markdown)
 
-    def test_rejects_invalid_applicable_folders(self) -> None:
+    def test_rejects_invalid_policy_fields(self) -> None:
         """Test Path: failure path
 
         Requirement Tested:
-        `policy document renderer` rejects invalid folder selections in a policy.
-        Examples include repeated folders, missing folders, and folders outside the configured roots.
+        `policy document renderer` rejects policy fields with invalid values.
+        Bad folder selections or accepted exceptions written as numbers or lists prevent generation.
 
         Verification Method: verify public function output
 
         Verification Detail:
-        Each invalid selection raises ValueError without generating the policy document.
+        Each invalid folder selection or non-text exemption raises ValueError without generating a policy document.
         """
         root = _renderer_fixture(self)
         (root / "outside").mkdir()
@@ -102,10 +102,12 @@ class PolicyTests(unittest.TestCase):
         original = source.read_text()
         selections = (None, "everything", [], [1], ["../src"], [str(root / "src")],
                       ["outside"], ["src/missing"], ["src/example.ts"], ["src", "src"])
-        for folders in selections:
-            with self.subTest(folders=folders):
-                source.write_text(original + "applicable_folders: " + json.dumps(folders) + "\n")
-                with self.assertRaisesRegex(ValueError, "applicable"):
+        cases = [("applicable_folders", value) for value in selections]
+        cases += [("exemptions", value) for value in (None, {}, [], ["src/example.ts"], 15, True)]
+        for field, value in cases:
+            with self.subTest(field=field, value=value):
+                source.write_text(original + field + ": " + json.dumps(value) + "\n")
+                with self.assertRaises(ValueError):
                     render_policy_documents(root=root)
                 self.assertFalse((root / "policy/user-interface/back-navigation.md").exists())
 
@@ -136,6 +138,7 @@ class PolicyTests(unittest.TestCase):
         self.assertIn("## Instructions\n", markdown)
         self.assertIn("including all subfolders", markdown)
         self.assertTrue(markdown.endswith("Noncompliant Files:\n"))
+        self.assertNotIn("## Accepted exemptions", markdown)
 
     def test_reports_changed_policy_document_path(self) -> None:
         """Test Path: happy path
