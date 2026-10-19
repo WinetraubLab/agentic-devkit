@@ -36,3 +36,17 @@ agentic-devkit policy verify
 
 Use this second result as the final policy result. If it fails, report the exact
 remaining policy failures and the attestations or files that still need work.
+
+## Step 4: Report failures by group
+
+Always end with this table, including when no reviews were required:
+
+| Policy group | Current failures | HEAD failures | New failures summary |
+|---|---:|---:|---|
+
+Use one row per folder under `policy/`, including groups present only in `HEAD`.
+Count `Noncompliant Files` entries across each group's attestations in the working
+tree and `git show HEAD:<path>`. A file listed under two policies counts twice;
+`NONE` or an absent policy counts as zero. Mark incomplete or invalid attestations
+as unknown rather than zero, and include a total row.
+Summarize new policy/file pairs versus `HEAD`.
