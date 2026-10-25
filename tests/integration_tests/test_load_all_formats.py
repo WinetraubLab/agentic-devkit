@@ -49,7 +49,7 @@ class LoadAllFormatsTests(unittest.TestCase):
 
         Similar Coverage:
         - Scenario Difference: `test_render_agent_md_file.py::test_creates_pending_packet`
-          Explanation: The current test verifies `create-agent-md` creates a `packet set` from a discovered `.py` test file. The named test verifies `render_agent_md_file` creates `single-test packet` containing its supplied test source exactly once and exactly 26 pending scorecard rows; both use happy path, but exercise materially different scenarios.
+          Explanation: The current test verifies `create-agent-md` creates a `packet set` from a discovered `.py` test file. The named test verifies `render_agent_md_file` creates `single-test packet` containing its supplied test source exactly once and exactly 27 pending scorecard rows; both use happy path, but exercise materially different scenarios.
         - Scenario Difference: `test_main.py::test_test_root_reports_generated_packet`
           Explanation: The current test verifies `create-agent-md` creates a `packet set` from a discovered `.py` test file. The named test verifies `CLI` emits `CLI output` with the generated `.agent.md` count when caller selects a nondefault test root; both use happy path, but exercise materially different scenarios.
         - Scenario Difference: `test_load_all_formats.py::test_loads_typescript_tests`
@@ -151,7 +151,7 @@ class LoadAllFormatsTests(unittest.TestCase):
 
         Similar Coverage:
         - Scenario Difference: `test_render_agent_md_file.py::test_creates_pending_packet`
-          Explanation: The current test verifies `create-agent-md` creates a `packet set` when it discovers a `.test.ts` test file. The named test verifies `render_agent_md_file` creates `single-test packet` containing its supplied test source exactly once and exactly 26 pending scorecard rows; both use happy path, but exercise materially different scenarios.
+          Explanation: The current test verifies `create-agent-md` creates a `packet set` when it discovers a `.test.ts` test file. The named test verifies `render_agent_md_file` creates `single-test packet` containing its supplied test source exactly once and exactly 27 pending scorecard rows; both use happy path, but exercise materially different scenarios.
         - Scenario Difference: `test_load_all_formats.py::test_loads_python_tests`
           Explanation: The current test verifies `create-agent-md` creates a `packet set` when it discovers a `.test.ts` test file. The named test verifies `create-agent-md` creates a `packet set` from a discovered `.py` test file; both use happy path, but exercise materially different scenarios.
         - Happy/Failure Path Difference: `test_load_all_formats.py::test_rejects_python_without_file_docstring`

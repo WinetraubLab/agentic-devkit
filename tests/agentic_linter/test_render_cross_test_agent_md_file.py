@@ -36,7 +36,7 @@ class CrossTestAgentMarkdownTests(unittest.TestCase):
 
         Similar Coverage:
         - Scenario Difference: `test_render_agent_md_file.py::test_creates_pending_packet`
-          Explanation: The current test verifies `render_cross_test_agent_md_file` creates `cross-test packet` containing one docstring entry for every unique selected path. The named test verifies `render_agent_md_file` creates `single-test packet` containing its supplied test source exactly once and exactly 26 pending scorecard rows; both use happy path, but exercise materially different scenarios.
+          Explanation: The current test verifies `render_cross_test_agent_md_file` creates `cross-test packet` containing one docstring entry for every unique selected path. The named test verifies `render_agent_md_file` creates `single-test packet` containing its supplied test source exactly once and exactly 27 pending scorecard rows; both use happy path, but exercise materially different scenarios.
         - Scenario Difference: `test_render_cross_test_agent_md_file.py::test_embeds_docstrings_without_test_implementation`
           Explanation: The current test verifies `render_cross_test_agent_md_file` creates `cross-test packet` containing one docstring entry for every unique selected path. The named test verifies `render_cross_test_agent_md_file` creates `cross-test packet` containing each test identifier and docstring without its implementation; both use happy path, but exercise materially different scenarios.
         """
@@ -232,7 +232,7 @@ class CrossTestAgentMarkdownTests(unittest.TestCase):
 
         Similar Coverage:
         - Module Difference: `test_render_agent_md_file.py::test_creates_pending_packet`
-          Explanation: The current test verifies `render_cross_test_agent_md_file` creates `cross-test packet` containing each test identifier and docstring without its implementation. The named test verifies `render_agent_md_file` creates `single-test packet` containing its supplied test source exactly once and exactly 26 pending scorecard rows; both exercise materially the same scenario through different named modules or contract subjects.
+          Explanation: The current test verifies `render_cross_test_agent_md_file` creates `cross-test packet` containing each test identifier and docstring without its implementation. The named test verifies `render_agent_md_file` creates `single-test packet` containing its supplied test source exactly once and exactly 27 pending scorecard rows; both exercise materially the same scenario through different named modules or contract subjects.
         - Scenario Difference: `test_render_cross_test_agent_md_file.py::test_deduplicates_cross_test_paths`
           Explanation: The current test verifies `render_cross_test_agent_md_file` creates `cross-test packet` containing each test identifier and docstring without its implementation. The named test verifies `render_cross_test_agent_md_file` creates `cross-test packet` containing one docstring entry for every unique selected path; both use happy path, but exercise materially different scenarios.
         """
