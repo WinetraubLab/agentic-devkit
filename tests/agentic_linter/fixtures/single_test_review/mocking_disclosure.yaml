@@ -1,0 +1,129 @@
+# Test-source examples for agent review.
+# Each example contains only `file_docstring`, `test`, and `expected_scorecard`.
+# Criteria omitted from `expected_scorecard` are ignored during comparison.
+# Criterion comments must match their titles in `single_test_review.agent.md.j2`.
+# Each outcome must be `pass` or `fail` followed by an explanation comment.
+
+mocking_disclosure_001:
+  file_docstring: |
+    """Tests in this file validate `collect_records` located at `src/records.py`.
+    `collect_records` retrieves records through a paginated client.
+    """
+  test: |
+    def test_collects_available_records():
+        """Test Path: happy path
+
+        Requirement Tested:
+        `collect_records` returns every record supplied by its client in order.
+        Standard usage: The scenario demonstrates baseline behavior.
+
+        Verification Method: verify public function output
+
+        Verification Detail:
+        The result contains every supplied record.
+        """
+
+        rows = [{"id": "item-a", "label": "Sample A"}, {"id": "item-b", "label": "Sample B"}]
+
+        class Client:
+            def query(self):
+                return self
+
+            def range(self, start, end):
+                return {"data": rows[start:end + 1], "error": None}
+
+        assert collect_records(Client()) == rows
+  expected_scorecard:
+    24: # Mocked Dependencies Are Disclosed
+      fail # The handwritten client replaces database paging, but Verification Detail does not disclose the dependency replacement.
+
+mocking_disclosure_002:
+  file_docstring: |
+    """Tests in this file validate `collect_records` located at `src/records.py`.
+    `collect_records` retrieves records through a paginated client.
+    """
+  test: |
+    def test_collects_available_records():
+        """Test Path: happy path
+
+        Requirement Tested:
+        `collect_records` returns every record supplied by its client in order.
+        Standard usage: The scenario demonstrates baseline behavior.
+
+        Verification Method: verify public function output
+
+        Verification Detail:
+        A handwritten database double returns slices of supplied records instead of querying storage. The result contains every supplied record.
+        """
+
+        rows = [{"id": "item-a", "label": "Sample A"}, {"id": "item-b", "label": "Sample B"}]
+
+        class Client:
+            def query(self):
+                return self
+
+            def range(self, start, end):
+                return {"data": rows[start:end + 1], "error": None}
+
+        assert collect_records(Client()) == rows
+  expected_scorecard:
+    24: # Mocked Dependencies Are Disclosed
+      pass # Verification Detail identifies the database double and its simulated paging behavior.
+
+mocking_disclosure_003:
+  file_docstring: |
+    """Tests in this file validate `collect_records` located at `src/records.py`.
+    `collect_records` retrieves records through a paginated client.
+    """
+  test: |
+    def test_collects_available_records():
+        """Test Path: happy path
+
+        Requirement Tested:
+        `collect_records` returns every record supplied by its client in order.
+        Standard usage: The scenario demonstrates baseline behavior.
+
+        Verification Method: verify public function output
+
+        Verification Detail:
+        The test uses mocking. The result contains every supplied record.
+        """
+
+        rows = [{"id": "item-a", "label": "Sample A"}, {"id": "item-b", "label": "Sample B"}]
+
+        class Client:
+            def query(self):
+                return self
+
+            def range(self, start, end):
+                return {"data": rows[start:end + 1], "error": None}
+
+        assert collect_records(Client()) == rows
+  expected_scorecard:
+    24: # Mocked Dependencies Are Disclosed
+      fail # Mentioning mocking does not identify the replaced dependency or its simulated behavior.
+
+mocking_disclosure_004:
+  file_docstring: |
+    """Tests in this file validate `sum_values` located at `src/numbers.py`.
+    `sum_values` calculates the sum of supplied numbers.
+    """
+  test: |
+    def test_adds_supplied_numbers():
+        """Test Path: happy path
+
+        Requirement Tested:
+        `sum_values` adds the supplied numbers.
+        Standard usage: The scenario demonstrates baseline behavior.
+
+        Verification Method: verify public function output
+
+        Verification Detail:
+        The result equals the sum of the supplied numbers.
+        """
+
+        values = [2, 3]
+        assert sum_values(values) == 5
+  expected_scorecard:
+    24: # Mocked Dependencies Are Disclosed
+      pass # Synthetic inputs and an expected value do not replace dependency behavior.

@@ -228,7 +228,7 @@ class AgenticMarkdownTests(unittest.TestCase):
         """Test Path: happy path
 
         Requirement Tested:
-        `render_agent_md_file` creates `single-test packet` containing its supplied test source exactly once and exactly 26 pending scorecard rows.
+        `render_agent_md_file` creates `single-test packet` containing its supplied test source exactly once and exactly 27 pending scorecard rows.
         Standard usage: The scenario demonstrates baseline behavior.
 
         Verification Method: verify public function output
@@ -236,21 +236,21 @@ class AgenticMarkdownTests(unittest.TestCase):
         Verification Detail:
         Filesystem contains `render_agent_md_file` output path.
         File contains the test source supplied to `render_agent_md_file` exactly once.
-        File contains 26 pending rows.
+        File contains 27 pending rows.
 
         Similar Coverage:
         - Scenario Difference: `test_render_cross_test_agent_md_file.py::test_deduplicates_cross_test_paths`
-          Explanation: The current test verifies `render_agent_md_file` creates `single-test packet` containing its supplied test source exactly once and exactly 26 pending scorecard rows. The named test verifies `render_cross_test_agent_md_file` creates `cross-test packet` containing one docstring entry for every unique selected path; both use happy path, but exercise materially different scenarios.
+          Explanation: The current test verifies `render_agent_md_file` creates `single-test packet` containing its supplied test source exactly once and exactly 27 pending scorecard rows. The named test verifies `render_cross_test_agent_md_file` creates `cross-test packet` containing one docstring entry for every unique selected path; both use happy path, but exercise materially different scenarios.
         - Module Difference: `test_render_cross_test_agent_md_file.py::test_embeds_docstrings_without_test_implementation`
-          Explanation: The current test verifies `render_agent_md_file` creates `single-test packet` containing its supplied test source exactly once and exactly 26 pending scorecard rows. The named test verifies `render_cross_test_agent_md_file` creates `cross-test packet` containing each test identifier and docstring without its implementation; both exercise materially the same scenario through different named modules or contract subjects.
+          Explanation: The current test verifies `render_agent_md_file` creates `single-test packet` containing its supplied test source exactly once and exactly 27 pending scorecard rows. The named test verifies `render_cross_test_agent_md_file` creates `cross-test packet` containing each test identifier and docstring without its implementation; both exercise materially the same scenario through different named modules or contract subjects.
         - Scenario Difference: `test_load_all_formats.py::test_loads_python_tests`
-          Explanation: The current test verifies `render_agent_md_file` creates `single-test packet` containing its supplied test source exactly once and exactly 26 pending scorecard rows. The named test verifies `create-agent-md` creates a `packet set` from a discovered `.py` test file; both use happy path, but exercise materially different scenarios.
+          Explanation: The current test verifies `render_agent_md_file` creates `single-test packet` containing its supplied test source exactly once and exactly 27 pending scorecard rows. The named test verifies `create-agent-md` creates a `packet set` from a discovered `.py` test file; both use happy path, but exercise materially different scenarios.
         - Scenario Difference: `test_load_all_formats.py::test_loads_typescript_tests`
-          Explanation: The current test verifies `render_agent_md_file` creates `single-test packet` containing its supplied test source exactly once and exactly 26 pending scorecard rows. The named test verifies `create-agent-md` creates a `packet set` when it discovers a `.test.ts` test file; both use happy path, but exercise materially different scenarios.
+          Explanation: The current test verifies `render_agent_md_file` creates `single-test packet` containing its supplied test source exactly once and exactly 27 pending scorecard rows. The named test verifies `create-agent-md` creates a `packet set` when it discovers a `.test.ts` test file; both use happy path, but exercise materially different scenarios.
         - Scenario Difference: `test_pre_commit_review_workflow.py::test_refresh_scenario`
-          Explanation: The current test verifies `render_agent_md_file` creates `single-test packet` containing its supplied test source exactly once and exactly 26 pending scorecard rows. The named test verifies `pre-commit review workflow` replaces the complete `.agent.md` set with one pending single-test file per current test and one pending cross-test file when create-agent-md runs with unscoped --fresh; both use happy path, but exercise materially different scenarios.
+          Explanation: The current test verifies `render_agent_md_file` creates `single-test packet` containing its supplied test source exactly once and exactly 27 pending scorecard rows. The named test verifies `pre-commit review workflow` replaces the complete `.agent.md` set with one pending single-test file per current test and one pending cross-test file when create-agent-md runs with unscoped --fresh; both use happy path, but exercise materially different scenarios.
         - Happy/Failure Path Difference: `test_pre_commit_review_workflow.py::test_stale_test_requires_review`
-          Explanation: The current test verifies `render_agent_md_file` creates `single-test packet` containing its supplied test source exactly once and exactly 26 pending scorecard rows. The named test verifies `pre-commit review workflow` requires a new review only for an edited test and its cross-test relationships; the current test is happy path, while the named test is failure path.
+          Explanation: The current test verifies `render_agent_md_file` creates `single-test packet` containing its supplied test source exactly once and exactly 27 pending scorecard rows. The named test verifies `pre-commit review workflow` requires a new review only for an edited test and its cross-test relationships; the current test is happy path, while the named test is failure path.
         """
 
         with tempfile.TemporaryDirectory() as directory:
@@ -272,7 +272,7 @@ class AgenticMarkdownTests(unittest.TestCase):
 
         self.assertTrue(artifact_exists)
         self.assertEqual(1, artifact_text.count(source))
-        self.assertEqual(26, artifact_text.count("| pending |"))
+        self.assertEqual(27, artifact_text.count("| pending |"))
 
 if __name__ == "__main__":
     unittest.main()

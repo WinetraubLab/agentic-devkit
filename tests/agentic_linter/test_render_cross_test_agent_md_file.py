@@ -36,9 +36,15 @@ class CrossTestAgentMarkdownTests(unittest.TestCase):
 
         Similar Coverage:
         - Scenario Difference: `test_render_agent_md_file.py::test_creates_pending_packet`
-          Explanation: The current test verifies `render_cross_test_agent_md_file` creates `cross-test packet` containing one docstring entry for every unique selected path. The named test verifies `render_agent_md_file` creates `single-test packet` containing its supplied test source exactly once and exactly 26 pending scorecard rows; both use happy path, but exercise materially different scenarios.
+          Explanation: The current test verifies `render_cross_test_agent_md_file` creates `cross-test packet` containing one docstring entry for every unique selected path. The named test verifies `render_agent_md_file` creates `single-test packet` containing its supplied test source exactly once and exactly 27 pending scorecard rows; both use happy path, but exercise materially different scenarios.
         - Scenario Difference: `test_render_cross_test_agent_md_file.py::test_embeds_docstrings_without_test_implementation`
           Explanation: The current test verifies `render_cross_test_agent_md_file` creates `cross-test packet` containing one docstring entry for every unique selected path. The named test verifies `render_cross_test_agent_md_file` creates `cross-test packet` containing each test identifier and docstring without its implementation; both use happy path, but exercise materially different scenarios.
+        - Scenario Difference: `test_load_all_formats.py::test_loads_python_tests`
+          Explanation: The current test verifies repeated selected paths produce one cross-test docstring entry; the named test verifies discovery of Python tests creates their individual and relationship packets.
+        - Scenario Difference: `test_load_all_formats.py::test_loads_typescript_tests`
+          Explanation: The current test verifies repeated selected paths produce one cross-test docstring entry; the named test verifies discovery of TypeScript tests creates their individual and relationship packets.
+        - Scenario Difference: `test_pre_commit_review_workflow.py::test_refresh_scenario`
+          Explanation: The current test verifies repeated selected paths produce one cross-test docstring entry; the named test verifies unscoped fresh generation replaces completed and obsolete packets with the complete pending set.
         """
 
         with tempfile.TemporaryDirectory() as directory:
@@ -82,6 +88,8 @@ class CrossTestAgentMarkdownTests(unittest.TestCase):
         Similar Coverage:
         - Scenario Difference: `test_render_cross_test_agent_md_file.py::test_completed_classification_remains_valid`
           Explanation: The current test verifies `render_cross_test_agent_md_file` creates one `pair classification` row for every unordered test pair. The named test verifies `render_cross_test_agent_md_file` treats a completed `pair classification` as still valid when selected test files remain unchanged; both use happy path, but exercise materially different scenarios.
+        - Happy/Failure Path Difference: `test_pre_commit_review_workflow.py::test_stale_test_requires_review`
+          Explanation: The current test verifies a selected test set produces each unordered relationship pair exactly once; the named test verifies a source edit regenerates only the changed test packet and its relationship rows.
         """
 
         with tempfile.TemporaryDirectory() as directory:
@@ -232,9 +240,15 @@ class CrossTestAgentMarkdownTests(unittest.TestCase):
 
         Similar Coverage:
         - Module Difference: `test_render_agent_md_file.py::test_creates_pending_packet`
-          Explanation: The current test verifies `render_cross_test_agent_md_file` creates `cross-test packet` containing each test identifier and docstring without its implementation. The named test verifies `render_agent_md_file` creates `single-test packet` containing its supplied test source exactly once and exactly 26 pending scorecard rows; both exercise materially the same scenario through different named modules or contract subjects.
+          Explanation: The current test verifies `render_cross_test_agent_md_file` creates `cross-test packet` containing each test identifier and docstring without its implementation. The named test verifies `render_agent_md_file` creates `single-test packet` containing its supplied test source exactly once and exactly 27 pending scorecard rows; both exercise materially the same scenario through different named modules or contract subjects.
         - Scenario Difference: `test_render_cross_test_agent_md_file.py::test_deduplicates_cross_test_paths`
           Explanation: The current test verifies `render_cross_test_agent_md_file` creates `cross-test packet` containing each test identifier and docstring without its implementation. The named test verifies `render_cross_test_agent_md_file` creates `cross-test packet` containing one docstring entry for every unique selected path; both use happy path, but exercise materially different scenarios.
+        - Scenario Difference: `test_load_all_formats.py::test_loads_python_tests`
+          Explanation: The current test verifies cross-test packets include identifiers and docstrings but exclude implementation; the named test verifies discovery of Python tests creates their individual and relationship packets.
+        - Scenario Difference: `test_load_all_formats.py::test_loads_typescript_tests`
+          Explanation: The current test verifies cross-test packets include identifiers and docstrings but exclude implementation; the named test verifies discovery of TypeScript tests creates their individual and relationship packets.
+        - Scenario Difference: `test_pre_commit_review_workflow.py::test_refresh_scenario`
+          Explanation: The current test verifies cross-test packets include identifiers and docstrings but exclude implementation; the named test verifies unscoped fresh generation replaces completed and obsolete packets with the complete pending set.
         """
 
         with tempfile.TemporaryDirectory() as directory:

@@ -212,6 +212,8 @@ class CicdValidationWorkflowTests(unittest.TestCase):
         Verification Method: verify public function output
 
         Verification Detail:
+        `_record_approved_manifest` simulates agent approval by writing passing packet results between real create-agent-md and lint invocations.
+        `_run_cli` runs the real CLI in a subprocess; the remaining helpers write source, remove packets, and enumerate files in the temporary repository.
         1. Harness creates a temporary repository containing one valid test.
         2. Harness completes its review.
         3. Harness persists current passing proof in the manifest.
@@ -238,6 +240,10 @@ class CicdValidationWorkflowTests(unittest.TestCase):
           Explanation: The current test verifies CI lint creates no review packets. The named test verifies an edited test creates only its packet and related relationship rows; the current test is happy path, while the named test is failure path.
         - Scenario Difference: `test_agent_review_examples.py::test_current_jsonl_attestation_skips_evaluation`
           Explanation: The current test verifies CI writes no review packets when the manifest already proves the tests; the named test verifies matching YAML-case proof bypasses evaluation and produces no pending packet paths.
+        - Scenario Difference: `test_load_all_formats.py::test_loads_python_tests`
+          Explanation: The current test verifies CI validation with current proof creates no review packets; the named test verifies discovery of Python tests creates their individual and relationship packets.
+        - Scenario Difference: `test_load_all_formats.py::test_loads_typescript_tests`
+          Explanation: The current test verifies CI validation with current proof creates no review packets; the named test verifies discovery of TypeScript tests creates their individual and relationship packets.
         """
 
         test_source = textwrap.dedent(
