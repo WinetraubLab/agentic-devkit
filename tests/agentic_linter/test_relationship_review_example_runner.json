@@ -1,7 +1,7 @@
 {
-  "reviewer": {"model": "gpt-6.1-sol medium"},
+  "reviewer": {"model": "gpt-6-astra medium"},
   "total": {"success": "7/7 (100% pass)", "enforced_checks": 7},
-  "runtime": {"yaml_cases": 4, "total": "18m 49.9s", "average_per_yaml_case": "4m 42.5s"},
+  "runtime": {"yaml_cases": 4, "total": "31.9s", "average_per_yaml_case": "8.0s"},
   "criteria": {
     "10": {"success": "4/4 (100% pass)", "enforced_checks": 4, "failing_yaml_cases": []},
     "11": {"success": "3/3 (100% pass)", "enforced_checks": 3, "failing_yaml_cases": []}

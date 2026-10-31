@@ -1,21 +1,22 @@
 {
-  "reviewer": {"model": "gpt-6.1-sol medium"},
-  "total": {"success": "715/772 (92.6% pass)", "enforced_checks": 772},
-  "runtime": {"yaml_cases": 97, "total": "24m 52.7s", "average_per_yaml_case": "15.4s"},
+  "reviewer": {"model": "gpt-6-astra medium"},
+  "total": {"success": "734/776 (94.6% pass)", "enforced_checks": 776},
+  "runtime": {"yaml_cases": 101, "total": "11064m 22.2s", "average_per_yaml_case": "109m 32.9s"},
   "criteria": {
-    "11": {"success": "28/29 (96.6% pass)", "enforced_checks": 29, "failing_yaml_cases": ["requirement_formulation_001_availability_without_behavior"]},
+    "11": {"success": "29/29 (100% pass)", "enforced_checks": 29, "failing_yaml_cases": []},
     "12": {"success": "31/31 (100% pass)", "enforced_checks": 31, "failing_yaml_cases": []},
-    "13": {"success": "26/32 (81.2% pass)", "enforced_checks": 32, "failing_yaml_cases": ["requirement_formulation_001_availability_without_behavior", "requirement_formulation_017_repository_policy_described", "requirement_formulation_019_source_test_pairing", "stability_005_typescript_fields_need", "stability_016_lint_requires_reviewer", "stability_017_lint_requires_reviewer"]},
+    "13": {"success": "29/32 (90.6% pass)", "enforced_checks": 32, "failing_yaml_cases": ["requirement_formulation_001_availability_without_behavior", "requirement_formulation_017_repository_policy_described", "stability_005_typescript_fields_need"]},
     "14": {"success": "27/29 (93.1% pass)", "enforced_checks": 29, "failing_yaml_cases": ["requirement_formulation_013_module_public_function", "requirement_formulation_025_overloaded_record_default"]},
-    "15": {"success": "27/27 (100% pass)", "enforced_checks": 27, "failing_yaml_cases": []},
-    "16": {"success": "77/80 (96.2% pass)", "enforced_checks": 80, "failing_yaml_cases": ["requirement_formulation_009_unused_context_without", "requirement_formulation_011_version_relationship_is", "stability_019_requires_reciprocal_references"]},
-    "17": {"success": "24/27 (88.9% pass)", "enforced_checks": 27, "failing_yaml_cases": ["requirement_formulation_024_changed_review_contract", "stability_016_lint_requires_reviewer", "stability_017_lint_requires_reviewer"]},
-    "21": {"success": "23/28 (82.1% pass)", "enforced_checks": 28, "failing_yaml_cases": ["requirement_formulation_020_ordered_review_stages", "stability_006_loads_python_tests", "stability_016_lint_requires_reviewer", "stability_018_requires_reciprocal_references", "stability_019_requires_reciprocal_references"]},
+    "15": {"success": "26/27 (96.3% pass)", "enforced_checks": 27, "failing_yaml_cases": ["stability_017_lint_requires_reviewer"]},
+    "16": {"success": "79/80 (98.8% pass)", "enforced_checks": 80, "failing_yaml_cases": ["stability_017_lint_requires_reviewer"]},
+    "17": {"success": "26/27 (96.3% pass)", "enforced_checks": 27, "failing_yaml_cases": ["requirement_formulation_024_changed_review_contract"]},
+    "21": {"success": "28/28 (100% pass)", "enforced_checks": 28, "failing_yaml_cases": []},
     "22": {"success": "24/25 (96% pass)", "enforced_checks": 25, "failing_yaml_cases": ["verification_detail_formulation_002_verification_uses_bare"]},
     "23": {"success": "25/26 (96.2% pass)", "enforced_checks": 26, "failing_yaml_cases": ["stability_006_loads_python_tests"]},
+    "24": {"success": "4/4 (100% pass)", "enforced_checks": 4, "failing_yaml_cases": []},
     "31": {"success": "24/26 (92.3% pass)", "enforced_checks": 26, "failing_yaml_cases": ["sentence_quality_021_double_negative_invalidation", "sentence_quality_022_double_negative_availability"]},
     "32": {"success": "25/26 (96.2% pass)", "enforced_checks": 26, "failing_yaml_cases": ["stability_013_cicd_accepts_current"]},
-    "33": {"success": "22/29 (75.9% pass)", "enforced_checks": 29, "failing_yaml_cases": ["sentence_quality_005_articles_do_not", "sentence_quality_020_redundant_defined_term", "stability_012_cicd_accepts_current", "stability_018_requires_reciprocal_references", "stability_019_requires_reciprocal_references", "stability_022_anonymous_agent_review", "stability_024_enforces_public_function"]},
+    "33": {"success": "25/29 (86.2% pass)", "enforced_checks": 29, "failing_yaml_cases": ["sentence_quality_020_redundant_defined_term", "stability_013_cicd_accepts_current", "stability_022_anonymous_agent_review", "stability_024_enforces_public_function"]},
     "34": {"success": "26/28 (92.9% pass)", "enforced_checks": 28, "failing_yaml_cases": ["stability_016_lint_requires_reviewer", "stability_024_enforces_public_function"]},
     "35": {"success": "25/26 (96.2% pass)", "enforced_checks": 26, "failing_yaml_cases": ["stability_024_enforces_public_function"]},
     "36": {"success": "24/24 (100% pass)", "enforced_checks": 24, "failing_yaml_cases": []},
@@ -26,8 +27,8 @@
     "43": {"success": "29/29 (100% pass)", "enforced_checks": 29, "failing_yaml_cases": []},
     "44": {"success": "30/32 (93.8% pass)", "enforced_checks": 32, "failing_yaml_cases": ["file_docstring_006_alternate_context_name", "file_docstring_007_similar_artifact_names"]},
     "46": {"success": "26/29 (89.7% pass)", "enforced_checks": 29, "failing_yaml_cases": ["file_docstring_006_alternate_context_name", "file_docstring_008_changed_canonical_phrase", "file_docstring_009_readme_name_shorthand"]},
-    "51": {"success": "20/33 (60.6% pass)", "enforced_checks": 33, "failing_yaml_cases": ["requirement_formulation_001_availability_without_behavior", "requirement_formulation_023_stale_attestation_uses", "requirement_formulation_024_changed_review_contract", "stability_001_readme_workflows_head", "stability_012_cicd_accepts_current", "stability_013_cicd_accepts_current", "stability_014_accepts_public_output", "stability_015_accepts_public_output", "stability_017_lint_requires_reviewer", "stability_018_requires_reciprocal_references", "stability_019_requires_reciprocal_references", "stability_022_anonymous_agent_review", "stability_025_enforces_public_function"]},
+    "51": {"success": "20/33 (60.6% pass)", "enforced_checks": 33, "failing_yaml_cases": ["stability_001_readme_workflows_head", "stability_002_accepts_defined_requirement", "stability_004_reports_same_line", "stability_005_typescript_fields_need", "stability_013_cicd_accepts_current", "stability_014_accepts_public_output", "stability_015_accepts_public_output", "stability_016_lint_requires_reviewer", "stability_017_lint_requires_reviewer", "stability_018_requires_reciprocal_references", "stability_022_anonymous_agent_review", "stability_023_reports_empty_requirement", "stability_025_enforces_public_function"]},
     "52": {"success": "25/25 (100% pass)", "enforced_checks": 25, "failing_yaml_cases": []},
-    "53": {"success": "26/29 (89.7% pass)", "enforced_checks": 29, "failing_yaml_cases": ["self_containment_005_reviewed_artifact_helpers", "stability_012_cicd_accepts_current", "stability_017_lint_requires_reviewer"]}
+    "53": {"success": "26/29 (89.7% pass)", "enforced_checks": 29, "failing_yaml_cases": ["self_containment_005_reviewed_artifact_helpers", "stability_016_lint_requires_reviewer", "stability_017_lint_requires_reviewer"]}
   }
 }

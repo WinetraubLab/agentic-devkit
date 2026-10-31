@@ -198,6 +198,8 @@ class AgentReviewManifestTests(unittest.TestCase):
         Verification Method: verify private function output
 
         Verification Detail:
+        `_write_manifest` supplies a synthetic passing-review record with the requested historical contract hash.
+        `_write_test_file` writes the supplied source with a file docstring, and `_test_hash` hashes the extracted test; the production functions run without substitution.
         The issue list is empty.
         No replacement review packet is required.
         The historical manifest record remains unchanged.
@@ -231,6 +233,8 @@ class AgentReviewManifestTests(unittest.TestCase):
           Explanation: The current test verifies unchanged test proof remains valid with historical review-contract metadata; the named test verifies completed pair classifications remain valid when reviewed test files are unchanged.
         - Scenario Difference: `test_pre_commit_review_workflow.py::test_current_manifest_generates_zero_packets`
           Explanation: The current test verifies unchanged test proof remains valid with historical review-contract metadata; the named test verifies ordinary packet generation reports zero packets for current passing proof.
+        - Happy/Failure Path Difference: `test_pre_commit_review_workflow.py::test_stale_test_requires_review`
+          Explanation: The current test verifies unchanged proof survives a historical review-contract hash; the named test verifies a source edit regenerates only the changed test packet and its relationship rows.
         """
 
         with tempfile.TemporaryDirectory() as directory:
@@ -388,6 +392,8 @@ class AgentReviewManifestTests(unittest.TestCase):
         Verification Method: verify public function output
 
         Verification Detail:
+        `_write_manifest` and `_write_artifact` simulate an approved agent review by writing passing proof and a passing review artifact for the supplied source.
+        `_write_test_file` writes that source with a file docstring, and `_test_hash` computes its extracted-test hash without replacing production behavior.
         `build_manifest_from_agent_md_files` output contains only `tests/test_sample.py`.
         Retained `manifest proof` has status `pass`.
         Retained source SHA256 equals the current `test_adds_values` content SHA256.
@@ -419,6 +425,8 @@ class AgentReviewManifestTests(unittest.TestCase):
           Explanation: The current test verifies recording retains existing current proof. The named test verifies a mixed run saves passing proof while reporting another failed review; these scenarios distinguish the two contracts.
         - Happy/Failure Path Difference: `test_build_manifest_from_agent_md_files.py::test_pending_review_is_not_recorded`
           Explanation: The current test verifies recording retains existing current proof. The named test verifies an incomplete first review creates no proof; these scenarios distinguish the two contracts.
+        - Happy/Failure Path Difference: `test_pre_commit_review_workflow.py::test_stale_test_requires_review`
+          Explanation: The current test verifies recording retains passing proof matching current source; the named test verifies a source edit regenerates only the changed test packet and its relationship rows.
         """
 
         with tempfile.TemporaryDirectory() as directory:

@@ -99,6 +99,8 @@ class PreCommitReviewWorkflowTests(unittest.TestCase):
         Verification Method: verify public function output
 
         Verification Detail:
+        `_complete_packets` simulates the agent reviewer by writing passing results to the generated packets; the real lint command then records that proof.
+        `_run_cli` invokes the real CLI in a subprocess, and `_write_source` writes the locally defined source to the temporary repository.
         The create-agent-md exit status indicates success.
         The create-agent-md output contains `generated 0 agent review packets`.
 
@@ -125,14 +127,43 @@ class PreCommitReviewWorkflowTests(unittest.TestCase):
           Explanation: The current test verifies ordinary packet generation reports zero packets for current passing proof; the named test verifies unchanged test proof remains valid with historical review-contract metadata.
         - Scenario Difference: `test_render_cross_test_agent_md_file.py::test_completed_classification_remains_valid`
           Explanation: The current test verifies ordinary packet generation reports zero packets for current passing proof; the named test verifies completed pair classifications remain valid when reviewed test files are unchanged.
+        - Scenario Difference: `test_load_all_formats.py::test_loads_python_tests`
+          Explanation: The current test verifies ordinary generation with current passing proof creates no packets; the named test verifies discovery of Python tests creates their individual and relationship packets.
+        - Scenario Difference: `test_load_all_formats.py::test_loads_typescript_tests`
+          Explanation: The current test verifies ordinary generation with current passing proof creates no packets; the named test verifies discovery of TypeScript tests creates their individual and relationship packets.
         """
 
         with tempfile.TemporaryDirectory() as directory:
             repo_root = Path(directory)
-            self._record_current_review(
-                repo_root,
-                evidence="current review passed",
+            test_source = textwrap.dedent(
+                '''\
+                """Tests in this file validate `current review example` located at `src/current.py`.
+                `current review example` is responsible for exposing a stable truth value.
+                """
+
+                def test_current_truth() -> None:
+                    """Test Path: happy path
+
+                    Requirement Tested:
+                    `current review example` exposes a true value.
+                    Standard usage: The scenario demonstrates baseline behavior.
+
+                    Verification Method: verify public function output
+
+                    Verification Detail:
+                    The exposed value equals true.
+                    """
+
+                    assert True
+                '''
             )
+            _write_source(repo_root / "src" / "current.py", "VALUE = True\n")
+            _write_source(repo_root / "tests" / "test_current.py", test_source)
+            initial_creation = _run_cli(repo_root, "create-agent-md")
+            self.assertEqual(0, initial_creation.returncode)  # Input check
+            _complete_packets(repo_root, status="pass", evidence="current review passed")
+            recorded_lint = _run_cli(repo_root, "lint")
+            self.assertEqual(0, recorded_lint.returncode)  # Input check
             creation = _run_cli(repo_root, "create-agent-md")
 
         self.assertEqual(0, creation.returncode)
@@ -528,6 +559,7 @@ class PreCommitReviewWorkflowTests(unittest.TestCase):
         Verification Method: verify public function output
 
         Verification Detail:
+        `_write_source` writes the supplied fixture files, `_run_cli` invokes the real CLI in a subprocess, and `_packet_paths` enumerates generated files; these helpers replace no dependency behavior.
         1. Harness creates a temporary repository containing a test whose docstring lacks Requirement Tested.
         2. Harness invokes `agentic-devkit tdd create-agent-md --repo-root <temporary-repository>`.
         3. Command output contains `missing_requirement`.
@@ -544,6 +576,10 @@ class PreCommitReviewWorkflowTests(unittest.TestCase):
           Explanation: The current test verifies `pre-commit review workflow` prevents `.agent.md` creation when conventional linter emits missing_requirement. The named test verifies `pre-commit review workflow` persists an approved test in the manifest when its `.agent.md` scorecard passes; the current test is failure path, while the named test is happy path.
         - Happy/Failure Path Difference: `test_pre_commit_review_workflow.py::test_refresh_scenario`
           Explanation: The current test verifies `pre-commit review workflow` prevents `.agent.md` creation when conventional linter emits missing_requirement. The named test verifies `pre-commit review workflow` replaces the complete `.agent.md` set with one pending single-test file per current test and one pending cross-test file when create-agent-md runs with unscoped --fresh; the current test is failure path, while the named test is happy path.
+        - Happy/Failure Path Difference: `test_load_all_formats.py::test_loads_python_tests`
+          Explanation: The current test verifies a missing requirement prevents review packet generation; the named test verifies discovery of Python tests creates their individual and relationship packets.
+        - Happy/Failure Path Difference: `test_load_all_formats.py::test_loads_typescript_tests`
+          Explanation: The current test verifies a missing requirement prevents review packet generation; the named test verifies discovery of TypeScript tests creates their individual and relationship packets.
         """
 
         invalid_test_source = textwrap.dedent(
@@ -747,6 +783,8 @@ class PreCommitReviewWorkflowTests(unittest.TestCase):
         Verification Method: verify public function output
 
         Verification Detail:
+        `_complete_packets` simulates completed agent reviews by writing scorecard results and relationship classifications to temporary packet files.
+        `_run_cli` invokes the real CLI in a subprocess; the file helpers read and write the temporary repository.
         1. Harness creates a temporary repository containing three tests.
         2. Harness invokes `agentic-devkit tdd create-agent-md --repo-root <temporary-repository>`.
         3. Harness classifies every review as successful.
@@ -796,6 +834,16 @@ class PreCommitReviewWorkflowTests(unittest.TestCase):
           Explanation: The current test verifies editing a test regenerates its packet and its affected relationship rows; the named test verifies an outdated YAML-case digest produces a pending-packet error.
         - Happy/Failure Path Difference: `test_render_cross_test_agent_md_file.py::test_completed_classification_remains_valid`
           Explanation: The current test verifies editing a test regenerates its packet and its affected relationship rows; the named test verifies completed pair classifications remain valid when reviewed test files are unchanged.
+        - Happy/Failure Path Difference: `test_build_manifest_from_agent_md_files.py::test_manifest_accepts_old_review_contract`
+          Explanation: The current test verifies a source edit regenerates only the changed test packet and its relationship rows; the named test verifies unchanged proof survives a historical review-contract hash.
+        - Happy/Failure Path Difference: `test_build_manifest_from_agent_md_files.py::test_recording_keeps_current_proof`
+          Explanation: The current test verifies a source edit regenerates only the changed test packet and its relationship rows; the named test verifies recording retains passing proof matching current source.
+        - Happy/Failure Path Difference: `test_render_cross_test_agent_md_file.py::test_lists_each_pair_once`
+          Explanation: The current test verifies a source edit regenerates only the changed test packet and its relationship rows; the named test verifies a selected test set produces each unordered relationship pair exactly once.
+        - Happy/Failure Path Difference: `test_load_all_formats.py::test_loads_python_tests`
+          Explanation: The current test verifies a source edit regenerates only the changed test packet and its relationship rows; the named test verifies discovery of Python tests creates their individual and relationship packets.
+        - Happy/Failure Path Difference: `test_load_all_formats.py::test_loads_typescript_tests`
+          Explanation: The current test verifies a source edit regenerates only the changed test packet and its relationship rows; the named test verifies discovery of TypeScript tests creates their individual and relationship packets.
         """
 
         original_source = textwrap.dedent(
@@ -1096,6 +1144,8 @@ class PreCommitReviewWorkflowTests(unittest.TestCase):
         Verification Method: verify public function output
 
         Verification Detail:
+        `_complete_packets` simulates completed agent reviews by writing scorecard results and relationship classifications to temporary packet files.
+        `_run_cli` invokes the real CLI in a subprocess; the file helpers read and write the temporary repository.
         1. `_packet_paths` output contains one named single-test `.agent.md` file for each current test and `cross_test_review.agent.md`.
         2. `_packet_contents` output gives every scorecard row status `pending`.
         3. `_packet_contents` output contains no prior completed evidence.
@@ -1123,6 +1173,10 @@ class PreCommitReviewWorkflowTests(unittest.TestCase):
           Explanation: The current test verifies fresh generation recreates every individual and relationship packet. The named test verifies repository discovery loads TypeScript tests; both use happy path, but exercise materially different scenarios.
         - Scenario Difference: `test_pre_commit_review_workflow.py::test_lint_ignores_obsolete_pending_packets`
           Explanation: The current test verifies fresh generation recreates every individual and relationship packet. The named test verifies lint ignores obsolete pending packets when manifest proof is current; both use happy path, but exercise materially different scenarios.
+        - Scenario Difference: `test_render_cross_test_agent_md_file.py::test_deduplicates_cross_test_paths`
+          Explanation: The current test verifies unscoped fresh generation replaces completed and obsolete packets with the complete pending set; the named test verifies repeated selected paths produce one cross-test docstring entry.
+        - Scenario Difference: `test_render_cross_test_agent_md_file.py::test_embeds_docstrings_without_test_implementation`
+          Explanation: The current test verifies unscoped fresh generation replaces completed and obsolete packets with the complete pending set; the named test verifies cross-test packets include identifiers and docstrings but exclude implementation.
         """
 
         first_source = textwrap.dedent(

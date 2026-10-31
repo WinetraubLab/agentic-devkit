@@ -4,7 +4,7 @@
 Terms:
 - `.py`: This suffix identifies a Python test file. For example, `test_parser.py` contains Python tests discovered by the CLI.
 - `.test.ts`: This suffix identifies a TypeScript test file. For example, `parser.test.ts` contains TypeScript tests discovered by the CLI.
-- `packet set`: A packet set contains one single-test `.agent.md` file populated with a discovered test's documentation and source and one cross-test `.agent.md` file populated with test identifiers and docstrings.
+- `packet set`: A packet set contains one single-test `.agent.md` file populated with a discovered test's documentation and source and one cross-test `.agent.md` file populated with test identifiers and docstrings, excluding test implementation.
 """
 
 from __future__ import annotations
@@ -60,6 +60,18 @@ class LoadAllFormatsTests(unittest.TestCase):
           Explanation: The current test verifies `create-agent-md` creates a `packet set` from a discovered `.py` test file. The named test verifies `create-agent-md` emits missing_file_docstring when a `.test.ts` file omits file-level documentation; the current test is happy path, while the named test is failure path.
         - Scenario Difference: `test_pre_commit_review_workflow.py::test_refresh_scenario`
           Explanation: The current test verifies repository discovery loads Python tests. The named test verifies fresh generation recreates every individual and relationship packet; both use happy path, but exercise materially different scenarios.
+        - Scenario Difference: `test_render_cross_test_agent_md_file.py::test_deduplicates_cross_test_paths`
+          Explanation: The current test verifies discovery of Python tests creates their individual and relationship packets; the named test verifies repeated selected paths produce one cross-test docstring entry.
+        - Scenario Difference: `test_render_cross_test_agent_md_file.py::test_embeds_docstrings_without_test_implementation`
+          Explanation: The current test verifies discovery of Python tests creates their individual and relationship packets; the named test verifies cross-test packets include identifiers and docstrings but exclude implementation.
+        - Scenario Difference: `test_cicd_validation_workflow.py::test_cicd_creates_no_packets`
+          Explanation: The current test verifies discovery of Python tests creates their individual and relationship packets; the named test verifies CI validation with current proof creates no review packets.
+        - Scenario Difference: `test_pre_commit_review_workflow.py::test_current_manifest_generates_zero_packets`
+          Explanation: The current test verifies discovery of Python tests creates their individual and relationship packets; the named test verifies ordinary generation with current passing proof creates no packets.
+        - Happy/Failure Path Difference: `test_pre_commit_review_workflow.py::test_classic_linter_errors_scenario`
+          Explanation: The current test verifies discovery of Python tests creates their individual and relationship packets; the named test verifies a missing requirement prevents review packet generation.
+        - Happy/Failure Path Difference: `test_pre_commit_review_workflow.py::test_stale_test_requires_review`
+          Explanation: The current test verifies discovery of Python tests creates their individual and relationship packets; the named test verifies a source edit regenerates only the changed test packet and its relationship rows.
         """
 
         python_source = textwrap.dedent(
@@ -160,6 +172,18 @@ class LoadAllFormatsTests(unittest.TestCase):
           Explanation: The current test verifies `create-agent-md` creates a `packet set` when it discovers a `.test.ts` test file. The named test verifies `create-agent-md` emits missing_file_docstring when a `.test.ts` file omits file-level documentation; the current test is happy path, while the named test is failure path.
         - Scenario Difference: `test_pre_commit_review_workflow.py::test_refresh_scenario`
           Explanation: The current test verifies repository discovery loads TypeScript tests. The named test verifies fresh generation recreates every individual and relationship packet; both use happy path, but exercise materially different scenarios.
+        - Scenario Difference: `test_render_cross_test_agent_md_file.py::test_deduplicates_cross_test_paths`
+          Explanation: The current test verifies discovery of TypeScript tests creates their individual and relationship packets; the named test verifies repeated selected paths produce one cross-test docstring entry.
+        - Scenario Difference: `test_render_cross_test_agent_md_file.py::test_embeds_docstrings_without_test_implementation`
+          Explanation: The current test verifies discovery of TypeScript tests creates their individual and relationship packets; the named test verifies cross-test packets include identifiers and docstrings but exclude implementation.
+        - Scenario Difference: `test_cicd_validation_workflow.py::test_cicd_creates_no_packets`
+          Explanation: The current test verifies discovery of TypeScript tests creates their individual and relationship packets; the named test verifies CI validation with current proof creates no review packets.
+        - Scenario Difference: `test_pre_commit_review_workflow.py::test_current_manifest_generates_zero_packets`
+          Explanation: The current test verifies discovery of TypeScript tests creates their individual and relationship packets; the named test verifies ordinary generation with current passing proof creates no packets.
+        - Happy/Failure Path Difference: `test_pre_commit_review_workflow.py::test_classic_linter_errors_scenario`
+          Explanation: The current test verifies discovery of TypeScript tests creates their individual and relationship packets; the named test verifies a missing requirement prevents review packet generation.
+        - Happy/Failure Path Difference: `test_pre_commit_review_workflow.py::test_stale_test_requires_review`
+          Explanation: The current test verifies discovery of TypeScript tests creates their individual and relationship packets; the named test verifies a source edit regenerates only the changed test packet and its relationship rows.
         """
 
         typescript_source = textwrap.dedent(
