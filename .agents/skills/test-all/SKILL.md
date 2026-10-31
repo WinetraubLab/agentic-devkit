@@ -55,3 +55,15 @@ Record the test count and command exit status.
 
 Report each stage as passed, failed, blocked, skipped, or not applicable, with
 counts or a brief reason. Note changed files and unresolved issues.
+
+End the final response with exactly one of these bold lines, after all tables,
+recommendations, and child-skill summaries:
+
+- **Bottom line: PASS**
+- **Bottom line: FAIL**
+
+Use PASS only when every required check and review is complete and passes.
+Use FAIL if any required check fails, is blocked, is skipped, or remains incomplete,
+even when its CLI exits successfully. Explicitly inapplicable checks do not count
+as failures. This final-line requirement takes precedence over child skills'
+closing-format instructions when running test-all.
