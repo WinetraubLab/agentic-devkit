@@ -22,11 +22,11 @@
 
 {{ policy_content }}
 
-{% if configuration -%}
-## Configuration
+{% if policy_data -%}
+## Policy data
 
 ```yaml
-{{ configuration_yaml }}
+{{ policy_data_yaml }}
 ```
 
 {% endif -%}
