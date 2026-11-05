@@ -22,6 +22,14 @@
 
 {{ policy_content }}
 
+{% if configuration -%}
+## Configuration
+
+```yaml
+{{ configuration_yaml }}
+```
+
+{% endif -%}
 ### Review checklist
 
 {% for item in review_checklist %}- [ ] {{ item }}
