@@ -92,7 +92,7 @@ def _read_source(path: Path, root: Path) -> dict:
         raise ValueError(f"{label} contains invalid YAML: {error}") from error
     if not isinstance(source, dict):
         raise ValueError(f"{label} must contain a YAML object.")
-    unknown = [str(field) for field in source if field not in (*REQUIRED_FIELDS, "review_checklist", "applicable_folders", "exemptions")]
+    unknown = [str(field) for field in source if field not in (*REQUIRED_FIELDS, "review_checklist", "applicable_folders", "exemptions", "policy_data")]
     if unknown:
         raise ValueError(f"{label} contains unknown fields: {', '.join(unknown)}.")
     for field in REQUIRED_FIELDS:
@@ -108,6 +108,10 @@ def _read_source(path: Path, root: Path) -> dict:
             if len(item.split()) > limit:
                 raise ValueError(f"{label} {field} entry {index} exceeds {limit} words.")
         source[field] = [" ".join(item.split()) for item in entries]
+    policy_data = source.get("policy_data", {})
+    if not isinstance(policy_data, dict):
+        raise ValueError(f"{label} requires policy_data to be a YAML object.")
+    source["policy_data"] = policy_data
     return source
 
 
@@ -172,6 +176,7 @@ def render_policy_documents(
         rendered = template.render(
             source,
             applicable_folders=folders, scope_directories=folders,
+            policy_data_yaml=yaml.safe_dump(source["policy_data"], sort_keys=False).rstrip(),
         )
         if check:
             label = output_path.relative_to(root).as_posix()
