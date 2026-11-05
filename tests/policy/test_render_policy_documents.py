@@ -13,6 +13,53 @@ from agentic_devkit.policies.render_policy_documents import render_policy_docume
 from tests.policy.test_harness.fixtures import _renderer_fixture, _complete
 
 class PolicyTests(unittest.TestCase):
+    def test_renders_policy_data(self) -> None:
+        """Test Path: happy path
+
+        Requirement Tested:
+        `policy document renderer` preserves structured policy data in generated Markdown and detects stale policy data.
+
+        Verification Method: verify public function output
+
+        Verification Detail:
+        The rendered YAML retains nested paths and reasons; changing a reason makes check mode fail.
+        """
+        root = _renderer_fixture(self)
+        source = root / "policy/user-interface/back-navigation.policy.yaml"
+        policy = yaml.safe_load(source.read_text())
+        policy_data = {"full_page_exceptions": [{"path": "docs/e2e/assets/example.png", "reason": "Show all rows."}]}
+        policy["policy_data"] = policy_data
+        source.write_text(yaml.safe_dump(policy))
+        render_policy_documents(root=root)
+        output = (root / "policy/user-interface/back-navigation.md").read_text()
+        rendered = output.split("## Policy data\n", 1)[1].split("```yaml\n", 1)[1].split("```", 1)[0]
+        self.assertEqual(yaml.safe_load(rendered), policy_data)
+        render_policy_documents(root=root, check=True)
+        policy_data["full_page_exceptions"][0]["reason"] = "Show both highlighted cards."
+        source.write_text(yaml.safe_dump(policy))
+        with self.assertRaisesRegex(ValueError, "stale"):
+            render_policy_documents(root=root, check=True)
+
+    def test_rejects_non_object_policy_data(self) -> None:
+        """Test Path: failure path
+
+        Requirement Tested:
+        `policy document renderer` rejects policy_data that is not a YAML object.
+
+        Verification Method: verify public function output
+
+        Verification Detail:
+        Null, lists, and scalar values fail with a policy_data diagnostic.
+        """
+        root = _renderer_fixture(self)
+        source = root / "policy/user-interface/back-navigation.policy.yaml"
+        policy = yaml.safe_load(source.read_text())
+        for value in (None, [], "text", 12, True):
+            with self.subTest(value=value):
+                source.write_text(yaml.safe_dump({**policy, "policy_data": value}))
+                with self.assertRaisesRegex(ValueError, "policy_data"):
+                    render_policy_documents(root=root)
+
     def test_rejects_long_checklist_entries(self) -> None:
         """Test Path: failure path
 
