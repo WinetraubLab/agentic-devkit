@@ -17,12 +17,19 @@ class PolicyTests(unittest.TestCase):
         """Test Path: happy path
 
         Requirement Tested:
-        `policy document renderer` preserves structured policy data in generated Markdown and detects stale policy data.
+        `policy document renderer` preserves structured policy data in generated Markdown.
+        Specialized usage: The policy data contains nested lists and mappings.
 
         Verification Method: verify public function output
 
         Verification Detail:
-        The rendered YAML retains nested paths and reasons; changing a reason makes check mode fail.
+        The rendered YAML equals the supplied policy data, including nested paths and reasons.
+
+        Similar Coverage:
+        - Happy/Failure Path Difference: `test_render_policy_documents.py::test_rejects_non_object_policy_data`
+          Explanation: This test preserves structured policy data; the named test rejects policy data with an invalid type.
+        - Scenario Difference: `test_render_policy_documents.py::test_renders_policy_document`
+          Explanation: This test preserves nested policy data; the named test renders the policy title, rules, and checklist using the bundled template.
         """
         root = _renderer_fixture(self)
         source = root / "policy/user-interface/back-navigation.policy.yaml"
@@ -34,6 +41,30 @@ class PolicyTests(unittest.TestCase):
         output = (root / "policy/user-interface/back-navigation.md").read_text()
         rendered = output.split("## Policy data\n", 1)[1].split("```yaml\n", 1)[1].split("```", 1)[0]
         self.assertEqual(yaml.safe_load(rendered), policy_data)
+
+    def test_detects_stale_policy_data(self) -> None:
+        """Test Path: failure path
+
+        Requirement Tested:
+        `policy document renderer` rejects document checks when structured policy data differs from its YAML source.
+        When a nested reason changes after rendering, the renderer rejects the stale document.
+
+        Verification Method: verify public function output
+
+        Verification Detail:
+        Check mode raises ValueError with a stale-data diagnostic after the source reason changes.
+
+        Similar Coverage:
+        - Scenario Difference: `test_render_policy_documents.py::test_rejects_manual_body_edits`
+          Explanation: This test rejects a document after policy data changes in the YAML source; the named test rejects direct edits to generated Markdown.
+        """
+        root = _renderer_fixture(self)
+        source = root / "policy/user-interface/back-navigation.policy.yaml"
+        policy = yaml.safe_load(source.read_text())
+        policy_data = {"full_page_exceptions": [{"path": "docs/e2e/assets/example.png", "reason": "Show all rows."}]}
+        policy["policy_data"] = policy_data
+        source.write_text(yaml.safe_dump(policy))
+        render_policy_documents(root=root)
         render_policy_documents(root=root, check=True)
         policy_data["full_page_exceptions"][0]["reason"] = "Show both highlighted cards."
         source.write_text(yaml.safe_dump(policy))
@@ -45,11 +76,20 @@ class PolicyTests(unittest.TestCase):
 
         Requirement Tested:
         `policy document renderer` rejects policy_data that is not a YAML object.
+        When policy_data is null, a list, or a scalar, the renderer rejects the policy.
 
         Verification Method: verify public function output
 
         Verification Detail:
         Null, lists, and scalar values fail with a policy_data diagnostic.
+
+        Similar Coverage:
+        - Happy/Failure Path Difference: `test_render_policy_documents.py::test_renders_policy_data`
+          Explanation: This test rejects policy data with an invalid type; the named test preserves structured policy data.
+        - Scenario Difference: `test_render_policy_documents.py::test_requires_review_checklist`
+          Explanation: This test rejects policy data with an invalid type; the named test rejects a missing or invalid checklist.
+        - Scenario Difference: `test_render_policy_documents.py::test_rejects_invalid_policy_fields`
+          Explanation: This test rejects policy data with an invalid type; the named test rejects malformed folder selections and exemption lists.
         """
         root = _renderer_fixture(self)
         source = root / "policy/user-interface/back-navigation.policy.yaml"
@@ -57,7 +97,7 @@ class PolicyTests(unittest.TestCase):
         for value in (None, [], "text", 12, True):
             with self.subTest(value=value):
                 source.write_text(yaml.safe_dump({**policy, "policy_data": value}))
-                with self.assertRaisesRegex(ValueError, "policy_data"):
+                with self.assertRaisesRegex(ValueError, "policy_data"):  # Input check
                     render_policy_documents(root=root)
 
     def test_rejects_long_checklist_entries(self) -> None:
@@ -119,6 +159,10 @@ class PolicyTests(unittest.TestCase):
 
         Verification Detail:
         The renderer raises ValueError naming the required checklist field for each invalid policy.
+
+        Similar Coverage:
+        - Scenario Difference: `test_render_policy_documents.py::test_rejects_non_object_policy_data`
+          Explanation: This test rejects a missing or invalid checklist; the named test rejects policy data with an invalid type.
         """
         root = _renderer_fixture(self)
         source = root / "policy/user-interface/back-navigation.policy.yaml"
@@ -248,6 +292,8 @@ class PolicyTests(unittest.TestCase):
           Explanation: This test rejects invalid YAML field values; the named test restricts recursive review to one selected subfolder.
         - Happy/Failure Path Difference: `test_render_policy_documents.py::test_renders_linked_applicable_folders`
           Explanation: This test rejects invalid YAML field values; the named test lists a linked folder for recursive review.
+        - Scenario Difference: `test_render_policy_documents.py::test_rejects_non_object_policy_data`
+          Explanation: This test rejects malformed folder selections and exemption lists; the named test rejects policy data with an invalid type.
         """
         root = _renderer_fixture(self)
         (root / "outside").mkdir()
@@ -282,6 +328,8 @@ class PolicyTests(unittest.TestCase):
           Explanation: This test creates a document from YAML using the provided template; the named test clears the review after YAML changes while retaining exemptions.
         - Scenario Difference: `test_cli.py::test_render_resets_attestations_and_digest`
           Explanation: This test creates a document from YAML using the provided template; the named test clears completed reviews through the render command.
+        - Scenario Difference: `test_render_policy_documents.py::test_renders_policy_data`
+          Explanation: This test renders the policy title, rules, and checklist using the bundled template; the named test preserves nested policy data.
         """
         root = _renderer_fixture(self, policy_source=(
             "title: Back navigation policy\n"
@@ -381,6 +429,8 @@ class PolicyTests(unittest.TestCase):
           Explanation: This test rejects direct edits to generated policy text; the named test reports missing policy documents with generation instructions.
         - Happy/Failure Path Difference: `test_cli.py::test_document_check_preserves_review_results`
           Explanation: This test rejects direct edits to generated policy text; the named test preserves recorded findings during document checks.
+        - Scenario Difference: `test_render_policy_documents.py::test_detects_stale_policy_data`
+          Explanation: This test rejects direct edits to generated Markdown; the named test rejects a document after policy data changes in the YAML source.
         """
         edits = (
             ("Use the shared back hook.", "Use a custom back function."),
