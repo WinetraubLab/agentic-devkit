@@ -174,6 +174,8 @@ class ConfiguredScopeTests(unittest.TestCase):
         Similar Coverage:
         - Scenario Difference: `test_policy_scope.py::test_requires_scope_configuration`
           Explanation: This test rejects malformed scope settings; the named test reports a missing scope file with creation instructions.
+        - Scenario Difference: `test_render_policy_documents.py::test_rejects_invalid_policy_fields`
+          Explanation: This test rejects malformed global review-root configuration; the named test rejects invalid per-policy folder selections and exemption lists.
         """
         root = _fixture(self)
         (root / "outside-link").symlink_to(root.parent, target_is_directory=True)

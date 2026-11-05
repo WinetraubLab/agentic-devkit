@@ -106,6 +106,8 @@ class PolicyCliTests(unittest.TestCase):
           Explanation: This test preserves completed attestations during a document check; the named test resets completed attestations after a review root is removed.
         - Happy/Failure Path Difference: `test_verify_policy_attestations.py::test_clears_data_type_attestations`
           Explanation: This test preserves completed attestations during a document check; the named test resets completed attestations after a tracked data-type file changes.
+        - Happy/Failure Path Difference: `test_render_policy_documents.py::test_detects_stale_policy_data`
+          Explanation: This test preserves completed attestations when checking current documents; the named test rejects a document after nested policy data changes in YAML.
         """
         root = _fixture(self)
         path = root / "policy/access/security.md"
@@ -165,6 +167,8 @@ class PolicyCliTests(unittest.TestCase):
           Explanation: This test reports missing policy documents with generation instructions; the named test preserves recorded findings during document checks.
         - Scenario Difference: `test_render_policy_documents.py::test_rejects_manual_body_edits`
           Explanation: This test reports missing policy documents with generation instructions; the named test rejects direct edits to generated policy text.
+        - Scenario Difference: `test_render_policy_documents.py::test_detects_stale_policy_data`
+          Explanation: This test reports missing policy documents with regeneration instructions; the named test rejects an existing document after nested policy data changes in YAML.
         """
         root = _renderer_fixture(self)
         self.assertFalse((root / "policy/user-interface/back-navigation.md").exists())  # Input check

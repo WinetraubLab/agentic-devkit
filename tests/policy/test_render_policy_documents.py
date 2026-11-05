@@ -30,6 +30,8 @@ class PolicyTests(unittest.TestCase):
           Explanation: This test preserves structured policy data; the named test rejects policy data with an invalid type.
         - Scenario Difference: `test_render_policy_documents.py::test_renders_policy_document`
           Explanation: This test preserves nested policy data; the named test renders the policy title, rules, and checklist using the bundled template.
+        - Happy/Failure Path Difference: `test_render_policy_documents.py::test_detects_stale_policy_data`
+          Explanation: This test preserves nested policy data in generated Markdown; the named test rejects a document after nested policy data changes in YAML.
         """
         root = _renderer_fixture(self)
         source = root / "policy/user-interface/back-navigation.policy.yaml"
@@ -57,6 +59,12 @@ class PolicyTests(unittest.TestCase):
         Similar Coverage:
         - Scenario Difference: `test_render_policy_documents.py::test_rejects_manual_body_edits`
           Explanation: This test rejects a document after policy data changes in the YAML source; the named test rejects direct edits to generated Markdown.
+        - Happy/Failure Path Difference: `test_cli.py::test_document_check_preserves_review_results`
+          Explanation: This test rejects a document after nested policy data changes in YAML; the named test preserves completed attestations when checking current documents.
+        - Scenario Difference: `test_cli.py::test_reports_missing_policy_documents`
+          Explanation: This test rejects an existing document after nested policy data changes in YAML; the named test reports missing policy documents with regeneration instructions.
+        - Happy/Failure Path Difference: `test_render_policy_documents.py::test_renders_policy_data`
+          Explanation: This test rejects a document after nested policy data changes in YAML; the named test preserves nested policy data in generated Markdown.
         """
         root = _renderer_fixture(self)
         source = root / "policy/user-interface/back-navigation.policy.yaml"
@@ -115,6 +123,8 @@ class PolicyTests(unittest.TestCase):
         Similar Coverage:
         - Scenario Difference: `test_render_policy_documents.py::test_rejects_long_exemption_entries`
           Explanation: This test rejects a checklist entry exceeding 25 words; the named test rejects an exemption entry exceeding 50 words.
+        - Scenario Difference: `test_render_policy_documents.py::test_requires_review_checklist`
+          Explanation: This test rejects checklist entries exceeding 25 words; the named test rejects missing checklists and invalid checklist types or blank entries.
         """
         root = _renderer_fixture(self)
         source = root / "policy/user-interface/back-navigation.policy.yaml"
@@ -139,6 +149,8 @@ class PolicyTests(unittest.TestCase):
         Similar Coverage:
         - Scenario Difference: `test_render_policy_documents.py::test_rejects_long_checklist_entries`
           Explanation: This test rejects an exemption entry exceeding 50 words; the named test rejects a checklist entry exceeding 25 words.
+        - Scenario Difference: `test_render_policy_documents.py::test_rejects_invalid_policy_fields`
+          Explanation: This test rejects exemption entries exceeding 50 words; the named test rejects invalid folder selections and exemption types or blank entries.
         """
         root = _renderer_fixture(self)
         source = root / "policy/user-interface/back-navigation.policy.yaml"
@@ -163,6 +175,10 @@ class PolicyTests(unittest.TestCase):
         Similar Coverage:
         - Scenario Difference: `test_render_policy_documents.py::test_rejects_non_object_policy_data`
           Explanation: This test rejects a missing or invalid checklist; the named test rejects policy data with an invalid type.
+        - Scenario Difference: `test_render_policy_documents.py::test_rejects_long_checklist_entries`
+          Explanation: This test rejects missing checklists and invalid checklist types or blank entries; the named test rejects checklist entries exceeding 25 words.
+        - Happy/Failure Path Difference: `test_render_policy_documents.py::test_renders_policy_document`
+          Explanation: This test rejects missing or invalid checklist lists; the named test renders both valid checklist items in the generated document.
         """
         root = _renderer_fixture(self)
         source = root / "policy/user-interface/back-navigation.policy.yaml"
@@ -294,6 +310,10 @@ class PolicyTests(unittest.TestCase):
           Explanation: This test rejects invalid YAML field values; the named test lists a linked folder for recursive review.
         - Scenario Difference: `test_render_policy_documents.py::test_rejects_non_object_policy_data`
           Explanation: This test rejects malformed folder selections and exemption lists; the named test rejects policy data with an invalid type.
+        - Scenario Difference: `test_policy_scope.py::test_rejects_invalid_scope_configuration`
+          Explanation: This test rejects invalid per-policy folder selections and exemption lists; the named test rejects malformed global review-root configuration.
+        - Scenario Difference: `test_render_policy_documents.py::test_rejects_long_exemption_entries`
+          Explanation: This test rejects invalid folder selections and exemption types or blank entries; the named test rejects exemption entries exceeding 50 words.
         """
         root = _renderer_fixture(self)
         (root / "outside").mkdir()
@@ -330,6 +350,8 @@ class PolicyTests(unittest.TestCase):
           Explanation: This test creates a document from YAML using the provided template; the named test clears completed reviews through the render command.
         - Scenario Difference: `test_render_policy_documents.py::test_renders_policy_data`
           Explanation: This test renders the policy title, rules, and checklist using the bundled template; the named test preserves nested policy data.
+        - Happy/Failure Path Difference: `test_render_policy_documents.py::test_requires_review_checklist`
+          Explanation: This test renders both valid checklist items in the generated document; the named test rejects missing or invalid checklist lists.
         """
         root = _renderer_fixture(self, policy_source=(
             "title: Back navigation policy\n"
@@ -439,7 +461,12 @@ class PolicyTests(unittest.TestCase):
         )
         for original, replacement in edits:
             with self.subTest(edited_text=original):
-                root = _renderer_fixture(self)
+                root = _renderer_fixture(self, policy_source=(
+                    "title: Back navigation policy\n"
+                    "objective: Keep navigation safe.\n"
+                    "policy_content: Use the shared back hook.\n"
+                    "review_checklist:\n  - Uses the shared back hook.\n"
+                ))
                 source = root / "policy/user-interface/back-navigation.policy.yaml"
                 source.write_text(source.read_text() + (
                     "exemptions:\n"
