@@ -135,9 +135,17 @@ policy_content: |
 review_checklist:
   - Parameters representing physical lengths in meters end in _m.
   - Counts and parameters measured in other units are not flagged.
+policy_data: # Optional structured data supporting policy_content.
+  full_page_exceptions:
+    - path: docs/e2e/assets/example/01-complete-page.png
+      reason: Show the complete page.
 exemptions: # Optional accepted violations; retained across review resets.
   - src/legacy-car.py may retain car_length until callers migrate to car_length_m.
 ```
+
+`policy_content` contains the written rules. `policy_data` contains optional
+structured data supporting those rules, such as approved paths, limits, or
+exceptions. Tools can read these values directly without parsing the policy text.
 
 Rendering inserts these values into the bundled `policy-template.md.j2`, which
 supplies the shared review instructions and attestation structure. The generated
