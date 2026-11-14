@@ -1,6 +1,6 @@
 ---
 name: review-policy-attestations
-description: Use when the user asks to check a repository against its policies, complete policy attestations, or resolve a policy verification failure.
+description: Use when the user says "run policy verification" or "run policy", asks to check a repository against its policies, complete policy attestations, or resolve a policy verification failure.
 ---
 
 # Review Policy Attestations
